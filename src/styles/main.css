@@ -1,0 +1,110 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 1px 10%;
+  background: #111;
+  color: white;
+}
+
+.nav-links a {
+  margin-left: 20px;
+  color: white;
+  text-decoration: none;
+}
+
+.hero {
+  height: 70vh;
+ 
+    background-image: url("images/section3.jpg") ;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.process, .features, .gallery {
+  padding: 60px 10%;
+  text-align: center;
+}
+
+.steps {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.step {
+  background: #eee;
+  padding: 20px;
+}
+
+.step.active {
+  background: orange;
+  color: white;
+}
+
+.gallery {
+  display: flex;
+  gap: 20px;
+}
+
+.img-box1 {
+  height: 200px;
+  flex: 1;
+background-image: url("images/stock.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.img-box2 {
+  height: 200px;
+  flex: 1;
+background-image: url("images/reception.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.img-box3 {
+  height: 200px;
+  flex: 1;
+background-image: url("images/mouvement.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.features {
+  background: #111;
+  color: white;
+}
+
+.feature-grid {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.card {
+  background: #222;
+  padding: 20px;
+}
+
+.footer {
+  background: black;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.dashboard {
+  text-align: center;
+  padding: 100px;
+}
