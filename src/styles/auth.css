@@ -80,7 +80,7 @@
   outline: none;
   font-size: 14px;
   background: rgba(255,255,255,0.15);
-  color: #fff;
+  
   transition: all 0.3s ease;
 }
 
@@ -92,7 +92,7 @@
 
 /* Focus effect */
 .auth-box input:focus {
-  background: rgba(255,255,255,0.25);
+  background: rgba(255, 255, 255, 0.25);
   box-shadow: 0 0 0 2px #ff9800;
   transform: scale(1.02);
 }
@@ -148,4 +148,76 @@
   .auth-box button {
     font-size: 14px;
   }
+}
+.password-change-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.password-change-container h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.password-change-container .form-group {
+  margin-bottom: 20px;
+}
+
+.password-change-container label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: 500;
+}
+
+.password-change-container input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.password-change-container input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.change-password-btn {
+  width: 100%;
+  padding: 14px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.change-password-btn:hover {
+  background: #45a049;
+}
+/* Message de succès */
+.success-message {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  backdrop-filter: blur(5px);
+  font-size: 16px;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
