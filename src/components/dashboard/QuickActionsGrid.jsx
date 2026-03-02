@@ -6,18 +6,21 @@ const QuickActionsGrid = ({ actions }) => {
 
   const handleActionClick = (action) => {
     switch(action.label) {
-      case 'Goods receipt':
-        navigate('/goods-receipt');
-        break;
+      case 'Préparation des commandes clients':
       case 'Sales order pick':
         navigate('/sales-order');
         break;
+      case 'Goods receipt':
+        navigate('/goods-receipt');
+        break;
+      case 'Déménagement':
       case 'Relocation':
         navigate('/relocation');
         break;
       case 'Stock taking':
         navigate('/stock-taking');
         break;
+      case 'Relocalisation par lots':
       case 'Batch relocation':
         navigate('/batch-relocation');
         break;

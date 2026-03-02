@@ -1,18 +1,14 @@
-// pages/Dashboard.jsx
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Sidebar from "../components/dashboard/layout/Sidebar";
-import QuickActionsGrid from "../components/dashboard/QuickActionsGrid";
-import AdminDashboard from "./AdminDashboard"; // Nouveau composant
 import "../styles/dashboard.css";
 
-const Dashboard = () => {
+const Dashboard_warehouse = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [userName] = useState(localStorage.getItem("nom") || "Utilisateur");
   const [userPrenom] = useState(localStorage.getItem("prenom") || "");
-  const [userRole] = useState(localStorage.getItem("role") || "USER");
+  const [userRole] = useState(localStorage.getItem("role") || "OPERATOR");
   const [profileImage, setProfileImage] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -25,6 +21,11 @@ const Dashboard = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
+    }
+    
+    const role = localStorage.getItem("role");
+    if (role === "ADMINISTRATEUR") {
+      navigate("/admin");
     }
   }, [navigate]);
 
@@ -68,7 +69,7 @@ const Dashboard = () => {
     }
   };
 
-  // Menu items adaptés selon le rôle
+  // Fonction pour obtenir les éléments du menu selon le rôle
   const getMenuItems = () => {
     const baseItems = [
       { id: "dashboard", label: "Tableau de bord", icon: "📊" },
@@ -76,88 +77,98 @@ const Dashboard = () => {
       { id: "password", label: "Changer Mot de Passe", icon: "🔒" },
     ];
 
-    // Ajouter les items admin si l'utilisateur est ADMIN
-    if (userRole === "ADMIN") {
-      baseItems.push(
-        { id: "users", label: "Gestion Utilisateurs", icon: "👥" },
-        { id: "roles", label: "Gestion Rôles", icon: "🔑" },
-        { id: "logs", label: "Journal d'activité", icon: "📝" }
-      );
+    switch(userRole) {
+      case 'RECEIVER':
+        return [
+          ...baseItems,
+          { id: "reception", label: "Réception", icon: "📥" },
+          { id: "rangement", label: "Rangement", icon: "📦" },
+          { id: "logout", label: "Déconnexion", icon: "🚪", action: handleLogout }
+        ];
+      
+      case 'EFFECTOR_TRANSFERT':
+        return [
+          ...baseItems,
+          { id: "picking", label: "Préparation de commandes", icon: "📋" },
+          { id: "transfert", label: "Transfert", icon: "🔄" },
+          { id: "logout", label: "Déconnexion", icon: "🚪", action: handleLogout }
+        ];
+      
+      case 'RESPONSABLE_ENTREPOT':
+        return [
+          ...baseItems,
+          { id: "stock", label: "Consultation Stock", icon: "📊" },
+          { id: "reception", label: "Validation Réception", icon: "✅" },
+          { id: "expedition", label: "Validation Expédition", icon: "📤" },
+          { id: "documents", label: "Impression Documents", icon: "🖨️" },
+          { id: "synchronisation", label: "Synchronisation ERP", icon: "🔄" },
+          { id: "logout", label: "Déconnexion", icon: "🚪", action: handleLogout }
+        ];
+      
+      case 'OPERATOR':
+      default:
+        return [
+          ...baseItems,
+          { id: "logout", label: "Déconnexion", icon: "🚪", action: handleLogout }
+        ];
     }
-
-    // Ajouter la déconnexion
-    baseItems.push({ id: "logout", label: "Déconnexion", icon: "🚪", action: handleLogout });
-
-    return baseItems;
   };
 
-  // Actions du stock (accessibles à tous)
-  const stockActions = [
-    { id: 1, label: "Sales order pick", icon: "📦", color: "#4361ee", bgColor: "#eef2ff" },
-    { id: 2, label: "Goods receipt", icon: "📥", color: "#f72585", bgColor: "#ffe0f0" },
-    { id: 3, label: "Relocation", icon: "🔄", color: "#4cc9f0", bgColor: "#e0f7fa" },
-    { id: 4, label: "Stock taking", icon: "📋", color: "#f8961e", bgColor: "#fff3e0" },
-    { id: 5, label: "Batch relocation", icon: "📦➡️", color: "#9c89b8", bgColor: "#f3e8ff" },
-    { id: 6, label: "Stock correction", icon: "✏️", color: "#ef476f", bgColor: "#ffe5e5" },
-    { id: 7, label: "Batch storage", icon: "🏢", color: "#06d6a0", bgColor: "#e0f2e9" },
-    { id: 8, label: "Prod. Put", icon: "⚙️", color: "#118ab2", bgColor: "#e0f2fe" }
-  ];
+  const getRoleLabel = (role) => {
+    const labels = {
+      'ADMINISTRATEUR': 'Administrateur',
+      'RESPONSABLE_ENTREPOT': 'Responsable Entrepôt',
+      'RECEIVER': 'Réceptionnaire',
+      'EFFECTOR_TRANSFERT': 'Effecteur Transfert',
+      'OPERATOR': 'Opérateur'
+    };
+    return labels[role] || role;
+  };
 
-  // Si l'utilisateur est admin et que l'onglet actif est un onglet admin, afficher le contenu admin
-  if (userRole === "ADMIN" && ["users", "roles", "logs"].includes(activeTab)) {
-    return (
-      <AdminDashboard 
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        userName={userName}
-        userPrenom={userPrenom}
-        userRole={userRole}
-        handleLogout={handleLogout}
-      />
-    );
-  }
-
-  return (
-    <div className="dashboard">
-      <Sidebar 
-        userName={userName}
-        userPrenom={userPrenom}
-        userRole={userRole}
-        menuItems={getMenuItems()}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
-
-      <div className="dashboard-main">
-        {activeTab === "dashboard" && (
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'dashboard':
+        return (
           <div className="dashboard-content">
             <div className="welcome-section">
               <h1>Bienvenue, {userPrenom} {userName} !</h1>
-              <p>WAREHOUSE - Rôle: {userRole}</p>
             </div>
 
-            <div className="stock-info-section">
-              <h2>Nos activités</h2>
-              <QuickActionsGrid actions={stockActions} />
+            <div className="description-section">
+              <h2>À propos de L-mobile INDUSTRY</h2>
+              <div className="description-card">
+                <p>
+                  L-mobile INDUSTRY: MS Dynamics includes the basic system as well as the individual modules
+                  (user modules and functional modules) which are valid exclusively in connection with the MS
+                  Dynamics ERP system and the value-added component used for the integration of MS Dynamics
+                  and L-mobile.
+                </p>
+                <p>
+                  Licensed functionalities introduced into the MS Dynamics ERP system and, where
+                  applicable, individual programming implemented in MS Dynamics may affect the scope and/or
+                  context of the functions described. For technical reasons, module names may differ within the
+                  application.
+                </p>
+                <p>
+                  The General Availability conditions also apply to this version of L-mobile.
+                </p>
+                <p className="highlight">
+                  Detailed information on the product scope can be found in the current description of services for
+                  L-mobile warehouse 2025 ready for MS Dynamics.
+                </p>
+              </div>
             </div>
           </div>
-        )}
+        );
 
-        {activeTab === "profile" && (
+      case 'profile':
+        return (
           <div className="profile-container">
             <h2>Mon Profil</h2>
             <div className="profile-card">
-              <div 
-                className="profile-avatar" 
-                onClick={handleImageClick}
-                style={{ cursor: 'pointer' }}
-              >
+              <div className="profile-avatar" onClick={handleImageClick} style={{ cursor: 'pointer' }}>
                 {profileImage ? (
-                  <img 
-                    src={profileImage} 
-                    alt="Profile" 
-                    className="profile-image"
-                  />
+                  <img src={profileImage} alt="Profile" className="profile-image" />
                 ) : (
                   <span className="avatar-initials">
                     {userPrenom?.charAt(0)}{userName?.charAt(0)}
@@ -189,60 +200,88 @@ const Dashboard = () => {
                 <div className="profile-row">
                   <label>Rôle:</label>
                   <span className={`role-badge role-${userRole?.toLowerCase()}`}>
-                    {userRole}
+                    {getRoleLabel(userRole)}
                   </span>
                 </div>
               </div>
 
               {profileImage && (
-                <button 
-                  onClick={handleDeleteImage}
-                  className="delete-photo-btn"
-                >
+                <button onClick={handleDeleteImage} className="delete-photo-btn">
                   🗑️ Supprimer la photo
                 </button>
               )}
             </div>
           </div>
-        )}
+        );
 
-        {activeTab === "password" && (
+      case 'password':
+        return (
           <div className="password-change-container">
             <h2>Changer le mot de passe</h2>
-            <form className="password-form">
+            <form className="password-form" onSubmit={(e) => e.preventDefault()}>
               <div className="form-group">
                 <label>Ancien mot de passe</label>
-                <input 
-                  type="password" 
-                  placeholder="Entrez votre ancien mot de passe"
-                  className="password-input"
-                />
+                <input type="password" placeholder="Entrez votre ancien mot de passe" className="password-input" />
               </div>
               <div className="form-group">
                 <label>Nouveau mot de passe</label>
-                <input 
-                  type="password" 
-                  placeholder="Entrez votre nouveau mot de passe"
-                  className="password-input"
-                />
+                <input type="password" placeholder="Entrez votre nouveau mot de passe" className="password-input" />
               </div>
               <div className="form-group">
                 <label>Confirmer le mot de passe</label>
-                <input 
-                  type="password" 
-                  placeholder="Confirmez votre nouveau mot de passe"
-                  className="password-input"
-                />
+                <input type="password" placeholder="Confirmez votre nouveau mot de passe" className="password-input" />
               </div>
               <button type="submit" className="change-password-btn">
                 Changer le mot de passe
               </button>
             </form>
           </div>
-        )}
+        );
+
+      default:
+        return (
+          <div className="module-container">
+            <h2>{getModuleTitle(activeTab)}</h2>
+            <div className="coming-soon">
+              <div className="coming-soon-icon">🚧</div>
+              <h3>Module en cours de développement</h3>
+              <p>Cette fonctionnalité sera disponible prochainement.</p>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  const getModuleTitle = (tabId) => {
+    const titles = {
+      'picking': 'Module Préparation de commandes',
+      'transfert': 'Module Transfert',
+      'reception': 'Module Réception',
+      'rangement': 'Module Rangement',
+      'stock': 'Consultation des stocks',
+      'expedition': 'Module Expédition',
+      'documents': 'Impression de documents',
+      'synchronisation': 'Synchronisation ERP'
+    };
+    return titles[tabId] || tabId;
+  };
+
+  return (
+    <div className="dashboard">
+      <Sidebar 
+        userName={userPrenom}
+        userPrenom={userName}
+        userRole={getRoleLabel(userRole)}
+        menuItems={getMenuItems()}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+
+      <div className="dashboard-main">
+        {renderContent()}
       </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default Dashboard_warehouse;
