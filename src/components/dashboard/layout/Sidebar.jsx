@@ -4,7 +4,7 @@ const Sidebar = ({ userName, userPrenom, userRole, menuItems, activeTab, onTabCh
   return (
     <div className="dashboard-sidebar">
       <div className="sidebar-header">
-        <h2>PFE Dashboard</h2>
+        <h2>Dashboard</h2>
         <div className="user-info">
           <p className="user-name">{userPrenom} {userName}</p>
           <p className="user-role">{userRole}</p>

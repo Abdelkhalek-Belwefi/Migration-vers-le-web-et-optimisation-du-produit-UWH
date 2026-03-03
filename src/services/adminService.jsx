@@ -19,7 +19,8 @@ export const adminService = {
             const response = await axios.get(`${API_URL}/users`, getAuthHeader());
             return response.data;
         } catch (error) {
-            throw error.response?.data || error.message;
+            console.error('Erreur API getAllUsers:', error.response?.data || error.message);
+            throw error;
         }
     },
 
@@ -33,7 +34,8 @@ export const adminService = {
             );
             return response.data;
         } catch (error) {
-            throw error.response?.data || error.message;
+            console.error('Erreur API updateUserRole:', error.response?.data || error.message);
+            throw error;
         }
     },
 
@@ -43,7 +45,30 @@ export const adminService = {
             await axios.delete(`${API_URL}/users/${userId}`, getAuthHeader());
             return true;
         } catch (error) {
-            throw error.response?.data || error.message;
+            console.error('Erreur API deleteUser:', error.response?.data || error.message);
+            throw error;
+        }
+    },
+
+    // Activer un compte
+    activerCompte: async (userId) => {
+        try {
+            const response = await axios.put(`${API_URL}/users/${userId}/activer`, {}, getAuthHeader());
+            return response.data;
+        } catch (error) {
+            console.error('Erreur API activerCompte:', error.response?.data || error.message);
+            throw error;
+        }
+    },
+
+    // Désactiver un compte
+    desactiverCompte: async (userId) => {
+        try {
+            const response = await axios.put(`${API_URL}/users/${userId}/desactiver`, {}, getAuthHeader());
+            return response.data;
+        } catch (error) {
+            console.error('Erreur API desactiverCompte:', error.response?.data || error.message);
+            throw error;
         }
     },
 
@@ -53,7 +78,8 @@ export const adminService = {
             const response = await axios.get(`${API_URL}/roles`, getAuthHeader());
             return response.data;
         } catch (error) {
-            throw error.response?.data || error.message;
+            console.error('Erreur API getAllRoles:', error.response?.data || error.message);
+            throw error;
         }
     },
 
@@ -63,7 +89,8 @@ export const adminService = {
             const response = await axios.post(`${API_URL}/users`, userData, getAuthHeader());
             return response.data;
         } catch (error) {
-            throw error.response?.data || error.message;
+            console.error('Erreur API createUser:', error.response?.data || error.message);
+            throw error;
         }
     }
 };

@@ -16,7 +16,7 @@ const UserManagement = () => {
         prenom: '',
         email: '',
         password: '',
-        role: 'OPERATOR'
+        role: 'OPERATEUR_ENTREPOT'
     });
 
     useEffect(() => {
@@ -44,6 +44,34 @@ const UserManagement = () => {
             setRoles(data);
         } catch (err) {
             console.error('Erreur lors du chargement des rôles:', err);
+        }
+    };
+
+    const handleActiverCompte = async (userId) => {
+        try {
+            await adminService.activerCompte(userId);
+            setUsers(users.map(user =>
+                user.id === userId ? { ...user, estActif: true } : user
+            ));
+            setSuccess('Compte activé avec succès');
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (err) {
+            setError("Erreur lors de l'activation");
+            setTimeout(() => setError(''), 3000);
+        }
+    };
+
+    const handleDesactiverCompte = async (userId) => {
+        try {
+            await adminService.desactiverCompte(userId);
+            setUsers(users.map(user =>
+                user.id === userId ? { ...user, estActif: false } : user
+            ));
+            setSuccess('Compte désactivé avec succès');
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (err) {
+            setError('Erreur lors de la désactivation');
+            setTimeout(() => setError(''), 3000);
         }
     };
 
@@ -89,7 +117,7 @@ const UserManagement = () => {
                 prenom: '',
                 email: '',
                 password: '',
-                role: 'OPERATOR'
+                role: 'OPERATEUR_ENTREPOT'
             });
             setSuccess('Utilisateur ajouté avec succès');
             setTimeout(() => setSuccess(''), 3000);
@@ -103,9 +131,8 @@ const UserManagement = () => {
         const roleClasses = {
             'ADMINISTRATEUR': 'role-badge admin',
             'RESPONSABLE_ENTREPOT': 'role-badge manager',
-            'RECEIVER': 'role-badge receiver',
-            'EFFECTOR_TRANSFERT': 'role-badge effector',
-            'OPERATOR': 'role-badge operator'
+            'OPERATEUR_ENTREPOT': 'role-badge operator',
+            'OPERATOR': 'role-badge pending'
         };
         return roleClasses[role] || 'role-badge';
     };
@@ -114,9 +141,8 @@ const UserManagement = () => {
         const labels = {
             'ADMINISTRATEUR': 'Administrateur',
             'RESPONSABLE_ENTREPOT': 'Responsable Entrepôt',
-            'RECEIVER': 'Réceptionnaire',
-            'EFFECTOR_TRANSFERT': 'Effecteur Transfert',
-            'OPERATOR': 'Opérateur'
+            'OPERATEUR_ENTREPOT': 'Opérateur Entrepôt',
+            'OPERATOR': 'En attente'
         };
         return labels[role] || role;
     };
@@ -144,6 +170,7 @@ const UserManagement = () => {
                             <th>Prénom</th>
                             <th>Email</th>
                             <th>Rôle</th>
+                            <th>Statut</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -173,6 +200,11 @@ const UserManagement = () => {
                                         </span>
                                     )}
                                 </td>
+                                <td>
+                                    <span className={`status-badge ${user.estActif ? 'active' : 'inactive'}`}>
+                                        {user.estActif ? 'Actif' : 'Inactif'}
+                                    </span>
+                                </td>
                                 <td className="actions">
                                     {editingUserId === user.id ? (
                                         <>
@@ -194,6 +226,21 @@ const UserManagement = () => {
                                         </>
                                     ) : (
                                         <>
+                                            {!user.estActif ? (
+                                                <button
+                                                    className="btn-activate"
+                                                    onClick={() => handleActiverCompte(user.id)}
+                                                >
+                                                    ✅
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="btn-deactivate"
+                                                    onClick={() => handleDesactiverCompte(user.id)}
+                                                >
+                                                    ⏸️
+                                                </button>
+                                            )}
                                             <button
                                                 className="btn-edit"
                                                 onClick={() => {

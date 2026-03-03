@@ -1,4 +1,3 @@
-// src/pages/EnAttente.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/en-attente.css';

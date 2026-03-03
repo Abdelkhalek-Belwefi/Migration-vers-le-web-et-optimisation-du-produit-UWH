@@ -219,7 +219,7 @@
     width: 100%;
     padding: 10px;
     border: 1px solid #ced4da;
-    border-radius: 4px;
+    border-radius: 15px;
     font-size: 14px;
 }
 
@@ -283,4 +283,68 @@
         transform: translateY(0);
         opacity: 1;
     }
+}
+/* Statut badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-badge.active {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-badge.inactive {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Boutons d'activation/désactivation */
+.btn-activate, .btn-deactivate {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+    margin-right: 5px;
+}
+
+.btn-activate {
+    background: #28a745;
+    color: white;
+}
+
+.btn-activate:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(40, 167, 69, 0.3);
+}
+
+.btn-deactivate {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-deactivate:hover {
+    background: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(255, 193, 7, 0.3);
+}
+
+/* Badge pour le rôle en attente */
+.role-badge.pending {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+}
+
+.role-badge.operator {
+    background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+    color: white;
 }

@@ -32,10 +32,8 @@ const LoginForm = () => {
 
       // Vérifier si le compte est actif
       if (!response.data.estActif) {
-        // Rediriger vers la page d'attente si le compte n'est pas activé
         navigate("/en-attente");
       } else {
-        // Rediriger vers le dashboard approprié selon le rôle
         if (response.data.role === "ADMINISTRATEUR") {
           navigate("/admin");
         } else {
@@ -43,7 +41,6 @@ const LoginForm = () => {
         }
       }
     } catch (error) {
-      // Gestion des erreurs spécifiques
       const errorMessage = error.response?.data?.message;
       
       if (errorMessage === "Votre compte est en attente de validation par l'administrateur") {
@@ -61,6 +58,11 @@ const LoginForm = () => {
   return (
     <div className="auth-container">
       <div className="auth-box">
+        {/* Flèche de retour vers l'accueil */}
+        <div className="auth-back-arrow" onClick={() => navigate("/")}>
+          ←
+        </div>
+        
         <h2>Connexion</h2>
         
         {error && (

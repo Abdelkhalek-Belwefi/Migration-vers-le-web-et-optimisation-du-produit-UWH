@@ -17,7 +17,6 @@ const SignupForm = () => {
   
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false); // Pour gérer le succès
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,8 +41,6 @@ const SignupForm = () => {
       password: formData.password
     };
 
-    console.log("📤 Données envoyées:", requestData);
-
     try {
       const response = await axios.post(
         "http://localhost:8080/api/auth/register",
@@ -53,38 +50,25 @@ const SignupForm = () => {
         }
       );
 
-      console.log("✅ Réponse complète:", response);
-      console.log("✅ Données reçues:", response.data);
-
-      // Vérifier que la réponse contient bien un token
       if (response.data && response.data.token) {
-        // Stocker les informations
+        // Stocker toutes les informations
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("role", response.data.role);
         localStorage.setItem("email", response.data.email);
         localStorage.setItem("nom", response.data.nom);
         localStorage.setItem("prenom", response.data.prenom);
+        localStorage.setItem("estActif", response.data.estActif);
         
-        setSuccess(true);
-        
-        // Rediriger vers le dashboard après 1 seconde
-        setTimeout(() => {
-          navigate("/Login");
-        }, 1000);
+        // Rediriger vers la page d'attente (compte en attente de validation)
+        navigate("/en-attente");
       } else {
         setError("Réponse invalide du serveur");
       }
 
     } catch (error) {
-      console.error("❌ Erreur détaillée:", error);
-      
       if (error.response) {
-        // Le serveur a répondu avec une erreur
-        console.error("Status:", error.response.status);
-        console.error("Data:", error.response.data);
         setError(error.response.data?.message || "Erreur lors de l'inscription");
       } else if (error.request) {
-        console.error("Pas de réponse:", error.request);
         setError("Le serveur ne répond pas. Vérifiez qu'il est bien lancé.");
       } else {
         setError("Erreur de connexion");
@@ -101,81 +85,75 @@ const SignupForm = () => {
         
         {error && <div className="error-message">{error}</div>}
         
-        {success ? (
-          <div className="success-message">
-            ✅ Inscription réussie ! Redirection vers le dashboard...
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              name="nom"
-              placeholder="Nom"
-              value={formData.nom}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            name="nom"
+            placeholder="Nom"
+            value={formData.nom}
+            onChange={handleChange}
+            required
+            disabled={loading}
+          />
 
-            <input
-              type="text"
-              name="prenom"
-              placeholder="Prénom"
-              value={formData.prenom}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
+          <input
+            type="text"
+            name="prenom"
+            placeholder="Prénom"
+            value={formData.prenom}
+            onChange={handleChange}
+            required
+            disabled={loading}
+          />
 
-            <input
-              type="tel"
-              name="numTelephone"
-              placeholder="Téléphone"
-              value={formData.numTelephone}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
+          <input
+            type="tel"
+            name="numTelephone"
+            placeholder="Téléphone"
+            value={formData.numTelephone}
+            onChange={handleChange}
+            required
+            disabled={loading}
+          />
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            disabled={loading}
+          />
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength="6"
-              disabled={loading}
-            />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            minLength="6"
+            disabled={loading}
+          />
 
-            <input
-              type="password"
-              name="repeatPassword"
-              placeholder="Repeat Password"
-              value={formData.repeatPassword}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
+          <input
+            type="password"
+            name="repeatPassword"
+            placeholder="Repeat Password"
+            value={formData.repeatPassword}
+            onChange={handleChange}
+            required
+            disabled={loading}
+          />
 
-            <button 
-              type="submit" 
-              disabled={loading}
-            >
-              {loading ? "Inscription..." : "Signup"}
-            </button>
-          </form>
-        )}
+          <button 
+            type="submit" 
+            disabled={loading}
+          >
+            {loading ? "Inscription..." : "Signup"}
+          </button>
+        </form>
 
         <p className="auth-link">
           Already have account? <Link to="/login">Login</Link>
