@@ -348,3 +348,19 @@
     background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
     color: white;
 }
+/* Badge pour l'admin protégé */
+.admin-badge {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    cursor: default;
+    white-space: nowrap;
+}

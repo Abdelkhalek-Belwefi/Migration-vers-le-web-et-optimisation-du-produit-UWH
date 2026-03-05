@@ -5,6 +5,7 @@ import Signup from "./pages/Signup";
 import Dashboard_warehouse from "./pages/Dashboard_warehouse";
 import AdminDashboard from "./pages/AdminDashboard";
 import EnAttente from "./pages/EnAttente";
+import ArticleList from "./components/articles/ArticleList"; // Ajout
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
@@ -26,10 +27,20 @@ function App() {
         />
 
         <Route
-          path="/admin"
+          path="/admin/*"
           element={
             <PrivateRoute requiredRole="ADMINISTRATEUR">
               <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Nouvelle route pour les articles */}
+        <Route
+          path="/articles"
+          element={
+            <PrivateRoute>
+              <ArticleList />
             </PrivateRoute>
           }
         />

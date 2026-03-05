@@ -1,0 +1,221 @@
+.article-list-container {
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header h2 {
+    color: #333;
+    margin: 0;
+    font-size: 24px;
+}
+
+.btn-add {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.search-section {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.search-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+
+.search-form input,
+.search-form select {
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.search-form input:focus,
+.search-form select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-search {
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-search:hover {
+    background: #218838;
+}
+
+.btn-reset {
+    padding: 10px 20px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-reset:hover {
+    background: #5a6268;
+}
+
+.table-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: auto;
+}
+
+.articles-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+.articles-table th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.articles-table td {
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    color: #333;
+}
+
+.articles-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status-badge.active {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-badge.inactive {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-edit,
+.btn-activate,
+.btn-deactivate {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.btn-edit {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-edit:hover {
+    background: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(255, 193, 7, 0.3);
+}
+
+.btn-activate {
+    background: #28a745;
+    color: white;
+}
+
+.btn-activate:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(40, 167, 69, 0.3);
+}
+
+.btn-deactivate {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-deactivate:hover {
+    background: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(255, 193, 7, 0.3);
+}
+
+.loading {
+    text-align: center;
+    padding: 50px;
+    font-size: 18px;
+    color: #666;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.alert.error {
+    background: #fee;
+    color: #c33;
+    border-left: 4px solid #c33;
+}
+.alert.success {
+    background: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}

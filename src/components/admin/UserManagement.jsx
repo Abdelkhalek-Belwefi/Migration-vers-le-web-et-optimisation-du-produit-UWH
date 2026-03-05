@@ -1,4 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { 
+    FaSave, 
+    FaTimes, 
+    FaCheck, 
+    FaPause,
+    FaEdit, 
+    FaTrash,
+    FaUserCheck,
+    FaUserClock,
+    FaCrown
+} from 'react-icons/fa';
 import { adminService } from '../../services/adminService';
 import './UserManagement.css';
 
@@ -41,7 +52,9 @@ const UserManagement = () => {
     const fetchRoles = async () => {
         try {
             const data = await adminService.getAllRoles();
-            setRoles(data);
+            // ✅ Filtrer pour exclure ADMINISTRATEUR de la liste déroulante
+            const filteredRoles = data.filter(role => role !== 'ADMINISTRATEUR');
+            setRoles(filteredRoles);
         } catch (err) {
             console.error('Erreur lors du chargement des rôles:', err);
         }
@@ -154,7 +167,7 @@ const UserManagement = () => {
             <div className="header">
                 <h2>Gestion des Utilisateurs</h2>
                 <button className="btn-add" onClick={() => setShowAddModal(true)}>
-                    + Ajouter un utilisateur
+                    <FaUserCheck /> Ajouter un utilisateur
                 </button>
             </div>
 
@@ -207,12 +220,14 @@ const UserManagement = () => {
                                 </td>
                                 <td className="actions">
                                     {editingUserId === user.id ? (
+                                        // Mode édition
                                         <>
                                             <button
                                                 className="btn-save"
                                                 onClick={() => handleRoleChange(user.id, selectedRole)}
+                                                title="Sauvegarder"
                                             >
-                                                ✓
+                                                <FaSave />
                                             </button>
                                             <button
                                                 className="btn-cancel"
@@ -220,42 +235,56 @@ const UserManagement = () => {
                                                     setEditingUserId(null);
                                                     setSelectedRole('');
                                                 }}
+                                                title="Annuler"
                                             >
-                                                ✗
+                                                <FaTimes />
                                             </button>
                                         </>
                                     ) : (
+                                        // Mode normal
                                         <>
-                                            {!user.estActif ? (
-                                                <button
-                                                    className="btn-activate"
-                                                    onClick={() => handleActiverCompte(user.id)}
-                                                >
-                                                    ✅
-                                                </button>
+                                            {user.email === 'admin@gmail.com' ? (
+                                                <span className="admin-badge" title="Compte système protégé">
+                                                    <FaCrown /> Admin système
+                                                </span>
                                             ) : (
-                                                <button
-                                                    className="btn-deactivate"
-                                                    onClick={() => handleDesactiverCompte(user.id)}
-                                                >
-                                                    ⏸️
-                                                </button>
+                                                <>
+                                                    {!user.estActif ? (
+                                                        <button
+                                                            className="btn-activate"
+                                                            onClick={() => handleActiverCompte(user.id)}
+                                                            title="Activer le compte"
+                                                        >
+                                                            <FaCheck />
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            className="btn-deactivate"
+                                                            onClick={() => handleDesactiverCompte(user.id)}
+                                                            title="Désactiver le compte"
+                                                        >
+                                                            <FaPause />
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        className="btn-edit"
+                                                        onClick={() => {
+                                                            setEditingUserId(user.id);
+                                                            setSelectedRole(user.role);
+                                                        }}
+                                                        title="Modifier le rôle"
+                                                    >
+                                                        <FaEdit />
+                                                    </button>
+                                                    <button
+                                                        className="btn-delete"
+                                                        onClick={() => handleDeleteUser(user.id)}
+                                                        title="Supprimer"
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
+                                                </>
                                             )}
-                                            <button
-                                                className="btn-edit"
-                                                onClick={() => {
-                                                    setEditingUserId(user.id);
-                                                    setSelectedRole(user.role);
-                                                }}
-                                            >
-                                                ✏️
-                                            </button>
-                                            <button
-                                                className="btn-delete"
-                                                onClick={() => handleDeleteUser(user.id)}
-                                            >
-                                                🗑️
-                                            </button>
                                         </>
                                     )}
                                 </td>
@@ -321,13 +350,15 @@ const UserManagement = () => {
                                 </select>
                             </div>
                             <div className="modal-actions">
-                                <button type="submit" className="btn-submit">Ajouter</button>
+                                <button type="submit" className="btn-submit">
+                                    <FaUserCheck /> Ajouter
+                                </button>
                                 <button
                                     type="button"
                                     className="btn-cancel"
                                     onClick={() => setShowAddModal(false)}
                                 >
-                                    Annuler
+                                    <FaTimes /> Annuler
                                 </button>
                             </div>
                         </form>

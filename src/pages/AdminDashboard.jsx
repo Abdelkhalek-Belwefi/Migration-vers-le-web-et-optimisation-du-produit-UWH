@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { 
+    FaUsers, 
+    FaKey, 
+    FaBoxOpen, 
+    FaChartBar, 
+    FaHistory, 
+    FaSignOutAlt,
+    FaTachometerAlt
+} from 'react-icons/fa';
 import Sidebar from '../components/dashboard/layout/Sidebar';
 import UserManagement from '../components/admin/UserManagement';
-import '../styles/admin-dashboard.css'; // à créer
+import ArticleList from '../components/articles/ArticleList';
+import '../styles/admin-dashboard.css';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -26,13 +36,15 @@ const AdminDashboard = () => {
         navigate('/login');
     };
 
+    // ✅ Menu avec React Icons
     const menuItems = [
-        { id: 'users', label: 'Utilisateurs', icon: '👥' },
-        { id: 'roles', label: 'Rôles', icon: '🔑' },
-        { id: 'stats', label: 'Statistiques', icon: '📊' },
-        { id: 'logs', label: 'Journaux', icon: '📝' },
-        { id: 'back', label: 'Dashboard principal', icon: '🏠', action: () => navigate('/dashboard') },
-        { id: 'logout', label: 'Déconnexion', icon: '🚪', action: handleLogout }
+        { id: 'users', label: 'Utilisateurs', icon: <FaUsers /> },
+        { id: 'roles', label: 'Rôles', icon: <FaKey /> },
+        { id: 'articles', label: 'Catalogue articles', icon: <FaBoxOpen /> },
+        { id: 'stats', label: 'Statistiques', icon: <FaChartBar /> },
+        { id: 'logs', label: 'Journaux', icon: <FaHistory /> },
+        { id: 'back', label: 'Dashboard principal', icon: <FaTachometerAlt />, action: () => navigate('/dashboard') },
+        { id: 'logout', label: 'Déconnexion', icon: <FaSignOutAlt />, action: handleLogout }
     ];
 
     return (
@@ -47,6 +59,7 @@ const AdminDashboard = () => {
             />
             <div className="admin-main">
                 {activeTab === 'users' && <UserManagement />}
+                
                 {activeTab === 'roles' && (
                     <div className="roles-management">
                         <h2>Gestion des Rôles</h2>
@@ -69,14 +82,7 @@ const AdminDashboard = () => {
                                     <li>Validation expédition</li>
                                 </ul>
                             </div>
-                            <div className="role-card receiver">
-                                <h3>Réceptionnaire</h3>
-                                <p>Gestion des réceptions</p>
-                                <ul>
-                                    <li>Validation réception</li>
-                                    <li>Exécution rangement</li>
-                                </ul>
-                            </div>
+                          
                             <div className="role-card effector">
                                 <h3>Effecteur Transfert</h3>
                                 <p>Gestion des transferts</p>
@@ -88,12 +94,16 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 )}
+                
+                {activeTab === 'articles' && <ArticleList />}
+                
                 {activeTab === 'stats' && (
                     <div className="stats-container">
                         <h2>Statistiques</h2>
                         <p>En cours de développement...</p>
                     </div>
                 )}
+                
                 {activeTab === 'logs' && (
                     <div className="logs-container">
                         <h2>Journal d'activité</h2>

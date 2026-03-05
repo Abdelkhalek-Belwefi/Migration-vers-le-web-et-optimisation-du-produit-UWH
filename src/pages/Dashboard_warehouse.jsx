@@ -1,6 +1,22 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { 
+    FaTachometerAlt, 
+    FaUser, 
+    FaLock, 
+    FaBoxOpen,
+    FaBoxes,
+    FaClipboardList,
+    FaExchangeAlt,
+    FaCheckCircle,
+    FaTruck,
+    FaPrint,
+    FaSync,
+    FaSignOutAlt
+} from 'react-icons/fa';
 import Sidebar from "../components/dashboard/layout/Sidebar";
+// ✅ IMPORT DU COMPOSANT ARTICLE
+import ArticleList from "../components/articles/ArticleList";
 import "../styles/dashboard.css";
 
 const Dashboard_warehouse = () => {
@@ -22,7 +38,7 @@ const Dashboard_warehouse = () => {
     if (!token) {
       navigate("/login");
     }
-    
+
     const role = localStorage.getItem("role");
     if (role === "ADMINISTRATEUR") {
       navigate("/admin");
@@ -41,7 +57,7 @@ const Dashboard_warehouse = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
+      if (!file.type.startsWith("image/")) {
         alert("Veuillez sélectionner une image valide");
         return;
       }
@@ -69,104 +85,102 @@ const Dashboard_warehouse = () => {
     }
   };
 
-  // Fonction pour obtenir les éléments du menu selon le rôle
   const getMenuItems = () => {
     const baseItems = [
-      { id: "dashboard", label: "Tableau de bord", icon: "📊" },
-      { id: "profile", label: "Mon Profil", icon: "👤" },
-      { id: "password", label: "Changer Mot de Passe", icon: "🔒" },
+      { id: "dashboard", label: "Tableau de bord", icon: <FaTachometerAlt /> },
+      { id: "profile", label: "Mon Profil", icon: <FaUser /> },
+      { id: "password", label: "Changer Mot de Passe", icon: <FaLock /> },
     ];
 
-    switch(userRole) {
-      case 'RECEIVER':
+    switch (userRole) {
+      case "OPERATEUR_ENTREPOT":
         return [
           ...baseItems,
-          { id: "reception", label: "Réception", icon: "📥" },
-          { id: "rangement", label: "Rangement", icon: "📦" },
-          { id: "logout", label: "Déconnexion", icon: "🚪", action: handleLogout }
+          { id: "articles", label: "Articles du catalogue", icon: <FaBoxOpen /> },
+          { id: "reception", label: "Réception", icon: <FaBoxes /> },
+          { id: "rangement", label: "Rangement", icon: <FaClipboardList /> },
+          { id: "picking", label: "Préparation de commandes", icon: <FaClipboardList /> },
+          { id: "transfert", label: "Transfert", icon: <FaExchangeAlt /> },
+          { id: "logout", label: "Déconnexion", icon: <FaSignOutAlt />, action: handleLogout }
         ];
-      
-      case 'EFFECTOR_TRANSFERT':
+
+      case "RESPONSABLE_ENTREPOT":
         return [
           ...baseItems,
-          { id: "picking", label: "Préparation de commandes", icon: "📋" },
-          { id: "transfert", label: "Transfert", icon: "🔄" },
-          { id: "logout", label: "Déconnexion", icon: "🚪", action: handleLogout }
+          { id: "articles", label: "Articles du catalogue", icon: <FaBoxOpen /> },
+          { id: "stock", label: "Consultation Stock", icon: <FaBoxes /> },
+          { id: "reception", label: "Validation Réception", icon: <FaCheckCircle /> },
+          { id: "expedition", label: "Validation Expédition", icon: <FaTruck /> },
+          { id: "documents", label: "Impression Documents", icon: <FaPrint /> },
+          { id: "synchronisation", label: "Synchronisation ERP", icon: <FaSync /> },
+          { id: "logout", label: "Déconnexion", icon: <FaSignOutAlt />, action: handleLogout }
         ];
-      
-      case 'RESPONSABLE_ENTREPOT':
+
+      case "EFFECTOR_TRANSFERT":
         return [
           ...baseItems,
-          { id: "stock", label: "Consultation Stock", icon: "📊" },
-          { id: "reception", label: "Validation Réception", icon: "✅" },
-          { id: "expedition", label: "Validation Expédition", icon: "📤" },
-          { id: "documents", label: "Impression Documents", icon: "🖨️" },
-          { id: "synchronisation", label: "Synchronisation ERP", icon: "🔄" },
-          { id: "logout", label: "Déconnexion", icon: "🚪", action: handleLogout }
+          { id: "articles", label: "Articles du catalogue", icon: <FaBoxOpen /> },
+          { id: "picking", label: "Préparation de commandes", icon: <FaClipboardList /> },
+          { id: "transfert", label: "Transfert", icon: <FaExchangeAlt /> },
+          { id: "logout", label: "Déconnexion", icon: <FaSignOutAlt />, action: handleLogout }
         ];
-      
-      case 'OPERATOR':
+
+      case "OPERATOR":
       default:
         return [
           ...baseItems,
-          { id: "logout", label: "Déconnexion", icon: "🚪", action: handleLogout }
+          { id: "logout", label: "Déconnexion", icon: <FaSignOutAlt />, action: handleLogout }
         ];
     }
   };
 
   const getRoleLabel = (role) => {
     const labels = {
-      'ADMINISTRATEUR': 'Administrateur',
-      'RESPONSABLE_ENTREPOT': 'Responsable Entrepôt',
-      'RECEIVER': 'Réceptionnaire',
-      'EFFECTOR_TRANSFERT': 'Effecteur Transfert',
-      'OPERATOR': 'Opérateur'
+      ADMINISTRATEUR: "Administrateur",
+      RESPONSABLE_ENTREPOT: "Responsable Entrepôt",
+      OPERATEUR_ENTREPOT: "Opérateur Entrepôt",
+      EFFECTOR_TRANSFERT: "Effecteur Transfert",
+      OPERATOR: "Opérateur (en attente)",
     };
     return labels[role] || role;
   };
 
+  const getModuleTitle = (tabId) => {
+    const titles = {
+      articles: "Articles du catalogue",
+      picking: "Module Préparation de commandes",
+      transfert: "Module Transfert",
+      reception: "Module Réception",
+      rangement: "Module Rangement",
+      stock: "Consultation des stocks",
+      expedition: "Module Expédition",
+      documents: "Impression de documents",
+      synchronisation: "Synchronisation ERP",
+    };
+    return titles[tabId] || tabId;
+  };
+
   const renderContent = () => {
-    switch(activeTab) {
-      case 'dashboard':
+    switch (activeTab) {
+      case "dashboard":
         return (
           <div className="dashboard-content">
             <div className="welcome-section">
               <h1>Bienvenue, {userPrenom} {userName} !</h1>
             </div>
-
-            <div className="description-section">
-              <h2>À propos de L-mobile INDUSTRY</h2>
-              <div className="description-card">
-                <p>
-                  L-mobile INDUSTRY: MS Dynamics includes the basic system as well as the individual modules
-                  (user modules and functional modules) which are valid exclusively in connection with the MS
-                  Dynamics ERP system and the value-added component used for the integration of MS Dynamics
-                  and L-mobile.
-                </p>
-                <p>
-                  Licensed functionalities introduced into the MS Dynamics ERP system and, where
-                  applicable, individual programming implemented in MS Dynamics may affect the scope and/or
-                  context of the functions described. For technical reasons, module names may differ within the
-                  application.
-                </p>
-                <p>
-                  The General Availability conditions also apply to this version of L-mobile.
-                </p>
-                <p className="highlight">
-                  Detailed information on the product scope can be found in the current description of services for
-                  L-mobile warehouse 2025 ready for MS Dynamics.
-                </p>
-              </div>
-            </div>
           </div>
         );
 
-      case 'profile':
+      case "profile":
         return (
           <div className="profile-container">
             <h2>Mon Profil</h2>
             <div className="profile-card">
-              <div className="profile-avatar" onClick={handleImageClick} style={{ cursor: 'pointer' }}>
+              <div
+                className="profile-avatar"
+                onClick={handleImageClick}
+                style={{ cursor: "pointer" }}
+              >
                 {profileImage ? (
                   <img src={profileImage} alt="Profile" className="profile-image" />
                 ) : (
@@ -176,12 +190,12 @@ const Dashboard_warehouse = () => {
                 )}
               </div>
 
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleImageChange} 
-                accept="image/*" 
-                style={{ display: 'none' }} 
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                style={{ display: "none" }}
               />
 
               <p className="profile-image-hint">
@@ -214,22 +228,22 @@ const Dashboard_warehouse = () => {
           </div>
         );
 
-      case 'password':
+      case "password":
         return (
           <div className="password-change-container">
             <h2>Changer le mot de passe</h2>
             <form className="password-form" onSubmit={(e) => e.preventDefault()}>
               <div className="form-group">
                 <label>Ancien mot de passe</label>
-                <input type="password" placeholder="Entrez votre ancien mot de passe" className="password-input" />
+                <input type="password" className="password-input" />
               </div>
               <div className="form-group">
                 <label>Nouveau mot de passe</label>
-                <input type="password" placeholder="Entrez votre nouveau mot de passe" className="password-input" />
+                <input type="password" className="password-input" />
               </div>
               <div className="form-group">
                 <label>Confirmer le mot de passe</label>
-                <input type="password" placeholder="Confirmez votre nouveau mot de passe" className="password-input" />
+                <input type="password" className="password-input" />
               </div>
               <button type="submit" className="change-password-btn">
                 Changer le mot de passe
@@ -237,6 +251,10 @@ const Dashboard_warehouse = () => {
             </form>
           </div>
         );
+
+      // ✅ AJOUT DU CAS POUR L'ONGLET ARTICLES
+      case "articles":
+        return <ArticleList />;
 
       default:
         return (
@@ -252,23 +270,9 @@ const Dashboard_warehouse = () => {
     }
   };
 
-  const getModuleTitle = (tabId) => {
-    const titles = {
-      'picking': 'Module Préparation de commandes',
-      'transfert': 'Module Transfert',
-      'reception': 'Module Réception',
-      'rangement': 'Module Rangement',
-      'stock': 'Consultation des stocks',
-      'expedition': 'Module Expédition',
-      'documents': 'Impression de documents',
-      'synchronisation': 'Synchronisation ERP'
-    };
-    return titles[tabId] || tabId;
-  };
-
   return (
     <div className="dashboard">
-      <Sidebar 
+      <Sidebar
         userName={userPrenom}
         userPrenom={userName}
         userRole={getRoleLabel(userRole)}
