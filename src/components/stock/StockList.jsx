@@ -3,7 +3,7 @@ import { FaPrint, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { stockService } from '../../services/stockService';
 import StockDetailModal from './StockDetailModal';
 import StockTransferForm from './StockTransferForm';
-import './StockList.css';
+import './styles/StockList.css';
 
 const StockList = () => {
     const [stocks, setStocks] = useState([]);

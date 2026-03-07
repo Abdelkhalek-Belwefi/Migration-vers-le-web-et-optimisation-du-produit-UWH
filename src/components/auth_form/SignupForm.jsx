@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
-import "../styles/auth.css";
+import "../../styles/auth.css";
 
 const SignupForm = () => {
   const navigate = useNavigate();

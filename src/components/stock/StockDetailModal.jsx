@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaTimes, FaPrint, FaBox, FaCalendarAlt, FaMapMarkerAlt, FaTag, FaExchangeAlt } from 'react-icons/fa';
-import './StockDetailModal.css';
+import './styles/StockDetailModal.css';
 
 const StockDetailModal = ({ stock, onClose, onPrint, onTransfer }) => {
     if (!stock) return null;

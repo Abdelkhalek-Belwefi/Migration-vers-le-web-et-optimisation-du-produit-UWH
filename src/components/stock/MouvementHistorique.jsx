@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { mouvementService } from '../../services/mouvementService';
 import { FaDownload, FaSearch, FaUndo } from 'react-icons/fa';
-import './MouvementHistorique.css';
+import './styles/MouvementHistorique.css';
 
 const MouvementHistorique = () => {
     const [mouvements, setMouvements] = useState([]);

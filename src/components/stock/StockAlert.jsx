@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { stockService } from '../../services/stockService';
 import { FaExclamationTriangle, FaBell } from 'react-icons/fa';
-import './StockAlert.css';
+import './styles/StockAlert.css';
 
 const StockAlert = () => {
     const [stocksCritiques, setStocksCritiques] = useState([]);

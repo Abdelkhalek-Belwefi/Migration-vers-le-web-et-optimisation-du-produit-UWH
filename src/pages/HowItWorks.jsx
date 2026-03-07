@@ -1,9 +1,9 @@
-import Navbar from "../components/Navbar";
-import HeroSection from "../components/HeroSection";
-import ProcessSection from "../components/ProcessSection";
-import GallerySection from "../components/GallerySection";
-import FeaturesSection from "../components/FeaturesSection.jsx";
-import Footer from "../components/Footer";
+import Navbar from "../components/home/Navbar.jsx";
+import HeroSection from "../components/home/HeroSection.jsx";
+import ProcessSection from "../components/home/ProcessSection.jsx";
+import GallerySection from "../components/home/GallerySection.jsx";
+import FeaturesSection from "../components/home/FeaturesSection.jsx";
+import Footer from "../components/home/Footer.jsx";
 
 const HowItWorks = () => {
   return (

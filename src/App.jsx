@@ -7,7 +7,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import EnAttente from "./pages/EnAttente";
 import ArticleList from "./components/articles/ArticleList";
 import StockList from "./components/stock/StockList"; // ✅ Import du composant Stock
-import PrivateRoute from "./components/PrivateRoute";
+import PrivateRoute from "./components/route/PrivateRoute";
 
 function App() {
   return (

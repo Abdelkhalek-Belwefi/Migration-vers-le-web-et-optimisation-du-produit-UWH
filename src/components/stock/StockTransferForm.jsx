@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { mouvementService } from '../../services/mouvementService';
 import { stockService } from '../../services/stockService';
-import './StockTransferForm.css';
+import './styles/StockTransferForm.css';
 
 const StockTransferForm = ({ stock, onSuccess, onCancel }) => {
     const [formData, setFormData] = useState({
