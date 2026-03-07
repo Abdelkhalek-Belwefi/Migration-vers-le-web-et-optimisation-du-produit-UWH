@@ -12,16 +12,23 @@ import {
     FaTruck,
     FaPrint,
     FaSync,
-    FaSignOutAlt
+    FaSignOutAlt,
+    FaHistory, // Pour l'historique des mouvements
+    FaBell     // Pour les notifications
 } from 'react-icons/fa';
 import Sidebar from "../components/dashboard/layout/Sidebar";
 import ArticleList from "../components/articles/ArticleList";
-import StockList from "../components/stock/StockList"; // ✅ IMPORT AJOUTÉ
+import StockList from "../components/stock/StockList";
+import StockMovementForm from "../components/stock/StockMovementForm";
+import MouvementHistorique from "../components/stock/MouvementHistorique";
+import StockAlert from "../components/stock/StockAlert";
 import "../styles/dashboard.css";
 
 const Dashboard_warehouse = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [selectedStock, setSelectedStock] = useState(null);
+  const [showMovementForm, setShowMovementForm] = useState(false);
   const [userName] = useState(localStorage.getItem("nom") || "Utilisateur");
   const [userPrenom] = useState(localStorage.getItem("prenom") || "");
   const [userRole] = useState(localStorage.getItem("role") || "OPERATOR");
@@ -85,6 +92,21 @@ const Dashboard_warehouse = () => {
     }
   };
 
+  const handleStockClick = (stock) => {
+    setSelectedStock(stock);
+    setShowMovementForm(true);
+  };
+
+  const handleMovementSuccess = () => {
+    setShowMovementForm(false);
+    setSelectedStock(null);
+    // Optionnel : recharger la liste des stocks
+    if (activeTab === "stock") {
+      // Forcer un rechargement du composant StockList
+      window.location.reload();
+    }
+  };
+
   const getMenuItems = () => {
     const baseItems = [
       { id: "dashboard", label: "Tableau de bord", icon: <FaTachometerAlt /> },
@@ -106,8 +128,8 @@ const Dashboard_warehouse = () => {
       case "RESPONSABLE_ENTREPOT":
         return [
           ...baseItems,
-          
           { id: "stock", label: "Consultation Stock", icon: <FaBoxes /> },
+          { id: "mouvements", label: "Historique mouvements", icon: <FaHistory /> },
           { id: "reception", label: "Validation Réception", icon: <FaCheckCircle /> },
           { id: "expedition", label: "Validation Expédition", icon: <FaTruck /> },
           { id: "documents", label: "Impression Documents", icon: <FaPrint /> },
@@ -142,6 +164,7 @@ const Dashboard_warehouse = () => {
       reception: "Module Réception",
       rangement: "Module Rangement",
       stock: "Consultation des stocks",
+      mouvements: "Historique des mouvements",
       expedition: "Module Expédition",
       documents: "Impression de documents",
       synchronisation: "Synchronisation ERP",
@@ -155,7 +178,10 @@ const Dashboard_warehouse = () => {
         return (
           <div className="dashboard-content">
             <div className="welcome-section">
-              <h1>Bienvenue, {userPrenom} {userName} !</h1>
+              <div className="welcome-header">
+                <h1>Bienvenue, {userPrenom} {userName} !</h1>
+                {userRole === "RESPONSABLE_ENTREPOT" && <StockAlert />}
+              </div>
             </div>
           </div>
         );
@@ -245,7 +271,28 @@ const Dashboard_warehouse = () => {
         return <ArticleList />;
 
       case "stock":
-        return <StockList />;
+        return (
+          <div className="stock-page">
+            <StockList onStockClick={handleStockClick} />
+            {showMovementForm && selectedStock && (
+              <div className="modal-overlay">
+                <div className="modal-content">
+                  <StockMovementForm
+                    stock={selectedStock}
+                    onSuccess={handleMovementSuccess}
+                    onCancel={() => {
+                      setShowMovementForm(false);
+                      setSelectedStock(null);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case "mouvements":
+        return <MouvementHistorique />;
 
       default:
         return (

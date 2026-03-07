@@ -1,8 +1,8 @@
 import React from 'react';
-import { FaTimes, FaPrint, FaBox, FaCalendarAlt, FaMapMarkerAlt, FaTag } from 'react-icons/fa';
+import { FaTimes, FaPrint, FaBox, FaCalendarAlt, FaMapMarkerAlt, FaTag, FaExchangeAlt } from 'react-icons/fa';
 import './StockDetailModal.css';
 
-const StockDetailModal = ({ stock, onClose, onPrint }) => {
+const StockDetailModal = ({ stock, onClose, onPrint, onTransfer }) => {
     if (!stock) return null;
 
     const getStatutLabel = (statut) => {
@@ -24,6 +24,9 @@ const StockDetailModal = ({ stock, onClose, onPrint }) => {
             default: return '';
         }
     };
+
+    const userRole = localStorage.getItem('role');
+    const isResponsable = userRole === 'RESPONSABLE_ENTREPOT' || userRole === 'ADMINISTRATEUR';
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -98,6 +101,11 @@ const StockDetailModal = ({ stock, onClose, onPrint }) => {
                 </div>
 
                 <div className="modal-actions">
+                    {isResponsable && (
+                        <button className="btn-transfer" onClick={() => onTransfer(stock)}>
+                            <FaExchangeAlt /> Transférer
+                        </button>
+                    )}
                     <button className="btn-print" onClick={() => onPrint(stock)}>
                         <FaPrint /> Imprimer
                     </button>

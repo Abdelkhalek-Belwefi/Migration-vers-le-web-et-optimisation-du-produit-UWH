@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaPrint, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { stockService } from '../../services/stockService';
 import StockDetailModal from './StockDetailModal';
+import StockTransferForm from './StockTransferForm';
 import './StockList.css';
 
 const StockList = () => {
@@ -12,6 +13,8 @@ const StockList = () => {
     const [success, setSuccess] = useState('');
     const [selectedStock, setSelectedStock] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showTransferForm, setShowTransferForm] = useState(false);
+    const [stockToTransfer, setStockToTransfer] = useState(null);
     const [sortConfig, setSortConfig] = useState({
         key: 'emplacement',
         direction: 'asc'
@@ -116,9 +119,8 @@ const StockList = () => {
         setShowDetailModal(true);
     };
 
-    // ✅ FONCTION DE CHANGEMENT DE STATUT CORRIGÉE
     const handleChangerStatut = async (id, nouveauStatut) => {
-        if (!nouveauStatut) return; // Ignorer si l'option vide est sélectionnée
+        if (!nouveauStatut) return;
         
         if (!window.confirm(`Voulez-vous changer le statut en ${getStatutLabel(nouveauStatut)} ?`)) {
             return;
@@ -128,7 +130,6 @@ const StockList = () => {
             setLoading(true);
             const updated = await stockService.changerStatut(id, nouveauStatut);
             
-            // Mettre à jour la liste des stocks
             setStocks(stocks.map(s => s.id === id ? updated : s));
             setFilteredStocks(filteredStocks.map(s => s.id === id ? updated : s));
             
@@ -141,6 +142,19 @@ const StockList = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleTransfer = (stock) => {
+        setStockToTransfer(stock);
+        setShowTransferForm(true);
+        setShowDetailModal(false);
+    };
+
+    const handleTransferSuccess = () => {
+        setShowTransferForm(false);
+        fetchStocks();
+        setSuccess('Transfert effectué avec succès');
+        setTimeout(() => setSuccess(''), 3000);
     };
 
     const handlePrint = (stock) => {
@@ -390,7 +404,20 @@ const StockList = () => {
                     stock={selectedStock}
                     onClose={() => setShowDetailModal(false)}
                     onPrint={handlePrint}
+                    onTransfer={handleTransfer}
                 />
+            )}
+
+            {showTransferForm && (
+                <div className="modal-overlay">
+                    <div className="modal-content" style={{ maxWidth: '700px' }}>
+                        <StockTransferForm
+                            stock={stockToTransfer}
+                            onSuccess={handleTransferSuccess}
+                            onCancel={() => setShowTransferForm(false)}
+                        />
+                    </div>
+                </div>
             )}
         </div>
     );

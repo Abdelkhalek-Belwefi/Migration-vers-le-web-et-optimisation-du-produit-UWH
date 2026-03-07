@@ -1,0 +1,104 @@
+.stock-alert-container {
+    position: relative;
+    display: inline-block;
+}
+
+.alert-bell {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: relative;
+    color: #6c757d;
+    transition: color 0.3s;
+}
+
+.alert-bell.has-alerts {
+    color: #dc3545;
+    animation: bellShake 0.5s ease-in-out;
+}
+
+.alert-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.alert-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 300px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.alert-section {
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.alert-section:last-child {
+    border-bottom: none;
+}
+
+.alert-section.critique h4 {
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+
+.alert-section.alerte h4 {
+    color: #fd7e14;
+    margin-bottom: 10px;
+}
+
+.alert-item {
+    padding: 8px;
+    margin-bottom: 5px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.alert-item .article {
+    display: block;
+    font-weight: 600;
+    color: #212529;
+}
+
+.alert-item .lot {
+    display: inline-block;
+    color: #6c757d;
+    margin-right: 10px;
+    font-size: 0.8rem;
+}
+
+.alert-item .quantite {
+    display: inline-block;
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.no-alerts {
+    padding: 20px;
+    text-align: center;
+    color: #28a745;
+    font-weight: 500;
+}
+
+@keyframes bellShake {
+    0% { transform: rotate(0); }
+    25% { transform: rotate(15deg); }
+    50% { transform: rotate(-15deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0); }
+}
