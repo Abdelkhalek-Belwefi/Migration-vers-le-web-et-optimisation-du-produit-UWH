@@ -7,11 +7,13 @@ import {
     FaChartBar, 
     FaHistory, 
     FaSignOutAlt,
-    FaTachometerAlt
+    FaTachometerAlt,
+    FaBoxes  // ✅ Ajout pour l'icône des stocks
 } from 'react-icons/fa';
 import Sidebar from '../components/dashboard/layout/Sidebar';
 import UserManagement from '../components/admin/UserManagement';
 import ArticleList from '../components/articles/ArticleList';
+import StockList from '../components/stock/StockList'; // ✅ IMPORT AJOUTÉ
 import '../styles/admin-dashboard.css';
 
 const AdminDashboard = () => {
@@ -36,11 +38,12 @@ const AdminDashboard = () => {
         navigate('/login');
     };
 
-    // ✅ Menu avec React Icons
+    // ✅ Menu avec l'item "Stocks" ajouté
     const menuItems = [
         { id: 'users', label: 'Utilisateurs', icon: <FaUsers /> },
         { id: 'roles', label: 'Rôles', icon: <FaKey /> },
         { id: 'articles', label: 'Catalogue articles', icon: <FaBoxOpen /> },
+        { id: 'stocks', label: 'Gestion des Stocks', icon: <FaBoxes /> }, // ✅ NOUVEAU
         { id: 'stats', label: 'Statistiques', icon: <FaChartBar /> },
         { id: 'logs', label: 'Journaux', icon: <FaHistory /> },
         { id: 'back', label: 'Dashboard principal', icon: <FaTachometerAlt />, action: () => navigate('/dashboard') },
@@ -96,6 +99,9 @@ const AdminDashboard = () => {
                 )}
                 
                 {activeTab === 'articles' && <ArticleList />}
+                
+                {/* ✅ NOUVEAU : Onglet pour les stocks */}
+                {activeTab === 'stocks' && <StockList />}
                 
                 {activeTab === 'stats' && (
                     <div className="stats-container">

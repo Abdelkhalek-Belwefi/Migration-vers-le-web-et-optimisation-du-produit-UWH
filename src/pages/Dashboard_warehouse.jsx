@@ -15,8 +15,8 @@ import {
     FaSignOutAlt
 } from 'react-icons/fa';
 import Sidebar from "../components/dashboard/layout/Sidebar";
-// ✅ IMPORT DU COMPOSANT ARTICLE
 import ArticleList from "../components/articles/ArticleList";
+import StockList from "../components/stock/StockList"; // ✅ IMPORT AJOUTÉ
 import "../styles/dashboard.css";
 
 const Dashboard_warehouse = () => {
@@ -96,7 +96,6 @@ const Dashboard_warehouse = () => {
       case "OPERATEUR_ENTREPOT":
         return [
           ...baseItems,
-          { id: "articles", label: "Articles du catalogue", icon: <FaBoxOpen /> },
           { id: "reception", label: "Réception", icon: <FaBoxes /> },
           { id: "rangement", label: "Rangement", icon: <FaClipboardList /> },
           { id: "picking", label: "Préparation de commandes", icon: <FaClipboardList /> },
@@ -107,21 +106,12 @@ const Dashboard_warehouse = () => {
       case "RESPONSABLE_ENTREPOT":
         return [
           ...baseItems,
-          { id: "articles", label: "Articles du catalogue", icon: <FaBoxOpen /> },
+          
           { id: "stock", label: "Consultation Stock", icon: <FaBoxes /> },
           { id: "reception", label: "Validation Réception", icon: <FaCheckCircle /> },
           { id: "expedition", label: "Validation Expédition", icon: <FaTruck /> },
           { id: "documents", label: "Impression Documents", icon: <FaPrint /> },
           { id: "synchronisation", label: "Synchronisation ERP", icon: <FaSync /> },
-          { id: "logout", label: "Déconnexion", icon: <FaSignOutAlt />, action: handleLogout }
-        ];
-
-      case "EFFECTOR_TRANSFERT":
-        return [
-          ...baseItems,
-          { id: "articles", label: "Articles du catalogue", icon: <FaBoxOpen /> },
-          { id: "picking", label: "Préparation de commandes", icon: <FaClipboardList /> },
-          { id: "transfert", label: "Transfert", icon: <FaExchangeAlt /> },
           { id: "logout", label: "Déconnexion", icon: <FaSignOutAlt />, action: handleLogout }
         ];
 
@@ -139,7 +129,6 @@ const Dashboard_warehouse = () => {
       ADMINISTRATEUR: "Administrateur",
       RESPONSABLE_ENTREPOT: "Responsable Entrepôt",
       OPERATEUR_ENTREPOT: "Opérateur Entrepôt",
-      EFFECTOR_TRANSFERT: "Effecteur Transfert",
       OPERATOR: "Opérateur (en attente)",
     };
     return labels[role] || role;
@@ -252,9 +241,11 @@ const Dashboard_warehouse = () => {
           </div>
         );
 
-      // ✅ AJOUT DU CAS POUR L'ONGLET ARTICLES
       case "articles":
         return <ArticleList />;
+
+      case "stock":
+        return <StockList />;
 
       default:
         return (

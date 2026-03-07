@@ -5,7 +5,8 @@ import Signup from "./pages/Signup";
 import Dashboard_warehouse from "./pages/Dashboard_warehouse";
 import AdminDashboard from "./pages/AdminDashboard";
 import EnAttente from "./pages/EnAttente";
-import ArticleList from "./components/articles/ArticleList"; // Ajout
+import ArticleList from "./components/articles/ArticleList";
+import StockList from "./components/stock/StockList"; // ✅ Import du composant Stock
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
@@ -35,12 +36,22 @@ function App() {
           }
         />
 
-        {/* Nouvelle route pour les articles */}
+        {/* Route pour les articles (Sprint 1) */}
         <Route
           path="/articles"
           element={
             <PrivateRoute>
               <ArticleList />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ✅ Nouvelle route pour les stocks (Sprint 2) */}
+        <Route
+          path="/stock"
+          element={
+            <PrivateRoute>
+              <StockList />
             </PrivateRoute>
           }
         />
