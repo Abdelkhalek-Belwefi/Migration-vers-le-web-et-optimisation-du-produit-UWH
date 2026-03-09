@@ -25,7 +25,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [scanLoading, setScanLoading] = useState(false);
-    const [scanValue, setScanValue] = useState('');
 
     useEffect(() => {
         loadArticles();
@@ -46,7 +45,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         if (!scannedCode || scannedCode.length < 3) return;
 
         setScanLoading(true);
-        setScanValue(scannedCode);
 
         try {
             // 1. Vérifier si c'est un numéro de PO
@@ -54,11 +52,7 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                 try {
                     const reception = await receptionService.getReceptionByPO(scannedCode);
                     if (reception) {
-                        // Réception existante → on pourrait proposer de la charger
                         alert(`La réception ${scannedCode} existe déjà. Vous pouvez la modifier.`);
-                        // Ou rediriger vers le détail si vous voulez
-                        // onCancel(); // Fermer le formulaire
-                        // Puis charger le détail (à implémenter)
                     }
                 } catch (err) {
                     // PO non trouvé, on le met dans le champ
@@ -73,7 +67,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                 const gs1Data = await gs1Service.decodeGS1(scannedCode);
                 
                 if (gs1Data && gs1Data.gtin) {
-                    // Chercher l'article correspondant
                     const article = articles.find(a => 
                         a.gtin === gs1Data.gtin || a.codeArticleERP === gs1Data.gtin
                     );
@@ -88,7 +81,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                             emplacementDestination: ''
                         });
                         
-                        // Message de succès
                         alert(`✅ Article trouvé : ${article.designation}`);
                     } else {
                         setError('Article non trouvé pour ce code GS1');
@@ -135,7 +127,10 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         const quantiteRecue = currentLine.quantiteRecue ? parseInt(currentLine.quantiteRecue) : 0;
         const selectedArticle = articles.find(a => a.id === parseInt(currentLine.articleId));
         
-        if (!selectedArticle) return;
+        if (!selectedArticle) {
+            alert('Article sélectionné invalide');
+            return;
+        }
 
         const newLine = {
             articleId: parseInt(currentLine.articleId),
@@ -177,20 +172,32 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
             return;
         }
 
+        if (!formData.numeroPO.trim()) {
+            alert('Le numéro de bon de commande est obligatoire');
+            return;
+        }
+
+        // ✅ Conversion des dates au format ISO standard
         const receptionData = {
             numeroPO: formData.numeroPO,
             fournisseur: formData.fournisseur || null,
             bonLivraison: formData.bonLivraison || null,
-            dateReception: formData.dateReception ? new Date(formData.dateReception + 'T12:00:00').toISOString() : new Date().toISOString(),
+            dateReception: formData.dateReception 
+                ? new Date(formData.dateReception + 'T12:00:00').toISOString() 
+                : new Date().toISOString(),
             lignes: formData.lignes.map(line => ({
                 articleId: line.articleId,
                 quantiteAttendue: line.quantiteAttendue,
                 quantiteRecue: line.quantiteRecue,
                 lot: line.lot,
-                dateExpiration: line.dateExpiration,
+                dateExpiration: line.dateExpiration 
+                    ? new Date(line.dateExpiration + 'T12:00:00').toISOString() 
+                    : null,
                 emplacementDestination: line.emplacementDestination
             }))
         };
+
+        console.log('📤 Données envoyées:', JSON.stringify(receptionData, null, 2));
 
         setLoading(true);
         setError('');
@@ -202,7 +209,8 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                 if (onSuccess) onSuccess(result);
             }, 1500);
         } catch (err) {
-            setError(err.message || 'Erreur lors de la création');
+            console.error('❌ Erreur création:', err);
+            setError(err.response?.data?.message || err.message || 'Erreur lors de la création');
         } finally {
             setLoading(false);
         }

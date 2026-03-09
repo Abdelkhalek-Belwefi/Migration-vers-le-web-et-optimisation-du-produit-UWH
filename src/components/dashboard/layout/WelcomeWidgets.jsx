@@ -21,12 +21,17 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
     const [stats, setStats] = useState({
         totalArticles: 0,
         stockCount: 0,
-        receptionsEnCours: 0
-        
-       
+        receptionsEnCours: 0,
+        pickingsEnCours: 0,
+        expeditionsEnCours: 0
     });
-    const [loading, setLoading] = useState(true);
     const [recentMovements, setRecentMovements] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [apiErrors, setApiErrors] = useState({
+        articles: false,
+        stocks: false,
+        mouvements: false
+    });
 
     useEffect(() => {
         loadStats();
@@ -34,19 +39,44 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
     }, []);
 
     const loadStats = async () => {
+        setLoading(true);
+        
         try {
-            const articles = await articleService.getAllArticles();
-            const stocks = await stockService.getAllStocks();
+            // Chargement des articles avec gestion d'erreur
+            let articles = [];
+            try {
+                articles = await articleService.getAllArticles();
+                setApiErrors(prev => ({ ...prev, articles: false }));
+                console.log('✅ Articles chargés:', articles.length);
+            } catch (err) {
+                console.warn('⚠️ Impossible de charger les articles - ' + (err.response?.status || err.message));
+                setApiErrors(prev => ({ ...prev, articles: true }));
+                articles = [];
+            }
 
+            // Chargement des stocks avec gestion d'erreur
+            let stocks = [];
+            try {
+                stocks = await stockService.getAllStocks();
+                setApiErrors(prev => ({ ...prev, stocks: false }));
+                console.log('✅ Stocks chargés:', stocks.length);
+            } catch (err) {
+                console.warn('⚠️ Impossible de charger les stocks - ' + (err.response?.status || err.message));
+                setApiErrors(prev => ({ ...prev, stocks: true }));
+                stocks = [];
+            }
+
+            // Mise à jour des stats
             setStats({
-                totalArticles: articles.length,
-                stockCount: stocks.length,
-                receptionsEnCours: 3 // À remplacer par vraie donnée
-       
-               
+                totalArticles: articles.length || 0,
+                stockCount: stocks.length || 0,
+                receptionsEnCours: 3, // À remplacer par vraie donnée
+                pickingsEnCours: 5,    // À remplacer par vraie donnée
+                expeditionsEnCours: 2   // À remplacer par vraie donnée
             });
+
         } catch (err) {
-            console.error('Erreur chargement stats:', err);
+            console.error('❌ Erreur générale stats:', err);
         } finally {
             setLoading(false);
         }
@@ -54,18 +84,31 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
 
     const loadRecentMovements = async () => {
         try {
-            const mouvements = await mouvementService.getAllMouvements();
-            // Prendre les 5 derniers mouvements
-            const recent = mouvements
-                .sort((a, b) => new Date(b.dateMouvement) - new Date(a.dateMouvement))
-                .slice(0, 5);
-            setRecentMovements(recent);
+            let mouvements = [];
+            try {
+                mouvements = await mouvementService.getAllMouvements();
+                setApiErrors(prev => ({ ...prev, mouvements: false }));
+                console.log('✅ Mouvements chargés:', mouvements.length);
+                
+                // Trier et prendre les 5 plus récents
+                const recent = mouvements
+                    .sort((a, b) => new Date(b.dateMouvement) - new Date(a.dateMouvement))
+                    .slice(0, 5);
+                setRecentMovements(recent);
+                
+            } catch (err) {
+                console.warn('⚠️ Impossible de charger les mouvements - ' + (err.response?.status || err.message));
+                setApiErrors(prev => ({ ...prev, mouvements: true }));
+                setRecentMovements([]);
+            }
         } catch (err) {
-            console.error('Erreur chargement mouvements:', err);
+            console.error('❌ Erreur chargement mouvements:', err);
+            setRecentMovements([]);
         }
     };
 
     const formatTime = (dateString) => {
+        if (!dateString) return '--:--';
         const date = new Date(dateString);
         return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     };
@@ -88,8 +131,28 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
         return classes[type] || '';
     };
 
+    const getArticleCount = () => {
+        if (apiErrors.articles) return '?';
+        return stats.totalArticles;
+    };
+
+    const getStockCount = () => {
+        if (apiErrors.stocks) return '?';
+        return stats.stockCount;
+    };
+
+    const getMovementCount = () => {
+        if (apiErrors.mouvements) return '?';
+        return recentMovements.length;
+    };
+
     if (loading) {
-        return <div className="welcome-loading">Chargement...</div>;
+        return (
+            <div className="welcome-loading">
+                <div className="spinner"></div>
+                <p>Chargement du tableau de bord...</p>
+            </div>
+        );
     }
 
     return (
@@ -109,14 +172,17 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
                 </div>
             </div>
 
-            {/* Mini statistiques - simplifiées */}
+            {/* Mini statistiques - avec indicateurs d'erreur */}
             <div className="mini-stats">
                 <div className="mini-stat-card">
                     <div className="mini-stat-icon" style={{ background: '#e3f2fd', color: '#1976d2' }}>
                         <FaBoxes />
                     </div>
                     <div className="mini-stat-info">
-                        <span className="mini-stat-value">{stats.totalArticles}</span>
+                        <span className="mini-stat-value">
+                            {getArticleCount()}
+                            {apiErrors.articles && <span className="stat-warning" title="Données non disponibles"> ⚠️</span>}
+                        </span>
                         <span className="mini-stat-label">Articles</span>
                     </div>
                 </div>
@@ -126,7 +192,10 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
                         <FaWarehouse />
                     </div>
                     <div className="mini-stat-info">
-                        <span className="mini-stat-value">{stats.stockCount}</span>
+                        <span className="mini-stat-value">
+                            {getStockCount()}
+                            {apiErrors.stocks && <span className="stat-warning" title="Données non disponibles"> ⚠️</span>}
+                        </span>
                         <span className="mini-stat-label">Lignes stock</span>
                     </div>
                 </div>
@@ -161,6 +230,13 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Message d'erreur API si nécessaire */}
+            {(apiErrors.articles || apiErrors.stocks || apiErrors.mouvements) && (
+                <div className="api-warning">
+                    <p>⚠️ Certaines données ne sont pas disponibles. Vérifiez vos permissions.</p>
+                </div>
+            )}
 
             {/* Tâches en cours */}
             <div className="tasks-in-progress">
@@ -217,7 +293,11 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
                             </div>
                         ))
                     ) : (
-                        <div className="no-movements">Aucun mouvement récent</div>
+                        <div className="no-movements">
+                            {apiErrors.mouvements 
+                                ? 'Impossible de charger les mouvements' 
+                                : 'Aucun mouvement récent'}
+                        </div>
                     )}
                 </div>
                 <button className="view-all-btn" onClick={() => navigate('/mouvements')}>
@@ -225,8 +305,33 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
                 </button>
             </div>
 
-           
-           
+            {/* Accès rapides aux modules */}
+            <div className="quick-modules">
+                <h3>Modules</h3>
+                <div className="modules-grid">
+                    <button className="module-btn" onClick={() => navigate('/stock')}>
+                        <FaBoxes /> Stock
+                    </button>
+                    <button className="module-btn" onClick={() => navigate('/mouvements')}>
+                        <FaChartLine /> Mouvements
+                    </button>
+                    <button className="module-btn" onClick={() => navigate('/reception')}>
+                        <FaBoxOpen /> Réception
+                    </button>
+                    <button className="module-btn" onClick={() => navigate('/rangement')}>
+                        <FaWarehouse /> Rangement
+                    </button>
+                    <button className="module-btn" onClick={() => navigate('/expedition')}>
+                        <FaTruck /> Expédition
+                    </button>
+                    <button className="module-btn" onClick={() => navigate('/documents')}>
+                        <FaPrint /> Documents
+                    </button>
+                    <button className="module-btn" onClick={() => navigate('/synchronisation')}>
+                        <FaSync /> Sync
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
