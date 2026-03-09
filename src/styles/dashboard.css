@@ -1139,3 +1139,32 @@ background-color: #adb7e6;
 .modal-content {
   animation: slideIn 0.3s ease;
 }
+/* Ajustement pour la nouvelle structure */
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.dashboard-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.dashboard-main {
+    flex: 1;
+    margin-left: 280px; /* Largeur de la sidebar */
+    padding: 20px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    height: calc(100vh - 70px); /* Hauteur moins la top navbar */
+}
+
+/* Ajustement responsive */
+@media (max-width: 768px) {
+    .dashboard-main {
+        margin-left: 0;
+        padding: 15px;
+    }
+}

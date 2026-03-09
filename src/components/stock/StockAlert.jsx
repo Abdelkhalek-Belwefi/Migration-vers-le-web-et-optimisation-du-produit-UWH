@@ -3,7 +3,7 @@ import { stockService } from '../../services/stockService';
 import { FaExclamationTriangle, FaBell } from 'react-icons/fa';
 import './styles/StockAlert.css';
 
-const StockAlert = () => {
+const StockAlert = ({ compact = false }) => {
     const [stocksCritiques, setStocksCritiques] = useState([]);
     const [stocksAlerte, setStocksAlerte] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -34,6 +34,31 @@ const StockAlert = () => {
 
     const totalAlertes = stocksCritiques.length + stocksAlerte.length;
 
+    // Version compacte (intégrée dans la page)
+    if (compact) {
+        return (
+            <div className="stock-alert-compact">
+                {stocksCritiques.length > 0 ? (
+                    <>
+                        <h4><FaExclamationTriangle /> Critique (≤10)</h4>
+                        {stocksCritiques.map(s => (
+                            <div key={s.id} className="alert-item">
+                                <span className="article">{s.articleDesignation}</span>
+                                <span className="lot">Lot: {s.lot}</span>
+                                <span className="quantite">{s.quantite} unités</span>
+                            </div>
+                        ))}
+                    </>
+                ) : (
+                    <div className="no-alerts-compact">
+                        ✅ Aucun stock critique
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // Version dropdown (dans la navbar)
     return (
         <div className="stock-alert-container">
             <button 

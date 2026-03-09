@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
     FaTachometerAlt, 
-    FaUser, 
-    FaLock, 
     FaBoxOpen,
     FaBoxes,
     FaClipboardList,
@@ -12,16 +10,17 @@ import {
     FaTruck,
     FaPrint,
     FaSync,
-    FaSignOutAlt,
-    FaHistory, // Pour l'historique des mouvements
-    FaBell     // Pour les notifications
+    FaHistory
 } from 'react-icons/fa';
 import Sidebar from "../components/dashboard/layout/Sidebar";
+import TopNavbar from "../components/dashboard/layout/TopNavbar";
+import WelcomeWidgets from "../components/dashboard//layout/WelcomeWidgets";
 import ArticleList from "../components/articles/ArticleList";
 import StockList from "../components/stock/StockList";
 import StockMovementForm from "../components/stock/StockMovementForm";
 import MouvementHistorique from "../components/stock/MouvementHistorique";
-import StockAlert from "../components/stock/StockAlert";
+import ReceptionList from "../components/reception/ReceptionList";
+import RangementList from "../components/rangement/RangementList";
 import "../styles/dashboard.css";
 
 const Dashboard_warehouse = () => {
@@ -92,6 +91,14 @@ const Dashboard_warehouse = () => {
     }
   };
 
+  const handleProfileClick = () => {
+    setActiveTab("profile");
+  };
+
+  const handlePasswordClick = () => {
+    setActiveTab("password");
+  };
+
   const handleStockClick = (stock) => {
     setSelectedStock(stock);
     setShowMovementForm(true);
@@ -100,18 +107,14 @@ const Dashboard_warehouse = () => {
   const handleMovementSuccess = () => {
     setShowMovementForm(false);
     setSelectedStock(null);
-    // Optionnel : recharger la liste des stocks
     if (activeTab === "stock") {
-      // Forcer un rechargement du composant StockList
       window.location.reload();
     }
   };
 
   const getMenuItems = () => {
     const baseItems = [
-      { id: "dashboard", label: "Tableau de bord", icon: <FaTachometerAlt /> },
-      { id: "profile", label: "Mon Profil", icon: <FaUser /> },
-      { id: "password", label: "Changer Mot de Passe", icon: <FaLock /> },
+      { id: "dashboard", label: "Tableau de bord", icon: <FaTachometerAlt /> }
     ];
 
     switch (userRole) {
@@ -121,8 +124,7 @@ const Dashboard_warehouse = () => {
           { id: "reception", label: "Réception", icon: <FaBoxes /> },
           { id: "rangement", label: "Rangement", icon: <FaClipboardList /> },
           { id: "picking", label: "Préparation de commandes", icon: <FaClipboardList /> },
-          { id: "transfert", label: "Transfert", icon: <FaExchangeAlt /> },
-          { id: "logout", label: "Déconnexion", icon: <FaSignOutAlt />, action: handleLogout }
+          { id: "transfert", label: "Transfert", icon: <FaExchangeAlt /> }
         ];
 
       case "RESPONSABLE_ENTREPOT":
@@ -131,18 +133,15 @@ const Dashboard_warehouse = () => {
           { id: "stock", label: "Consultation Stock", icon: <FaBoxes /> },
           { id: "mouvements", label: "Historique mouvements", icon: <FaHistory /> },
           { id: "reception", label: "Validation Réception", icon: <FaCheckCircle /> },
+          { id: "rangement", label: "Suivi Rangement", icon: <FaClipboardList /> },
           { id: "expedition", label: "Validation Expédition", icon: <FaTruck /> },
           { id: "documents", label: "Impression Documents", icon: <FaPrint /> },
-          { id: "synchronisation", label: "Synchronisation ERP", icon: <FaSync /> },
-          { id: "logout", label: "Déconnexion", icon: <FaSignOutAlt />, action: handleLogout }
+          { id: "synchronisation", label: "Synchronisation ERP", icon: <FaSync /> }
         ];
 
       case "OPERATOR":
       default:
-        return [
-          ...baseItems,
-          { id: "logout", label: "Déconnexion", icon: <FaSignOutAlt />, action: handleLogout }
-        ];
+        return baseItems;
     }
   };
 
@@ -162,7 +161,7 @@ const Dashboard_warehouse = () => {
       picking: "Module Préparation de commandes",
       transfert: "Module Transfert",
       reception: "Module Réception",
-      rangement: "Module Rangement",
+      rangement: "Gestion du rangement",
       stock: "Consultation des stocks",
       mouvements: "Historique des mouvements",
       expedition: "Module Expédition",
@@ -177,12 +176,11 @@ const Dashboard_warehouse = () => {
       case "dashboard":
         return (
           <div className="dashboard-content">
-            <div className="welcome-section">
-              <div className="welcome-header">
-                <h1>Bienvenue, {userPrenom} {userName} !</h1>
-                {userRole === "RESPONSABLE_ENTREPOT" && <StockAlert />}
-              </div>
-            </div>
+            <WelcomeWidgets 
+              userPrenom={userPrenom}
+              userName={userName}
+              userRole={userRole}
+            />
           </div>
         );
 
@@ -294,6 +292,12 @@ const Dashboard_warehouse = () => {
       case "mouvements":
         return <MouvementHistorique />;
 
+      case "reception":
+        return <ReceptionList />;
+
+      case "rangement":
+        return <RangementList />;
+
       default:
         return (
           <div className="module-container">
@@ -310,17 +314,29 @@ const Dashboard_warehouse = () => {
 
   return (
     <div className="dashboard">
-      <Sidebar
-        userName={userPrenom}
-        userPrenom={userName}
+      <TopNavbar 
+        userPrenom={userPrenom}
+        userName={userName}
         userRole={getRoleLabel(userRole)}
-        menuItems={getMenuItems()}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        profileImage={profileImage}
+        onLogout={handleLogout}
+        onProfileClick={handleProfileClick}
+        onPasswordClick={handlePasswordClick}
       />
+      
+      <div className="dashboard-layout">
+        <Sidebar
+          userName={userPrenom}
+          userPrenom={userName}
+          userRole={getRoleLabel(userRole)}
+          menuItems={getMenuItems()}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-      <div className="dashboard-main">
-        {renderContent()}
+        <div className="dashboard-main">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

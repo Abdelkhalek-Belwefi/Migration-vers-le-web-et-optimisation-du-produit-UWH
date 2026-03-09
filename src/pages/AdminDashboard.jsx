@@ -5,20 +5,21 @@ import {
     FaKey, 
     FaBoxOpen, 
     FaChartBar, 
-    FaHistory, 
     FaSignOutAlt,
     FaTachometerAlt,
-    FaBoxes  // ✅ Ajout pour l'icône des stocks
+    FaBoxes,
+    FaHome
 } from 'react-icons/fa';
 import Sidebar from '../components/dashboard/layout/Sidebar';
 import UserManagement from '../components/admin/UserManagement';
 import ArticleList from '../components/articles/ArticleList';
-import StockList from '../components/stock/StockList'; // ✅ IMPORT AJOUTÉ
+import StockList from '../components/stock/StockList';
+import AdminStats from '../components/admin/stats/AdminStats';
 import '../styles/admin-dashboard.css';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('users');
+    const [activeTab, setActiveTab] = useState('dashboard');
     const [userName] = useState(localStorage.getItem('nom') || 'Admin');
     const [userPrenom] = useState(localStorage.getItem('prenom') || '');
     const [userRole] = useState(localStorage.getItem('role') || 'ADMINISTRATEUR');
@@ -38,15 +39,14 @@ const AdminDashboard = () => {
         navigate('/login');
     };
 
-    // ✅ Menu avec l'item "Stocks" ajouté
+    // ✅ Menu simplifié - "Journaux" et "Dashboard principal" supprimés
     const menuItems = [
+        { id: 'dashboard', label: 'Tableau de bord', icon: <FaHome /> },
         { id: 'users', label: 'Utilisateurs', icon: <FaUsers /> },
-        { id: 'roles', label: 'Rôles', icon: <FaKey /> },
+       
         { id: 'articles', label: 'Catalogue articles', icon: <FaBoxOpen /> },
-        { id: 'stocks', label: 'Gestion des Stocks', icon: <FaBoxes /> }, // ✅ NOUVEAU
-        { id: 'stats', label: 'Statistiques', icon: <FaChartBar /> },
-        { id: 'logs', label: 'Journaux', icon: <FaHistory /> },
-        { id: 'back', label: 'Dashboard principal', icon: <FaTachometerAlt />, action: () => navigate('/dashboard') },
+        { id: 'stocks', label: 'Gestion des Stocks', icon: <FaBoxes /> },
+        
         { id: 'logout', label: 'Déconnexion', icon: <FaSignOutAlt />, action: handleLogout }
     ];
 
@@ -61,6 +61,9 @@ const AdminDashboard = () => {
                 onTabChange={setActiveTab}
             />
             <div className="admin-main">
+                {/* Tableau de bord avec statistiques */}
+                {activeTab === 'dashboard' && <AdminStats />}
+                
                 {activeTab === 'users' && <UserManagement />}
                 
                 {activeTab === 'roles' && (
@@ -100,19 +103,11 @@ const AdminDashboard = () => {
                 
                 {activeTab === 'articles' && <ArticleList />}
                 
-                {/* ✅ NOUVEAU : Onglet pour les stocks */}
                 {activeTab === 'stocks' && <StockList />}
                 
                 {activeTab === 'stats' && (
                     <div className="stats-container">
                         <h2>Statistiques</h2>
-                        <p>En cours de développement...</p>
-                    </div>
-                )}
-                
-                {activeTab === 'logs' && (
-                    <div className="logs-container">
-                        <h2>Journal d'activité</h2>
                         <p>En cours de développement...</p>
                     </div>
                 )}

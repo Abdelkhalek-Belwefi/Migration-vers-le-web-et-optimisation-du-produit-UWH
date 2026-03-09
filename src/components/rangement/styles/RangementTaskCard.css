@@ -1,0 +1,199 @@
+.task-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-left: 4px solid #dee2e6;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+/* ✅ Classes de statut cohérentes */
+.task-card.a-faire {
+    border-left-color: #ffc107;
+}
+
+.task-card.en-cours {
+    border-left-color: #17a2b8;
+}
+
+.task-card.terminee {
+    border-left-color: #28a745;
+    opacity: 0.8;
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.task-header h3 {
+    margin: 0;
+    color: #212529;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    display: inline-block;
+}
+
+.badge-warning {
+    background: #ffc107;
+    color: #333;
+}
+
+.badge-info {
+    background: #17a2b8;
+}
+
+.badge-success {
+    background: #28a745;
+}
+
+.task-details {
+    margin-bottom: 20px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.detail-row .icon {
+    margin-right: 8px;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.detail-row .label {
+    width: 80px;
+    color: #6c757d;
+}
+
+.detail-row .value {
+    flex: 1;
+    color: #212529;
+    font-weight: 500;
+}
+
+.detail-row .value.quantity {
+    font-weight: 700;
+    color: #4361ee;
+}
+
+.detail-row .value.destination {
+    font-family: monospace;
+    background: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+/* ✅ Boutons d'action */
+.btn-start, .btn-scan, .btn-complete, .btn-cancel-scan {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-start {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-start:hover:not(:disabled) {
+    background: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(255, 193, 7, 0.3);
+}
+
+.btn-scan {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-scan:hover:not(:disabled) {
+    background: #138496;
+    transform: translateY(-2px);
+}
+
+.btn-complete {
+    background: #28a745;
+    color: white;
+}
+
+.btn-complete:hover:not(:disabled) {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(40, 167, 69, 0.3);
+}
+
+.btn-cancel-scan {
+    background: #6c757d;
+    color: white;
+    margin-top: 10px;
+}
+
+.btn-cancel-scan:hover:not(:disabled) {
+    background: #5a6268;
+}
+
+.btn-start:disabled,
+.btn-scan:disabled,
+.btn-complete:disabled,
+.btn-cancel-scan:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.complete-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.scan-input {
+    padding: 10px;
+    border: 2px solid #17a2b8;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: monospace;
+    text-align: center;
+}
+
+.scan-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.2);
+}
+
+.info-message {
+    text-align: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    color: #6c757d;
+    font-size: 14px;
+    font-style: italic;
+}
