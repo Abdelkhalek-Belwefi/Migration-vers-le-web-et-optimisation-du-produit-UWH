@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { receptionService } from '../../services/receptionService';
 import ReceptionForm from './ReceptionForm';
-import ReceptionDetail from './ReceptionDetail';  // ✅ Importer le détail
+import ReceptionDetail from './ReceptionDetail';
 import './styles/ReceptionList.css';
 
 const ReceptionList = () => {
@@ -9,8 +9,9 @@ const ReceptionList = () => {
     const [filteredReceptions, setFilteredReceptions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [showForm, setShowForm] = useState(false);
-    const [selectedReceptionId, setSelectedReceptionId] = useState(null);  // ✅ ID de la réception sélectionnée
+    const [selectedReceptionId, setSelectedReceptionId] = useState(null);
     const [searchParams, setSearchParams] = useState({
         numeroPO: '',
         fournisseur: '',
@@ -75,15 +76,20 @@ const ReceptionList = () => {
         setFilteredReceptions(receptions);
     };
 
+    // MODIFICATION ICI : amélioration de la gestion d'erreur
     const handleValider = async (id) => {
         if (!window.confirm('Valider cette réception ? Cette action est irréversible.')) return;
         
         try {
             await receptionService.validerReception(id);
             loadReceptions();
-            setSelectedReceptionId(null);  // Retour à la liste après validation
+            setSelectedReceptionId(null);
+            setSuccess('✅ Réception validée avec succès !');
+            setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError('Erreur lors de la validation');
+            const message = err.response?.data?.message || err.message || 'Erreur lors de la validation';
+            setError(`❌ ${message}`);
+            setTimeout(() => setError(''), 5000);
         }
     };
 
@@ -97,12 +103,12 @@ const ReceptionList = () => {
     };
 
     const handleRowClick = (id) => {
-        setSelectedReceptionId(id);  // ✅ Afficher le détail
+        setSelectedReceptionId(id);
         setShowForm(false);
     };
 
     const handleBackToList = () => {
-        setSelectedReceptionId(null);  // ✅ Retour à la liste
+        setSelectedReceptionId(null);
         setShowForm(false);
     };
 
@@ -149,23 +155,20 @@ const ReceptionList = () => {
             </div>
 
             {error && <div className="alert error">{error}</div>}
+            {success && <div className="alert success">{success}</div>}
 
-            {/* ✅ AFFICHAGE CONDITIONNEL */}
             {showForm ? (
-                // Formulaire de création
                 <ReceptionForm 
                     onSuccess={handleFormSuccess}
                     onCancel={handleFormCancel}
                 />
             ) : selectedReceptionId ? (
-                // Détail d'une réception
                 <ReceptionDetail 
                     receptionId={selectedReceptionId}
                     onBack={handleBackToList}
                     onValidate={handleValider}
                 />
             ) : (
-                // Liste des réceptions
                 <>
                     <div className="search-section">
                         <form onSubmit={handleSearch} className="search-form">

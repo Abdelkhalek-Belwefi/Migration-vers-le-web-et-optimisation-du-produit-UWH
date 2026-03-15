@@ -219,3 +219,197 @@
     color: #155724;
     border-left: 4px solid #28a745;
 }
+/* Ajoutez ceci dans ArticleList.css */
+.serial-cell {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #2c3e50;
+    background-color: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.serial-cell:hover {
+    background-color: #e9ecef;
+    cursor: help;
+    overflow: visible;
+    white-space: normal;
+    word-break: break-all;
+}
+
+/* Style pour les cellules vides */
+.serial-cell:empty::before,
+.serial-cell:contains('-') {
+    color: #999;
+    font-style: italic;
+}
+
+/* Ajoutez aussi ceci pour mieux voir les données */
+.filled {
+    border-left: 3px solid #28a745 !important;
+    background-color: #f0fff4;
+}
+/* Styles supplémentaires pour la version corrigée */
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0066cc;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+.empty-icon {
+    font-size: 64px;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.item-count {
+    font-size: 14px;
+    font-weight: normal;
+    color: #666;
+    margin-left: 10px;
+}
+
+.inactive-row {
+    background-color: #fff3f3;
+    opacity: 0.8;
+}
+
+.inactive-row:hover {
+    background-color: #ffe6e6 !important;
+}
+
+.empty-value {
+    color: #999;
+    font-style: italic;
+}
+
+.number-cell {
+    text-align: right;
+    font-family: 'Courier New', monospace;
+}
+
+.code-cell, .serial-cell, .lot-cell {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin: 20px 0;
+}
+
+.page-btn {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #0066cc;
+    color: white;
+    border-color: #0066cc;
+}
+
+.page-btn.active {
+    background: #0066cc;
+    color: white;
+    border-color: #0066cc;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Amélioration du responsive */
+@media (max-width: 1200px) {
+    .articles-table {
+        font-size: 14px;
+    }
+    
+    .actions {
+        flex-direction: column;
+    }
+    
+    .actions button {
+        margin: 2px 0;
+    }
+}
+
+/* Styles pour les tooltips */
+[title] {
+    cursor: help;
+}
+
+[title]:hover {
+    position: relative;
+}
+
+/* Amélioration des alertes */
+.alert {
+    padding: 12px 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert.error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.alert.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}

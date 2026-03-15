@@ -274,3 +274,51 @@
     50% { opacity: 0.5; }
     100% { opacity: 1; }
 }
+/* À ajouter dans AddArticleModal.css */
+.full-width {
+    width: 100%;
+    grid-column: 1 / -1;
+}
+
+.field-hint {
+    display: block;
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.category-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.category-select:hover {
+    border-color: #999;
+}
+
+.category-select:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 2px rgba(0,102,204,0.2);
+}
+
+/* À ajouter dans ArticleList.css */
+.serial-cell {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: monospace;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.serial-cell:hover {
+    background-color: #f5f5f5;
+    cursor: help;
+}

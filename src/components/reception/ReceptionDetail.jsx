@@ -34,15 +34,17 @@ const ReceptionDetail = ({ receptionId, onBack, onValidate }) => {
         }
     };
 
+    // MODIFICATION ICI : amélioration de la gestion d'erreur
     const handleValider = async () => {
         if (!window.confirm('Valider cette réception ? Cette action est irréversible.')) return;
         
         try {
             await onValidate(receptionId);
-            setSuccess('Réception validée avec succès !');
+            setSuccess('✅ Réception validée avec succès !');
             loadReception();
         } catch (err) {
-            setError('Erreur lors de la validation');
+            const message = err.response?.data?.message || err.message || 'Erreur lors de la validation';
+            setError(`❌ ${message}`);
         }
     };
 

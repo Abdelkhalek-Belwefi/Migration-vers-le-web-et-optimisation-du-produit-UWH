@@ -12,6 +12,13 @@ const getAuthHeader = () => {
     };
 };
 
+// Nettoyage renforcé : enlève les caractères de contrôle (ASCII 0-31) et les espaces
+const cleanGS1Code = (code) => {
+    if (!code) return '';
+    // Supprimer tous les caractères de contrôle, garder les imprimables
+    return code.replace(/[\x00-\x1F\x7F]/g, '').replace(/\s+/g, '').trim();
+};
+
 export const gs1Service = {
     /**
      * Décode un code GS1 et retourne les informations extraites
@@ -20,14 +27,17 @@ export const gs1Service = {
     decodeGS1: async (gs1Code) => {
         console.log('📤 Envoi du code GS1 au backend:', gs1Code);
         
+        // Nettoyer le code (enlever caractères de contrôle)
+        const cleaned = cleanGS1Code(gs1Code);
+        if (!cleaned) {
+            console.warn('⚠️ Code vide après nettoyage');
+            return { error: 'Code vide' };
+        }
+
         try {
-            // Nettoyer le code (enlever les espaces)
-            const cleanCode = encodeURIComponent(gs1Code.trim());
-            const response = await axios.get(`${API_URL}/decode/${cleanCode}`, getAuthHeader());
-            
+            const response = await axios.get(`${API_URL}/decode/${encodeURIComponent(cleaned)}`, getAuthHeader());
             console.log('✅ Réponse GS1 reçue:', response.data);
             return response.data;
-            
         } catch (error) {
             console.error('❌ Erreur API decodeGS1:');
             console.error('Status:', error.response?.status);
@@ -36,7 +46,7 @@ export const gs1Service = {
             
             // Fallback : décodage simple côté client
             console.log('🔧 Utilisation du fallback client');
-            return decodeGS1Simple(gs1Code);
+            return decodeGS1Simple(cleaned);
         }
     }
 };
@@ -47,7 +57,7 @@ export const gs1Service = {
 const decodeGS1Simple = (code) => {
     const result = {};
     
-    // Nettoyer le code
+    // Nettoyer le code (enlever parenthèses et espaces)
     let cleanCode = code.replace(/[()]/g, '').replace(/\s/g, '');
     
     // Détecter le format
@@ -60,20 +70,26 @@ const decodeGS1Simple = (code) => {
     } else {
         result.format = 'GS1';
         
-        // Extraire GTIN (AI 01)
-        const gtinMatch = cleanCode.match(/(?:01)?(\d{14})/);
+        // Extraire GTIN (AI 01) - 14 chiffres
+        const gtinMatch = cleanCode.match(/01(\d{14})/);
         if (gtinMatch) {
             result.gtin = gtinMatch[1];
+        } else {
+            // Chercher simplement 13-14 chiffres
+            const digitsMatch = cleanCode.match(/\d{13,14}/);
+            if (digitsMatch) {
+                result.gtin = digitsMatch[0];
+            }
         }
         
-        // Extraire LOT (AI 10)
-        const lotMatch = cleanCode.match(/(?:10)?([A-Za-z0-9]{1,20})/);
-        if (lotMatch && !lotMatch[1].match(/^\d{14}$/)) {
+        // Extraire LOT (AI 10) - jusqu'à 20 caractères alphanumériques
+        const lotMatch = cleanCode.match(/10([A-Za-z0-9]{1,20})/);
+        if (lotMatch) {
             result.lot = lotMatch[1];
         }
         
-        // Extraire date expiration (AI 17)
-        const expMatch = cleanCode.match(/(?:17)?(\d{6})/);
+        // Extraire date expiration (AI 17) - format YYMMDD
+        const expMatch = cleanCode.match(/17(\d{6})/);
         if (expMatch) {
             const expDate = expMatch[1];
             const year = 2000 + parseInt(expDate.substring(0, 2));
@@ -82,10 +98,22 @@ const decodeGS1Simple = (code) => {
             result.dateExpiration = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
         }
         
+        // Extraire numéro de série (AI 21)
+        const snMatch = cleanCode.match(/21([A-Za-z0-9]{1,20})/);
+        if (snMatch) {
+            result.numSerie = snMatch[1];
+        }
+        
         // Extraire quantité (AI 30)
-        const qtyMatch = cleanCode.match(/(?:30)?(\d+)/);
-        if (qtyMatch && qtyMatch[1].length < 6) {
+        const qtyMatch = cleanCode.match(/30(\d+)/);
+        if (qtyMatch) {
             result.quantite = parseInt(qtyMatch[1]);
+        }
+        
+        // Extraire poids (AI 3103)
+        const weightMatch = cleanCode.match(/3103(\d{6})/);
+        if (weightMatch) {
+            result.poids = parseInt(weightMatch[1]) / 1000;
         }
     }
     

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { receptionService } from '../../services/receptionService';
 import { articleService } from '../../services/articleService';
 import { gs1Service } from '../../services/gs1Service';
@@ -25,6 +25,9 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [scanLoading, setScanLoading] = useState(false);
+    const [scanEmplacementLoading, setScanEmplacementLoading] = useState(false);
+
+    const emplacementScanRef = useRef(null);
 
     useEffect(() => {
         loadArticles();
@@ -39,7 +42,7 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // ===== GESTION DU SCAN =====
+    // ===== GESTION DU SCAN PRINCIPAL =====
     const handleScan = async (e) => {
         const scannedCode = e.target.value;
         if (!scannedCode || scannedCode.length < 3) return;
@@ -65,25 +68,35 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
             // 2. Essayer de décoder comme code GS1
             else {
                 const gs1Data = await gs1Service.decodeGS1(scannedCode);
-                
-                if (gs1Data && gs1Data.gtin) {
-                    const article = articles.find(a => 
-                        a.gtin === gs1Data.gtin || a.codeArticleERP === gs1Data.gtin
-                    );
-                    
-                    if (article) {
-                        setCurrentLine({
-                            articleId: article.id.toString(),
-                            quantiteAttendue: gs1Data.quantite ? gs1Data.quantite.toString() : '1',
-                            quantiteRecue: gs1Data.quantite ? gs1Data.quantite.toString() : '1',
-                            lot: gs1Data.lot || '',
-                            dateExpiration: gs1Data.dateExpiration || '',
-                            emplacementDestination: ''
-                        });
-                        
-                        alert(`✅ Article trouvé : ${article.designation}`);
-                    } else {
-                        setError('Article non trouvé pour ce code GS1');
+
+                // Même si gtin est null, on peut avoir lot et date
+                if (gs1Data && (gs1Data.gtin || gs1Data.lot || gs1Data.dateExpiration)) {
+                    const updates = {};
+
+                    // Si un GTIN est présent, chercher l'article correspondant
+                    if (gs1Data.gtin) {
+                        const article = articles.find(a => 
+                            a.gtin === gs1Data.gtin || a.codeArticleERP === gs1Data.gtin
+                        );
+                        if (article) {
+                            updates.articleId = article.id.toString();
+                            updates.quantiteAttendue = gs1Data.quantite ? gs1Data.quantite.toString() : '1';
+                            updates.quantiteRecue = gs1Data.quantite ? gs1Data.quantite.toString() : '1';
+                            alert(`✅ Article trouvé : ${article.designation}`);
+                        } else {
+                            setError('Article non trouvé pour ce code GS1');
+                        }
+                    }
+
+                    // Mettre à jour les autres champs s'ils sont présents
+                    if (gs1Data.lot) updates.lot = gs1Data.lot;
+                    if (gs1Data.dateExpiration) updates.dateExpiration = gs1Data.dateExpiration;
+
+                    setCurrentLine(prev => ({ ...prev, ...updates }));
+
+                    // Focus sur le champ emplacement pour le prochain scan
+                    if (emplacementScanRef.current) {
+                        emplacementScanRef.current.focus();
                     }
                 } else {
                     setError('Format de code non reconnu');
@@ -94,7 +107,28 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
             setError('Erreur lors du décodage du code');
         } finally {
             setScanLoading(false);
-            e.target.value = ''; // Vider le champ
+            e.target.value = '';
+        }
+    };
+
+    // ===== GESTION DU SCAN D'EMPLACEMENT =====
+    const handleEmplacementScan = async (e) => {
+        const scannedCode = e.target.value;
+        if (!scannedCode || scannedCode.length < 2) return;
+
+        setScanEmplacementLoading(true);
+
+        try {
+            setCurrentLine({
+                ...currentLine,
+                emplacementDestination: scannedCode
+            });
+        } catch (err) {
+            console.error('Erreur scan emplacement:', err);
+            setError('Erreur lors du scan de l\'emplacement');
+        } finally {
+            setScanEmplacementLoading(false);
+            e.target.value = '';
         }
     };
 
@@ -356,15 +390,23 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                                     onChange={handleLineChange}
                                 />
                             </div>
-                            <div className="form-group">
+                            <div className="form-group scan-emplacement-wrapper">
                                 <label>Emplacement</label>
-                                <input
-                                    type="text"
-                                    name="emplacementDestination"
-                                    value={currentLine.emplacementDestination}
-                                    onChange={handleLineChange}
-                                    placeholder="RAYON-A-01"
-                                />
+                                <div className="scan-input-wrapper">
+                                    <input
+                                        ref={emplacementScanRef}
+                                        type="text"
+                                        name="emplacementDestination"
+                                        value={currentLine.emplacementDestination}
+                                        onChange={handleLineChange}
+                                        onBlur={handleEmplacementScan}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleEmplacementScan(e)}
+                                        placeholder="Scannez l'emplacement"
+                                        disabled={scanEmplacementLoading}
+                                    />
+                                    {scanEmplacementLoading && <span className="scan-spinner">🔍</span>}
+                                </div>
+                                <small className="field-hint">Scannez le code-barres de l'emplacement</small>
                             </div>
                             <div className="form-group">
                                 <button 

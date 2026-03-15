@@ -23,6 +23,7 @@ const MouvementHistorique = () => {
         try {
             setLoading(true);
             const data = await mouvementService.getAllMouvements();
+            console.log('📦 Mouvements reçus:', data); // Pour déboguer
             setMouvements(data);
             setFilteredMouvements(data);
             setError('');
@@ -79,20 +80,29 @@ const MouvementHistorique = () => {
     };
 
     const handleExportCSV = () => {
-        const headers = ['Date', 'Article', 'Lot', 'Emplacement', 'Type', 'Qté', 'Ancien', 'Nouveau', 'Motif', 'Utilisateur', 'Commentaire'];
-        const csvData = filteredMouvements.map(m => [
-            new Date(m.dateMouvement).toLocaleString(),
-            m.articleDesignation,
-            m.lot,
-            m.emplacement,
-            m.type,
-            m.quantite,
-            m.ancienneQuantite,
-            m.nouvelleQuantite,
-            m.motif,
-            m.utilisateurNom || 'Système',
-            m.commentaire || ''
-        ]);
+        const headers = ['Date', 'Article', 'Lot(s)', 'Emplacement(s)', 'Type', 'Qté', 'Ancien', 'Nouveau', 'Motif', 'Utilisateur', 'Commentaire'];
+        const csvData = filteredMouvements.map(m => {
+            // Formater les lots et emplacements selon le type
+            let lots = m.lotSource || '-';
+            let emplacements = m.emplacementSource || '-';
+            if (m.type === 'TRANSFERT' && m.lotDestination) {
+                lots = `${m.lotSource} → ${m.lotDestination}`;
+                emplacements = `${m.emplacementSource} → ${m.emplacementDestination}`;
+            }
+            return [
+                new Date(m.dateMouvement).toLocaleString(),
+                m.articleDesignation,
+                lots,
+                emplacements,
+                m.type,
+                m.quantite,
+                m.ancienneQuantiteSource,
+                m.nouvelleQuantiteSource,
+                m.motif,
+                m.utilisateurNom || 'Système',
+                m.commentaire || ''
+            ];
+        });
 
         const csvContent = [headers, ...csvData]
             .map(row => row.map(cell => `"${cell}"`).join(','))
@@ -106,7 +116,12 @@ const MouvementHistorique = () => {
     };
 
     const getTypeIcon = (type) => {
-        return type === 'ENTREE' ? '➕' : '➖';
+        switch(type) {
+            case 'ENTREE': return '➕';
+            case 'SORTIE': return '➖';
+            case 'TRANSFERT': return '🔄';
+            default: return '';
+        }
     };
 
     const getMotifLabel = (motif) => {
@@ -119,6 +134,30 @@ const MouvementHistorique = () => {
             'QUALITE': '🔬 Contrôle qualité'
         };
         return labels[motif] || motif;
+    };
+
+    // Affichage des lots avec flèche pour les transferts
+    const renderLots = (m) => {
+        if (m.type === 'TRANSFERT' && m.lotDestination) {
+            return (
+                <span title={`Source: ${m.lotSource}, Destination: ${m.lotDestination}`}>
+                    {m.lotSource} → {m.lotDestination}
+                </span>
+            );
+        }
+        return m.lotSource || '-';
+    };
+
+    // Affichage des emplacements avec flèche pour les transferts
+    const renderEmplacements = (m) => {
+        if (m.type === 'TRANSFERT' && m.emplacementDestination) {
+            return (
+                <span title={`Source: ${m.emplacementSource}, Destination: ${m.emplacementDestination}`}>
+                    {m.emplacementSource} → {m.emplacementDestination}
+                </span>
+            );
+        }
+        return m.emplacementSource || '-';
     };
 
     if (loading) return <div className="loading">Chargement de l'historique...</div>;
@@ -140,6 +179,7 @@ const MouvementHistorique = () => {
                         <option value="">Tous les types</option>
                         <option value="ENTREE">Entrées</option>
                         <option value="SORTIE">Sorties</option>
+                        <option value="TRANSFERT">Transferts</option>
                     </select>
 
                     <select name="motif" value={searchParams.motif} onChange={handleInputChange}>
@@ -183,8 +223,8 @@ const MouvementHistorique = () => {
                         <tr>
                             <th>Date</th>
                             <th>Article</th>
-                            <th>Lot</th>
-                            <th>Emplacement</th>
+                            <th>Lot(s)</th>
+                            <th>Emplacement(s)</th>
                             <th>Type</th>
                             <th>Qté</th>
                             <th>Ancien</th>
@@ -196,17 +236,17 @@ const MouvementHistorique = () => {
                     </thead>
                     <tbody>
                         {filteredMouvements.map(m => (
-                            <tr key={m.id} className={m.type.toLowerCase()}>
+                            <tr key={m.id} className={m.type?.toLowerCase()}>
                                 <td>{new Date(m.dateMouvement).toLocaleString()}</td>
                                 <td>{m.articleDesignation} ({m.articleCode})</td>
-                                <td>{m.lot}</td>
-                                <td>{m.emplacement}</td>
+                                <td>{renderLots(m)}</td>
+                                <td>{renderEmplacements(m)}</td>
                                 <td className="type-cell">
                                     {getTypeIcon(m.type)} {m.type}
                                 </td>
                                 <td className="quantite-cell">{m.quantite}</td>
-                                <td>{m.ancienneQuantite}</td>
-                                <td className="nouvelle-quantite">{m.nouvelleQuantite}</td>
+                                <td>{m.ancienneQuantiteSource}</td>
+                                <td className="nouvelle-quantite">{m.nouvelleQuantiteSource}</td>
                                 <td>{getMotifLabel(m.motif)}</td>
                                 <td>{m.utilisateurNom || 'Système'}</td>
                                 <td>{m.commentaire || '-'}</td>

@@ -101,20 +101,22 @@ export const receptionService = {
     },
 
     // ✅ Méthode de validation corrigée
-    validerReception: async (id) => {
-        try {
-            console.log('🔍 Validation de la réception ID:', id);
-            const response = await axios.put(`${API_URL}/${id}/valider`, {}, getAuthHeader());
-            console.log('✅ Réponse validation:', response.data);
-            return response.data;
-        } catch (error) {
-            console.error('❌ validerReception:');
-            console.error('Status:', error.response?.status);
-            console.error('Data:', error.response?.data);
-            console.error('Message:', error.message);
-            throw error;
-        }
-    },
+   validerReception: async (id) => {
+    try {
+        console.log('🔍 Validation de la réception ID:', id);
+        const response = await axios.put(`${API_URL}/${id}/valider`, {}, getAuthHeader());
+        console.log('✅ Réponse validation:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('❌ validerReception:');
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+        console.error('Message:', error.message);
+        // Extraire le message d'erreur du backend s'il existe
+        const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la validation';
+        throw new Error(errorMessage);
+    }
+},
 
     getPutawayTasks: async (receptionId) => {
         try {

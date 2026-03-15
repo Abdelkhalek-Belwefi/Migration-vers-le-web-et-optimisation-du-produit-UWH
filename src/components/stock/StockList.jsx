@@ -1,6 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { FaPrint, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+    FaPrint, 
+    FaSortAmountDown, 
+    FaSortAmountUp, 
+    FaSearch, 
+    FaBarcode,
+    FaTimes,
+    FaFilter,
+    FaQrcode
+} from 'react-icons/fa';
 import { stockService } from '../../services/stockService';
+import { articleService } from '../../services/articleService';
 import StockDetailModal from './StockDetailModal';
 import StockTransferForm from './StockTransferForm';
 import './styles/StockList.css';
@@ -25,6 +35,19 @@ const StockList = () => {
         emplacement: '',
         statut: ''
     });
+
+    // États pour le mode de filtre
+    const [filterMode, setFilterMode] = useState('normal'); // 'normal' ou 'scan'
+    const [showFilterPanel, setShowFilterPanel] = useState(false); // pour mobile éventuellement, mais on garde simple
+    const [scanParams, setScanParams] = useState({
+        lotScan: '',
+        emplacementScan: '',
+        articleCodeScan: ''
+    });
+    const [scanLoading, setScanLoading] = useState(false);
+    const lotScanRef = useRef(null);
+    const emplacementScanRef = useRef(null);
+    const articleScanRef = useRef(null);
 
     const userRole = localStorage.getItem('role');
     const isResponsable = userRole === 'RESPONSABLE_ENTREPOT' || userRole === 'ADMINISTRATEUR';
@@ -57,7 +80,6 @@ const StockList = () => {
             let aVal = a[sortConfig.key];
             let bVal = b[sortConfig.key];
 
-            // Gestion spéciale pour les dates
             if (sortConfig.key === 'dateReception' || sortConfig.key === 'dateExpiration') {
                 aVal = aVal ? new Date(aVal).getTime() : 0;
                 bVal = bVal ? new Date(bVal).getTime() : 0;
@@ -77,6 +99,7 @@ const StockList = () => {
         }));
     };
 
+    // Recherche normale
     const handleSearch = async (e) => {
         e.preventDefault();
         try {
@@ -111,9 +134,61 @@ const StockList = () => {
             emplacement: '',
             statut: ''
         });
+        setScanParams({
+            lotScan: '',
+            emplacementScan: '',
+            articleCodeScan: ''
+        });
         fetchStocks();
     };
 
+    // Gestion du scan
+    const handleScan = async (field, value) => {
+        if (!value || value.trim() === '') return;
+        setScanLoading(true);
+        try {
+            setScanParams(prev => ({ ...prev, [field]: value }));
+
+            const params = {};
+            if (field === 'lotScan') params.lot = value;
+            if (field === 'emplacementScan') params.emplacement = value;
+            if (field === 'articleCodeScan') {
+                const article = await articleService.findByCode(value);
+                if (article) {
+                    params.articleId = article.id;
+                } else {
+                    setError('Aucun article trouvé avec ce code');
+                    setScanLoading(false);
+                    return;
+                }
+            }
+
+            const data = await stockService.searchStocks(params);
+            setStocks(data);
+            setError('');
+        } catch (err) {
+            setError('Erreur lors de la recherche par scan');
+            console.error(err);
+        } finally {
+            setScanLoading(false);
+        }
+    };
+
+    const handleScanKeyPress = (e, field) => {
+        if (e.key === 'Enter') {
+            handleScan(field, e.target.value);
+            e.target.value = '';
+        }
+    };
+
+    const handleScanBlur = (e, field) => {
+        if (e.target.value.trim() !== '') {
+            handleScan(field, e.target.value);
+            e.target.value = '';
+        }
+    };
+
+    // Autres fonctions (inchangées)
     const handleRowClick = (stock) => {
         setSelectedStock(stock);
         setShowDetailModal(true);
@@ -121,23 +196,16 @@ const StockList = () => {
 
     const handleChangerStatut = async (id, nouveauStatut) => {
         if (!nouveauStatut) return;
-        
-        if (!window.confirm(`Voulez-vous changer le statut en ${getStatutLabel(nouveauStatut)} ?`)) {
-            return;
-        }
-        
+        if (!window.confirm(`Voulez-vous changer le statut en ${getStatutLabel(nouveauStatut)} ?`)) return;
         try {
             setLoading(true);
             const updated = await stockService.changerStatut(id, nouveauStatut);
-            
             setStocks(stocks.map(s => s.id === id ? updated : s));
             setFilteredStocks(filteredStocks.map(s => s.id === id ? updated : s));
-            
             setSuccess('Statut mis à jour avec succès');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             setError('Erreur lors du changement de statut');
-            console.error(err);
             setTimeout(() => setError(''), 3000);
         } finally {
             setLoading(false);
@@ -282,7 +350,7 @@ const StockList = () => {
                 <h2>Consultation des Stocks</h2>
                 <div className="header-actions">
                     <button className="btn-print-list" onClick={handlePrintList}>
-                        <FaPrint /> Imprimer la liste
+                        <FaPrint /> Imprimer
                     </button>
                 </div>
             </div>
@@ -290,41 +358,120 @@ const StockList = () => {
             {error && <div className="alert error">{error}</div>}
             {success && <div className="alert success">{success}</div>}
 
-            <div className="search-section">
-                <form onSubmit={handleSearch} className="search-form">
-                    <input
-                        type="text"
-                        name="articleId"
-                        placeholder="ID Article"
-                        value={searchParams.articleId}
-                        onChange={handleInputChange}
-                    />
-                    <input
-                        type="text"
-                        name="lot"
-                        placeholder="Lot"
-                        value={searchParams.lot}
-                        onChange={handleInputChange}
-                    />
-                    <input
-                        type="text"
-                        name="emplacement"
-                        placeholder="Emplacement"
-                        value={searchParams.emplacement}
-                        onChange={handleInputChange}
-                    />
-                    <select name="statut" value={searchParams.statut} onChange={handleInputChange}>
-                        <option value="">Tous les statuts</option>
-                        <option value="DISPONIBLE">Disponible</option>
-                        <option value="RESERVE">Réservé</option>
-                        <option value="BLOQUE">Bloqué</option>
-                        <option value="QUALITE">Contrôle qualité</option>
-                    </select>
-                    <button type="submit" className="btn-search">Rechercher</button>
-                    <button type="button" className="btn-reset" onClick={handleReset}>Réinitialiser</button>
-                </form>
+            {/* Sélecteur de mode de filtre - à droite, petits boutons */}
+            <div className="filter-mode-bar">
+                <button
+                    className={`filter-mode-btn ${filterMode === 'normal' ? 'active' : ''}`}
+                    onClick={() => setFilterMode('normal')}
+                >
+                    <FaFilter /> Normal
+                </button>
+                <button
+                    className={`filter-mode-btn ${filterMode === 'scan' ? 'active' : ''}`}
+                    onClick={() => setFilterMode('scan')}
+                >
+                    <FaQrcode /> Scan
+                </button>
             </div>
 
+            {/* Panneau de filtre actif */}
+            <div className="filter-panel">
+                {filterMode === 'normal' && (
+                    <div className="filter-normal">
+                        <form onSubmit={handleSearch} className="filter-form">
+                            <div className="filter-row">
+                                <input
+                                    type="text"
+                                    name="articleId"
+                                    placeholder="ID Article"
+                                    value={searchParams.articleId}
+                                    onChange={handleInputChange}
+                                />
+                                <input
+                                    type="text"
+                                    name="lot"
+                                    placeholder="Lot"
+                                    value={searchParams.lot}
+                                    onChange={handleInputChange}
+                                />
+                                <input
+                                    type="text"
+                                    name="emplacement"
+                                    placeholder="Emplacement"
+                                    value={searchParams.emplacement}
+                                    onChange={handleInputChange}
+                                />
+                                <select name="statut" value={searchParams.statut} onChange={handleInputChange}>
+                                    <option value="">Statut</option>
+                                    <option value="DISPONIBLE">Disponible</option>
+                                    <option value="RESERVE">Réservé</option>
+                                    <option value="BLOQUE">Bloqué</option>
+                                    <option value="QUALITE">Contrôle qualité</option>
+                                </select>
+                                <button type="submit" className="btn-search">Rechercher</button>
+                                <button type="button" className="btn-reset" onClick={handleReset}>Réinitialiser</button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {filterMode === 'scan' && (
+                    <div className="filter-scan">
+                        <div className="scan-fields">
+                            <div className="scan-field">
+                                <label>Lot</label>
+                                <div className="scan-input-wrapper">
+                                    <FaBarcode className="scan-icon" />
+                                    <input
+                                        ref={lotScanRef}
+                                        type="text"
+                                        placeholder="Scanner le lot"
+                                        onKeyPress={(e) => handleScanKeyPress(e, 'lotScan')}
+                                        onBlur={(e) => handleScanBlur(e, 'lotScan')}
+                                        disabled={scanLoading}
+                                    />
+                                    {scanLoading && <span className="scan-spinner" />}
+                                </div>
+                            </div>
+                            <div className="scan-field">
+                                <label>Emplacement</label>
+                                <div className="scan-input-wrapper">
+                                    <FaBarcode className="scan-icon" />
+                                    <input
+                                        ref={emplacementScanRef}
+                                        type="text"
+                                        placeholder="Scanner l'emplacement"
+                                        onKeyPress={(e) => handleScanKeyPress(e, 'emplacementScan')}
+                                        onBlur={(e) => handleScanBlur(e, 'emplacementScan')}
+                                        disabled={scanLoading}
+                                    />
+                                    {scanLoading && <span className="scan-spinner" />}
+                                </div>
+                            </div>
+                            <div className="scan-field">
+                                <label>Code article</label>
+                                <div className="scan-input-wrapper">
+                                    <FaBarcode className="scan-icon" />
+                                    <input
+                                        ref={articleScanRef}
+                                        type="text"
+                                        placeholder="Scanner l'article"
+                                        onKeyPress={(e) => handleScanKeyPress(e, 'articleCodeScan')}
+                                        onBlur={(e) => handleScanBlur(e, 'articleCodeScan')}
+                                        disabled={scanLoading}
+                                    />
+                                    {scanLoading && <span className="scan-spinner" />}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="scan-actions">
+                            <button type="button" className="btn-reset" onClick={handleReset}>Effacer tout</button>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Tableau des stocks (inchangé) */}
             <div className="table-container">
                 <table className="stock-table">
                     <thead>
@@ -345,16 +492,16 @@ const StockList = () => {
                                 Emplacement {getSortIcon('emplacement')}
                             </th>
                             <th onClick={() => handleSort('quantite')}>
-                                Quantité {getSortIcon('quantite')}
+                                Qté {getSortIcon('quantite')}
                             </th>
                             <th onClick={() => handleSort('statut')}>
                                 Statut {getSortIcon('statut')}
                             </th>
                             <th onClick={() => handleSort('dateReception')}>
-                                Date réception {getSortIcon('dateReception')}
+                                Réception {getSortIcon('dateReception')}
                             </th>
                             <th onClick={() => handleSort('dateExpiration')}>
-                                Date expiration {getSortIcon('dateExpiration')}
+                                Expiration {getSortIcon('dateExpiration')}
                             </th>
                             {isResponsable && <th>Actions</th>}
                         </tr>
@@ -364,7 +511,7 @@ const StockList = () => {
                             <tr 
                                 key={stock.id} 
                                 onClick={() => handleRowClick(stock)}
-                                style={{ cursor: 'pointer' }}
+                                className="clickable-row"
                             >
                                 <td>{stock.id}</td>
                                 <td>{stock.articleDesignation}</td>
@@ -384,8 +531,9 @@ const StockList = () => {
                                         <select
                                             onChange={(e) => handleChangerStatut(stock.id, e.target.value)}
                                             defaultValue=""
+                                            className="statut-select"
                                         >
-                                            <option value="" disabled>Changer statut</option>
+                                            <option value="" disabled>Changer</option>
                                             <option value="DISPONIBLE">Disponible</option>
                                             <option value="RESERVE">Réservé</option>
                                             <option value="BLOQUE">Bloqué</option>
@@ -399,6 +547,7 @@ const StockList = () => {
                 </table>
             </div>
 
+            {/* Modals (inchangés) */}
             {showDetailModal && (
                 <StockDetailModal
                     stock={selectedStock}

@@ -11,10 +11,24 @@ import {
     FaBoxOpen,
     FaFont,
     FaAlignLeft,
-    FaList
+    FaList,
+    FaHashtag
 } from 'react-icons/fa';
 import { articleService } from '../../services/articleService';
 import './styles/AddArticleModal.css';
+
+// Liste des catégories
+const CATEGORIES = [
+    { value: 'ELECTRONIQUE', label: 'Électronique' },
+    { value: 'MOBILIER', label: 'Mobilier' },
+    { value: 'CONSOMMABLE', label: 'Consommable' },
+    { value: 'MATIERE_PREMIERE', label: 'Matière première' },
+    { value: 'PRODUIT_FINI', label: 'Produit fini' },
+    { value: 'EMBALLAGE', label: 'Emballage' },
+    { value: 'OUTILLAGE', label: 'Outillage' },
+    { value: 'PIECE_DETACHEE', label: 'Pièce détachée' },
+    { value: 'AUTRE', label: 'Autre' }
+];
 
 const AddArticleModal = ({ 
     show, 
@@ -29,6 +43,7 @@ const AddArticleModal = ({
         id: null,
         codeArticleERP: '',
         gtin: '',
+        numSerie: '',
         designation: '',
         description: '',
         category: '',
@@ -56,6 +71,7 @@ const AddArticleModal = ({
                 id: articleToEdit.id,
                 codeArticleERP: articleToEdit.codeArticleERP || '',
                 gtin: articleToEdit.gtin || '',
+                numSerie: articleToEdit.numSerie || '',
                 designation: articleToEdit.designation || '',
                 description: articleToEdit.description || '',
                 category: articleToEdit.category || '',
@@ -67,12 +83,11 @@ const AddArticleModal = ({
                 actif: articleToEdit.actif !== undefined ? articleToEdit.actif : true
             });
         } else {
-            // Reset en mode ajout
             resetForm();
         }
     }, [articleToEdit, isEditMode, show]);
 
-    // Focus sur le champ de scan quand le modal s'ouvre
+    // Focus sur le champ de scan
     useEffect(() => {
         if (show && scanInputRef.current) {
             setTimeout(() => {
@@ -87,6 +102,7 @@ const AddArticleModal = ({
             id: null,
             codeArticleERP: '',
             gtin: '',
+            numSerie: '',
             designation: '',
             description: '',
             category: '',
@@ -102,92 +118,136 @@ const AddArticleModal = ({
     };
 
     /**
-     * Décode un code-barres (EAN-13, GTIN-14 ou GS1 complet)
+     * ====================================================
+     * 🎯 VERSION FINALE CORRIGÉE - Décodage GS1
+     * ====================================================
+     * Basé sur votre code scanné :
+     * (01)06123456789014(17)260330(10)61234567890141C(21)SER000317260330
      */
     const decodeBarcode = (barcode) => {
-        console.log('🔍 Décodage du code-barres:', barcode);
+        console.log('🔍 DÉCODAGE - Code reçu:', barcode);
         
         if (!barcode || barcode.length < 8) {
             return { error: 'Code trop court' };
         }
         
-        const result = {};
+        // Garder la structure avec parenthèses pour mieux identifier les AI
+        let codeWithParens = barcode;
+        const result = {
+            format: 'GS1',
+            gtin: null,
+            lot: null,
+            numSerie: null,
+            dateExpiration: null,
+            dateObj: null
+        };
         
-        // 👉 Cas 1: EAN-13 (13 chiffres)
-        if (/^\d{13}$/.test(barcode)) {
-            console.log('✅ EAN-13 détecté');
-            result.gtin = barcode;
-            result.format = 'EAN-13';
-            return result;
-        }
+        /**
+         * 🎯 Extraction séquentielle des identifiants d'application
+         * On parcourt le code caractère par caractère pour détecter les parenthèses
+         */
         
-        // 👉 Cas 2: GTIN-14 (14 chiffres)
-        if (/^\d{14}$/.test(barcode)) {
-            console.log('✅ GTIN-14 détecté');
-            result.gtin = barcode;
-            result.format = 'GTIN-14';
-            return result;
-        }
+        // Méthode 1: Extraction par regex avec parenthèses
+        console.log('🔄 Extraction avec parenthèses...');
         
-        // 👉 Cas 3: Code GS1 avec AI
-        console.log('Tentative de décodage GS1...');
-        
-        // Nettoyer le code
-        let cleanCode = barcode
-            .replace(/[()\[\]{}]/g, '')        // Enlever parenthèses
-            .replace(/\s+/g, '')                // Enlever espaces
-            .replace(/\u001D/g, '')              // Enlever séparateur GS
-            .replace(/[^A-Za-z0-9]/g, '');      // Garder lettres et chiffres
-        
-        // Extraire GTIN (AI 01)
-        const gtinMatch = cleanCode.match(/(?:01|\(01\))?(\d{14})/);
+        // GTIN (01) - 14 chiffres après (01)
+        const gtinMatch = barcode.match(/\(01\)(\d{14})/);
         if (gtinMatch) {
             result.gtin = gtinMatch[1];
-            console.log('GTIN extrait:', result.gtin);
-        } else {
-            // Chercher simplement 13-14 chiffres
-            const digitsMatch = cleanCode.match(/\d{13,14}/);
-            if (digitsMatch) {
-                result.gtin = digitsMatch[0];
-                console.log('GTIN extrait (simple):', result.gtin);
-            }
+            console.log('✅ GTIN trouvé (01):', result.gtin);
         }
         
-        // Extraire LOT (AI 10)
-        const lotMatch = cleanCode.match(/(?:10|\(10\))([A-Za-z0-9]{1,20})/);
-        if (lotMatch) {
-            result.lot = lotMatch[1];
-            console.log('Lot extrait:', result.lot);
-        }
-        
-        // Extraire date expiration (AI 17)
-        const expMatch = cleanCode.match(/(?:17|\(17\))(\d{6})/);
+        // Date expiration (17) - 6 chiffres après (17)
+        const expMatch = barcode.match(/\(17\)(\d{6})/);
         if (expMatch) {
             const expDate = expMatch[1];
+            result.dateExpiration = expDate;
+            
+            // Convertir YYMMDD en objet Date
             const year = 2000 + parseInt(expDate.substring(0, 2));
-            const month = parseInt(expDate.substring(2, 4));
+            const month = parseInt(expDate.substring(2, 4)) - 1; // Mois 0-11
             const day = parseInt(expDate.substring(4, 6));
-            result.expiration = `${day}/${month}/${year}`;
-            console.log('Date expiration extraite:', result.expiration);
+            
+            result.dateObj = new Date(year, month, day);
+            console.log('✅ Date expiration trouvée (17):', expDate, '→', result.dateObj.toISOString());
         }
         
-        // Extraire quantité (AI 30)
-        const qtyMatch = cleanCode.match(/(?:30|\(30\))(\d+)/);
-        if (qtyMatch) {
-            result.quantity = parseInt(qtyMatch[1]);
-            console.log('Quantité extraite:', result.quantity);
+        // LOT (10) - jusqu'au prochain AI ou fin
+        const lotMatch = barcode.match(/\(10\)([^\(]+)/);
+        if (lotMatch) {
+            // Nettoyer le lot (enlever les parenthèses suivantes si présentes)
+            let lot = lotMatch[1];
+            // Si le lot contient une parenthèse ouvrante, on coupe avant
+            if (lot.includes('(')) {
+                lot = lot.substring(0, lot.indexOf('('));
+            }
+            result.lot = lot.trim();
+            console.log('✅ LOT trouvé (10):', result.lot);
         }
         
-        // Extraire poids (AI 3103)
-        const weightMatch = cleanCode.match(/(?:3103|\(3103\))(\d{6})/);
-        if (weightMatch) {
-            result.weight = parseInt(weightMatch[1]) / 1000;
-            console.log('Poids extrait (kg):', result.weight);
+        // Numéro série (21) - jusqu'au prochain AI ou fin
+        const snMatch = barcode.match(/\(21\)([^\(]+)/);
+        if (snMatch) {
+            let numSerie = snMatch[1];
+            // Nettoyer
+            if (numSerie.includes('(')) {
+                numSerie = numSerie.substring(0, numSerie.indexOf('('));
+            }
+            result.numSerie = numSerie.trim();
+            console.log('✅ Numéro série trouvé (21):', result.numSerie);
         }
         
-        result.format = 'GS1';
-        console.log('Résultat décodage:', result);
+        // Si on n'a rien trouvé avec parenthèses, essayer sans parenthèses
+        if (!result.gtin && !result.lot && !result.numSerie) {
+            console.log('🔄 Tentative sans parenthèses...');
+            let cleanCode = barcode.replace(/[()]/g, '');
+            
+            // GTIN (01) - commence par 01 suivi de 14 chiffres
+            const gtinRaw = cleanCode.match(/01(\d{14})/);
+            if (gtinRaw) result.gtin = gtinRaw[1];
+            
+            // Date (17)
+            const expRaw = cleanCode.match(/17(\d{6})/);
+            if (expRaw) {
+                result.dateExpiration = expRaw[1];
+                const year = 2000 + parseInt(expRaw[1].substring(0, 2));
+                const month = parseInt(expRaw[1].substring(2, 4)) - 1;
+                const day = parseInt(expRaw[1].substring(4, 6));
+                result.dateObj = new Date(year, month, day);
+            }
+            
+            // LOT (10) - prend tout jusqu'à rencontrer un autre AI (2 chiffres)
+            const lotRaw = cleanCode.match(/10(\d+[A-Za-z]*?)(?=\d{2}|$)/);
+            if (lotRaw) result.lot = lotRaw[1];
+            
+            // Série (21)
+            const snRaw = cleanCode.match(/21([A-Za-z0-9]+?)(?=\d{2}|$)/);
+            if (snRaw) result.numSerie = snRaw[1];
+        }
+        
+        console.log('✅ RÉSULTAT DÉCODAGE:', result);
         return result;
+    };
+
+    /**
+     * Calcule la durée d'expiration en jours
+     */
+    const calculateExpirationDays = (expDate) => {
+        if (!expDate) return '';
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const diffTime = expDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        console.log('📅 Calcul expiration:', {
+            aujourdhui: today.toISOString(),
+            expiration: expDate.toISOString(),
+            diffJours: diffDays
+        });
+        
+        return diffDays > 0 ? diffDays : 0;
     };
 
     /**
@@ -200,36 +260,63 @@ const AddArticleModal = ({
             return;
         }
 
-        console.log('📷 Scan détecté:', scannedValue);
+        console.log('📷 SCAN - Valeur:', scannedValue);
         setScanning(true);
         setError('');
         setSuccess('');
 
         try {
-            // Étape 1: Décoder le code
+            // Décoder le code
             const decoded = decodeBarcode(scannedValue);
             
             if (decoded.error) {
                 setError(decoded.error);
+                setScanning(false);
                 return;
             }
             
-            // Étape 2: Mettre à jour le formulaire avec les données décodées
+            // Message de succès
+            let successMsg = '✅ Données extraites:';
+            if (decoded.gtin) successMsg += ` GTIN:${decoded.gtin}`;
+            if (decoded.lot) successMsg += ` LOT:${decoded.lot}`;
+            if (decoded.numSerie) successMsg += ` SÉRIE:${decoded.numSerie}`;
+            setSuccess(successMsg);
+            
+            // Préparer les mises à jour
             const updates = {};
             
             if (decoded.gtin) {
                 updates.gtin = decoded.gtin;
-                setSuccess(`GTIN ${decoded.format} détecté: ${decoded.gtin}`);
-                
-                // Étape 3: Essayer de trouver l'article par GTIN
+            }
+            
+            if (decoded.lot) {
+                // Pour votre code, le LOT est "61234567890141C"
+                updates.lotDefaut = decoded.lot;
+                console.log('✅ Lot affecté:', decoded.lot);
+            }
+            
+            if (decoded.numSerie) {
+                // Pour votre code, le N° SÉRIE est "SER000317260330"
+                updates.numSerie = decoded.numSerie;
+                console.log('✅ Numéro série affecté:', decoded.numSerie);
+            }
+            
+            if (decoded.dateObj) {
+                const days = calculateExpirationDays(decoded.dateObj);
+                updates.dureeExpirationJours = days;
+                console.log('✅ Durée expiration calculée:', days, 'jours');
+            }
+            
+            // Essayer de trouver l'article par GTIN
+            if (decoded.gtin) {
                 try {
                     const article = await articleService.findByGTIN(decoded.gtin);
                     if (article) {
-                        // Article trouvé ! Charger toutes ses données
                         setFormData({
                             id: article.id,
                             codeArticleERP: article.codeArticleERP || '',
                             gtin: article.gtin || '',
+                            numSerie: article.numSerie || '',
                             designation: article.designation || '',
                             description: article.description || '',
                             category: article.category || '',
@@ -246,32 +333,22 @@ const AddArticleModal = ({
                         return;
                     }
                 } catch (err) {
-                    console.log('Article non trouvé en base');
+                    console.log('ℹ️ Nouvel article à créer');
                 }
             }
             
-            if (decoded.lot) {
-                updates.lotDefaut = decoded.lot;
+            // Mettre à jour le formulaire
+            if (Object.keys(updates).length > 0) {
+                setFormData(prev => {
+                    const newFormData = { ...prev, ...updates };
+                    console.log('📋 Formulaire mis à jour:', newFormData);
+                    return newFormData;
+                });
             }
-            
-            if (decoded.weight) {
-                updates.poids = decoded.weight;
-            }
-            
-            if (decoded.expiration) {
-                // Pourrait calculer la durée en jours depuis aujourd'hui
-                // setDureeExpirationJours(calculerJours(decoded.expiration));
-            }
-            
-            // Mettre à jour le formulaire avec les données trouvées
-            setFormData(prev => ({
-                ...prev,
-                ...updates
-            }));
             
         } catch (err) {
             console.error('❌ Erreur scan:', err);
-            setError('Erreur lors du décodage du code-barres');
+            setError('Erreur lors du décodage');
         } finally {
             setScanning(false);
             e.target.value = '';
@@ -281,7 +358,6 @@ const AddArticleModal = ({
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         
-        // Validation spéciale pour GTIN (chiffres uniquement)
         if (name === 'gtin') {
             const gtinValue = value.replace(/\D/g, '');
             setFormData({
@@ -310,7 +386,7 @@ const AddArticleModal = ({
             return false;
         }
         if (!formData.designation.trim()) {
-            setError('La désignation est obligatoire');
+            setError('Le nom est obligatoire');
             return false;
         }
         if (!formData.uniteMesure) {
@@ -341,7 +417,7 @@ const AddArticleModal = ({
             onClose();
             resetForm();
         } catch (err) {
-            setError(err.message || `Erreur lors de ${isEditMode ? 'la modification' : "l'ajout"} de l'article`);
+            setError(err.message || `Erreur lors de ${isEditMode ? 'la modification' : "l'ajout"}`);
         } finally {
             setLoading(false);
         }
@@ -367,7 +443,7 @@ const AddArticleModal = ({
                 {error && <div className="alert error">{error}</div>}
                 {success && <div className="alert success">{success}</div>}
 
-                {/* Zone de scan GS1 */}
+                {/* Zone de scan */}
                 <div className="scan-section">
                     <label htmlFor="scanInput">
                         <FaCamera /> Scanner un code-barres
@@ -378,7 +454,7 @@ const AddArticleModal = ({
                             ref={scanInputRef}
                             type="text"
                             id="scanInput"
-                            placeholder="Scannez le code-barres (EAN-13, GTIN-14, GS1)"
+                            placeholder="Scannez le code GS1"
                             onChange={handleScan}
                             disabled={scanning}
                             autoComplete="off"
@@ -386,12 +462,12 @@ const AddArticleModal = ({
                         {scanning && <span className="scanning-indicator">🔍 Décodage...</span>}
                     </div>
                     <small className="scan-hint">
-                        Formats supportés : EAN-13 (13 chiffres), GTIN-14 (14 chiffres), GS1 complet
+                        <strong>Exemple:</strong> (01)06123456789014(17)260330(10)LOT123(21)SER456
                     </small>
                 </div>
 
                 <form onSubmit={handleSubmit} ref={formRef}>
-                    {/* Section Code ERP et GTIN */}
+                    {/* Code ERP et GTIN */}
                     <div className="form-row">
                         <div className="form-group">
                             <label>
@@ -409,7 +485,7 @@ const AddArticleModal = ({
                         </div>
                         <div className="form-group">
                             <label>
-                                <FaBarcode /> GTIN (Code GS1)
+                                <FaBarcode /> GTIN (GS1)
                             </label>
                             <input
                                 type="text"
@@ -417,23 +493,40 @@ const AddArticleModal = ({
                                 value={formData.gtin}
                                 onChange={handleChange}
                                 disabled={loading || !canEdit}
-                                placeholder="14 chiffres max"
+                                placeholder="14 chiffres"
                                 maxLength="14"
                                 pattern="[0-9]*"
                                 inputMode="numeric"
-                                className={formData.gtin && formData.gtin.length !== 14 ? 'input-error' : ''}
                             />
-                            {formData.gtin && formData.gtin.length !== 14 && (
-                                <small className="error-text">Le GTIN doit faire 14 chiffres</small>
-                            )}
                         </div>
                     </div>
 
-                    {/* Section Désignation et Catégorie */}
+                    {/* Numéro de série */}
+                    <div className="form-row">
+                        <div className="form-group full-width">
+                            <label>
+                                <FaHashtag /> Numéro de série
+                            </label>
+                            <input
+                                type="text"
+                                name="numSerie"
+                                value={formData.numSerie}
+                                onChange={handleChange}
+                                disabled={loading || !canEdit}
+                                placeholder="Numéro de série (AI 21)"
+                                className={formData.numSerie ? 'filled' : ''}
+                            />
+                            <small className="field-hint">
+                                Identifiant unique pour traçabilité unitaire
+                            </small>
+                        </div>
+                    </div>
+
+                    {/* Nom et Catégorie */}
                     <div className="form-row">
                         <div className="form-group">
                             <label>
-                                <FaFont /> Désignation *
+                                 Nom 
                             </label>
                             <input
                                 type="text"
@@ -449,18 +542,24 @@ const AddArticleModal = ({
                             <label>
                                 <FaList /> Catégorie
                             </label>
-                            <input
-                                type="text"
+                            <select
                                 name="category"
                                 value={formData.category}
                                 onChange={handleChange}
                                 disabled={loading || !canEdit}
-                                placeholder="Ex: MOBILIER, ELECTRONIQUE..."
-                            />
+                                className="category-select"
+                            >
+                                <option value="">Sélectionner une catégorie</option>
+                                {CATEGORIES.map(cat => (
+                                    <option key={cat.value} value={cat.value}>
+                                        {cat.label}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 
-                    {/* Section Description */}
+                    {/* Description */}
                     <div className="form-group">
                         <label>
                             <FaAlignLeft /> Description
@@ -475,7 +574,7 @@ const AddArticleModal = ({
                         />
                     </div>
 
-                    {/* Section Unité de mesure */}
+                    {/* Unité de mesure */}
                     <div className="form-row">
                         <div className="form-group">
                             <label>Unité de mesure *</label>
@@ -497,7 +596,7 @@ const AddArticleModal = ({
                         </div>
                     </div>
 
-                    {/* Section Poids et Volume */}
+                    {/* Poids et Volume */}
                     <div className="form-row">
                         <div className="form-group">
                             <label>
@@ -531,7 +630,7 @@ const AddArticleModal = ({
                         </div>
                     </div>
 
-                    {/* Section Lot et Expiration */}
+                    {/* Lot et Expiration */}
                     <div className="form-row">
                         <div className="form-group">
                             <label>Lot par défaut</label>
@@ -541,8 +640,10 @@ const AddArticleModal = ({
                                 value={formData.lotDefaut}
                                 onChange={handleChange}
                                 disabled={loading || !canEdit}
-                                placeholder="Ex: LOT001"
+                                placeholder="Numéro de lot (AI 10)"
+                                className={formData.lotDefaut ? 'filled' : ''}
                             />
+                            <small className="field-hint">Lot: {formData.lotDefaut || 'Non défini'}</small>
                         </div>
                         <div className="form-group">
                             <label>
@@ -555,8 +656,13 @@ const AddArticleModal = ({
                                 onChange={handleNumberChange}
                                 min="0"
                                 disabled={loading || !canEdit}
-                                placeholder="Ex: 365"
+                                placeholder="Jours restants"
                             />
+                            <small className="field-hint">
+                                {formData.dureeExpirationJours ? 
+                                    `Expire dans ${formData.dureeExpirationJours} jours` : 
+                                    'Basé sur date (AI 17)'}
+                            </small>
                         </div>
                     </div>
 
