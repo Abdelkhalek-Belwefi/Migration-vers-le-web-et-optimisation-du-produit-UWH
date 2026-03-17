@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { receptionService } from '../../services/receptionService';
 import { articleService } from '../../services/articleService';
 import { gs1Service } from '../../services/gs1Service';
-import { ocrService } from '../../services/ocrService'; // 🔹 NOUVEAU
+import { ocrService } from '../../services/ocrService';
 import './styles/ReceptionForm.css';
 import { MdAdd } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import { FaDownload } from "react-icons/fa";
-import { FaBarcode } from "react-icons/fa";
+import { FaBarcode, FaQrcode } from "react-icons/fa";
 
 const ReceptionForm = ({ onSuccess, onCancel }) => {
     const [formData, setFormData] = useState({
@@ -31,14 +31,12 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
     const [success, setSuccess] = useState('');
     const [scanLoading, setScanLoading] = useState(false);
     const [scanEmplacementLoading, setScanEmplacementLoading] = useState(false);
-    // 🔹 Nouveaux états pour le scan document
     const [documentScanLoading, setDocumentScanLoading] = useState(false);
-    const documentScanRef = useRef(null);
-
-    // 🔹 Nouveaux états pour l'OCR
     const [ocrLoading, setOcrLoading] = useState(false);
-    const fileInputRef = useRef(null);
+    const [showScanFields, setShowScanFields] = useState(false); // nouvel état
 
+    const documentScanRef = useRef(null);
+    const fileInputRef = useRef(null);
     const emplacementScanRef = useRef(null);
 
     useEffect(() => {
@@ -62,7 +60,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         setScanLoading(true);
 
         try {
-            // 1. Vérifier si c'est un numéro de PO
             if (scannedCode.toUpperCase().startsWith('PO-')) {
                 try {
                     const reception = await receptionService.getReceptionByPO(scannedCode);
@@ -70,15 +67,9 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                         alert(`La réception ${scannedCode} existe déjà. Vous pouvez la modifier.`);
                     }
                 } catch (err) {
-                    // PO non trouvé, on le met dans le champ
-                    setFormData({
-                        ...formData,
-                        numeroPO: scannedCode
-                    });
+                    setFormData({ ...formData, numeroPO: scannedCode });
                 }
-            } 
-            // 2. Essayer de décoder comme code GS1
-            else {
+            } else {
                 const gs1Data = await gs1Service.decodeGS1(scannedCode);
 
                 if (gs1Data && (gs1Data.gtin || gs1Data.lot || gs1Data.dateExpiration)) {
@@ -127,10 +118,7 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         setScanEmplacementLoading(true);
 
         try {
-            setCurrentLine({
-                ...currentLine,
-                emplacementDestination: scannedCode
-            });
+            setCurrentLine({ ...currentLine, emplacementDestination: scannedCode });
         } catch (err) {
             console.error('Erreur scan emplacement:', err);
             setError('Erreur lors du scan de l\'emplacement');
@@ -140,7 +128,7 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // 🔹 GESTION DU SCAN DU BON DE LIVRAISON
+    // ===== GESTION DU SCAN DU BON DE LIVRAISON =====
     const handleDocumentScan = async (e) => {
         const scannedCode = e.target.value;
         if (!scannedCode || scannedCode.length < 3) return;
@@ -161,11 +149,7 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                 setSuccess(`✅ Document reconnu : ${documentInfo.numeroPO || scannedCode}`);
                 setTimeout(() => setSuccess(''), 3000);
             } else {
-                // Si aucune info, au moins mettre le code scanné dans le champ bonLivraison
-                setFormData(prev => ({
-                    ...prev,
-                    bonLivraison: scannedCode
-                }));
+                setFormData(prev => ({ ...prev, bonLivraison: scannedCode }));
                 setSuccess(`📄 Bon de livraison enregistré : ${scannedCode}`);
                 setTimeout(() => setSuccess(''), 3000);
             }
@@ -178,7 +162,7 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // 🔹 GESTION DU TÉLÉCHARGEMENT DE FICHIER POUR OCR
+    // ===== GESTION DU TÉLÉCHARGEMENT DE FICHIER POUR OCR =====
     const handleFileSelect = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -198,7 +182,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             console.error('Erreur OCR:', err);
-            // Récupérer le message d'erreur du backend si disponible
             const backendMessage = err.response?.data?.error || err.message;
             setError(backendMessage || 'Erreur lors de l\'analyse du document');
         } finally {
@@ -208,17 +191,11 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
     };
 
     const handleInputChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleLineChange = (e) => {
-        setCurrentLine({
-            ...currentLine,
-            [e.target.name]: e.target.value
-        });
+        setCurrentLine({ ...currentLine, [e.target.name]: e.target.value });
     };
 
     const handleAddLine = () => {
@@ -252,10 +229,7 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
             articleDesignation: selectedArticle.designation
         };
 
-        setFormData({
-            ...formData,
-            lignes: [...formData.lignes, newLine]
-        });
+        setFormData({ ...formData, lignes: [...formData.lignes, newLine] });
 
         setCurrentLine({
             articleId: '',
@@ -326,74 +300,86 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
 
     return (
         <div className="reception-form-container">
-            <h2><FaDownload /> Nouvelle réception</h2>
-
-            {/* ✅ ZONE DE SCAN PRINCIPALE (articles) */}
-            <div className="scan-section">
-                <h3><FaBarcode /> Scanner un article</h3>
-                <div className="scan-input-wrapper">
-                    <input
-                        type="text"
-                        placeholder="Scannez le code-barres (PO, article ou GS1)..."
-                        onBlur={handleScan}
-                        onKeyPress={(e) => e.key === 'Enter' && handleScan(e)}
-                        disabled={scanLoading}
-                        autoFocus
-                    />
-                    {scanLoading && <span className="scan-spinner">🔍</span>}
-                </div>
-                <p className="scan-help">
-                    Formats supportés :<br />
-                    • PO-XXXX : charge une réception existante<br />
-                    • Code GS1 : pré-remplit l'article, le lot et la date
-                </p>
+            <div className="header-with-scan">
+                <h2><FaDownload /> Nouvelle réception</h2>
+                <button 
+                    className="btn-toggle-scan"
+                    onClick={() => setShowScanFields(!showScanFields)}
+                >
+                    <FaQrcode /> Scanner
+                </button>
             </div>
 
-            {/* 🔹 ZONE DE SCAN DÉDIÉE AU BON DE LIVRAISON */}
-            <div className="scan-section document-scan">
-                <h3><FaDownload /> Scanner le bon de livraison</h3>
-                <div className="scan-input-wrapper">
-                    <input
-                        ref={documentScanRef}
-                        type="text"
-                        placeholder="Scannez le code-barres du document"
-                        onBlur={handleDocumentScan}
-                        onKeyPress={(e) => e.key === 'Enter' && handleDocumentScan(e)}
-                        disabled={documentScanLoading}
-                    />
-                    {documentScanLoading && <span className="scan-spinner">🔍</span>}
-                </div>
-                <p className="scan-help">
-                    Le code peut être un GS1, un QR code ou un numéro de BL. Les informations (PO, fournisseur) seront automatiquement remplies.
-                </p>
-            </div>
+            {showScanFields && (
+                <div className="scan-fields-row">
+                    {/* ZONE DE SCAN PRINCIPALE (articles) */}
+                    <div className="scan-field-item">
+                        <h3><FaBarcode /> Scanner un article</h3>
+                        <div className="scan-input-wrapper">
+                            <input
+                                type="text"
+                                placeholder="Scannez le code-barres (PO, article ou GS1)..."
+                                onBlur={handleScan}
+                                onKeyPress={(e) => e.key === 'Enter' && handleScan(e)}
+                                disabled={scanLoading}
+                                autoFocus
+                            />
+                            {scanLoading && <span className="scan-spinner">🔍</span>}
+                        </div>
+                        <p className="scan-help">
+                            Formats supportés :<br />
+                            • PO-XXXX : charge une réception existante<br />
+                            • Code GS1 : pré-remplit l'article, le lot et la date
+                        </p>
+                    </div>
 
-            {/* 🔹 ZONE D'ANALYSE DE DOCUMENT (OCR) */}
-            <div className="scan-section ocr-section">
-                <h3>📄 Analyser un document</h3>
-                <div className="file-input-wrapper">
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*,application/pdf"
-                        onChange={handleFileSelect}
-                        disabled={ocrLoading}
-                        style={{ display: 'none' }}
-                    />
-                    <button
-                        type="button"
-                        className="btn-ocr"
-                        onClick={() => fileInputRef.current.click()}
-                        disabled={ocrLoading}
-                    >
-                        {ocrLoading ? 'Analyse en cours...' : 'Choisir une image ou un PDF du document'}
-                    </button>
-                    {ocrLoading && <span className="scan-spinner">🔍</span>}
+                    {/* ZONE DE SCAN DÉDIÉE AU BON DE LIVRAISON */}
+                    <div className="scan-field-item">
+                        <h3><FaDownload /> Scanner le bon de livraison</h3>
+                        <div className="scan-input-wrapper">
+                            <input
+                                ref={documentScanRef}
+                                type="text"
+                                placeholder="Scannez le code-barres du document"
+                                onBlur={handleDocumentScan}
+                                onKeyPress={(e) => e.key === 'Enter' && handleDocumentScan(e)}
+                                disabled={documentScanLoading}
+                            />
+                            {documentScanLoading && <span className="scan-spinner">🔍</span>}
+                        </div>
+                        <p className="scan-help">
+                            Le code peut être un GS1, un QR code ou un numéro de BL. Les informations (PO, fournisseur) seront automatiquement remplies.
+                        </p>
+                    </div>
+
+                    {/* ZONE D'ANALYSE DE DOCUMENT (OCR) */}
+                    <div className="scan-field-item">
+                        <h3>📄 Analyser un document</h3>
+                        <div className="file-input-wrapper">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*,application/pdf"
+                                onChange={handleFileSelect}
+                                disabled={ocrLoading}
+                                style={{ display: 'none' }}
+                            />
+                            <button
+                                type="button"
+                                className="btn-ocr"
+                                onClick={() => fileInputRef.current.click()}
+                                disabled={ocrLoading}
+                            >
+                                {ocrLoading ? 'Analyse en cours...' : 'Choisir une image ou un PDF'}
+                            </button>
+                            {ocrLoading && <span className="scan-spinner">🔍</span>}
+                        </div>
+                        <p className="scan-help">
+                            Sélectionnez une image scannée ou un PDF du bon de livraison ou de la facture.
+                        </p>
+                    </div>
                 </div>
-                <p className="scan-help">
-                    Sélectionnez une image scannée ou un PDF du bon de livraison ou de la facture. Le système extraira automatiquement le numéro PO, le fournisseur et le numéro BL.
-                </p>
-            </div>
+            )}
 
             {error && <div className="alert error">{error}</div>}
             {success && <div className="alert success">{success}</div>}
