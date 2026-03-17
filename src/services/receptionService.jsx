@@ -100,23 +100,21 @@ export const receptionService = {
         }
     },
 
-    // ✅ Méthode de validation corrigée
-   validerReception: async (id) => {
-    try {
-        console.log('🔍 Validation de la réception ID:', id);
-        const response = await axios.put(`${API_URL}/${id}/valider`, {}, getAuthHeader());
-        console.log('✅ Réponse validation:', response.data);
-        return response.data;
-    } catch (error) {
-        console.error('❌ validerReception:');
-        console.error('Status:', error.response?.status);
-        console.error('Data:', error.response?.data);
-        console.error('Message:', error.message);
-        // Extraire le message d'erreur du backend s'il existe
-        const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la validation';
-        throw new Error(errorMessage);
-    }
-},
+    validerReception: async (id) => {
+        try {
+            console.log('🔍 Validation de la réception ID:', id);
+            const response = await axios.put(`${API_URL}/${id}/valider`, {}, getAuthHeader());
+            console.log('✅ Réponse validation:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('❌ validerReception:');
+            console.error('Status:', error.response?.status);
+            console.error('Data:', error.response?.data);
+            console.error('Message:', error.message);
+            const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la validation';
+            throw new Error(errorMessage);
+        }
+    },
 
     getPutawayTasks: async (receptionId) => {
         try {
@@ -134,6 +132,21 @@ export const receptionService = {
             return response.data;
         } catch (error) {
             console.error('❌ getAllPutawayTasks:', error.response?.data || error.message);
+            throw error;
+        }
+    },
+
+    // 🔹 NOUVELLE MÉTHODE : Récupérer les informations d'un document scanné
+    getDocumentInfo: async (code) => {
+        try {
+            const response = await axios.get(`${API_URL}/document/${encodeURIComponent(code)}`, getAuthHeader());
+            return response.data;
+        } catch (error) {
+            console.error('❌ getDocumentInfo:', error.response?.data || error.message);
+            // On retourne null si 404 (document non reconnu), sinon on propage l'erreur
+            if (error.response?.status === 404) {
+                return null;
+            }
             throw error;
         }
     }

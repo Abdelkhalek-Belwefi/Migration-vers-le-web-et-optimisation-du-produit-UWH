@@ -663,6 +663,25 @@ background-color: #adb7e6;
 }
 
 /* ---------- FORMULAIRE CHANGEMENT MOT DE PASSE ---------- */
+/* ===== VARIABLES (si non définies ailleurs) ===== */
+:root {
+  --primary: #4ecdc4;
+  --secondary: #45b7d1;
+  --success: #6fcf97;
+  --warning: #f9ca24;
+  --error: #ff6b6b;
+  --text-primary: #2c3e50;
+  --text-secondary: #34495e;
+  --bg-light: #f8f9fa;
+  --border-radius-xl: 1rem;
+  --border-radius-2xl: 2rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* ===== CONTENEUR PRINCIPAL ===== */
 .password-change-container {
   width: 100%;
   max-width: 500px;
@@ -677,8 +696,13 @@ background-color: #adb7e6;
   animation: slideUpFade 0.5s ease;
   position: relative;
   overflow: hidden;
+
+  /* Améliorations */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform;
 }
 
+/* Barre de progression animée (existante améliorée) */
 .password-change-container::before {
   content: '';
   position: absolute;
@@ -686,10 +710,83 @@ background-color: #adb7e6;
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--success));
-  animation: gradientMove 3s linear infinite;
+  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--success), var(--warning), var(--primary));
+  background-size: 300% 100%;
+  animation: gradientMove 4s linear infinite;
+  z-index: 1;
 }
 
+/* Effet de brillance (shine) */
+.password-change-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  border-radius: inherit;
+}
+
+/* Bordure dégradée externe (au survol) */
+.password-change-container .border-glow {
+  display: none; /* on utilise un pseudo-élément si nécessaire */
+}
+
+/* Amélioration avec pseudo-élément pour bordure animée */
+.password-change-container {
+  position: relative;
+}
+.password-change-container .border-glow {
+  /* optionnel : on peut utiliser un span mais mieux avec after */
+}
+
+/* Pour éviter de complexifier, on peut utiliser un pseudo-élément */
+.password-change-container {
+  --border-glow: linear-gradient(45deg, var(--primary), var(--secondary), var(--success), var(--warning), var(--primary));
+}
+
+.password-change-container::after {
+  /* déjà utilisé pour shine, donc on crée un autre pseudo ? On peut fusionner ou utiliser un autre élément */
+  /* Ici on utilise un troisième pseudo avec content normalement impossible. On va plutôt utiliser un élément <div> via JavaScript ou modifier l'approche. 
+     Solution simple : on utilise le pseudo after pour la brillance et on ajoute un élément <div class="border-glow"> en HTML pour la bordure. 
+     Mais pour rester en pur CSS sans modifier HTML, on peut combiner les effets sur le même pseudo en jouant avec opacité et z-index. 
+     Ou on utilise un box-shadow externe animé. */
+}
+
+/* Option plus simple : remplacer la bordure externe par un box-shadow externe animé */
+.password-change-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 30px 40px -15px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(78, 205, 196, 0.3);
+}
+
+/* Activation de la brillance au survol */
+.password-change-container:hover::after {
+  opacity: 0.2;
+}
+
+/* Animation du dégradé */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Animation d'entrée */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== TITRE ===== */
 .password-change-container h2 {
   text-align: center;
   color: var(--text-primary);
@@ -701,72 +798,146 @@ background-color: #adb7e6;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -0.5px;
+  transition: background 0.3s ease;
 }
 
-.form-group {
+/* Variation plus colorée au survol du conteneur */
+.password-change-container:hover h2 {
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--success) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* ===== STYLE DES CHAMPS DE FORMULAIRE (amélioration complète) ===== */
+.password-change-container .form-group {
   margin-bottom: var(--spacing-6);
 }
 
-.form-group label {
+.password-change-container label {
   display: block;
-  margin-bottom: var(--spacing-2);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
   color: var(--text-secondary);
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  transition: color 0.2s ease;
 }
 
-
-
-
-.form-group input:hover {
-  border-color: var(--primary-light);
-}
-
-.change-password-btn {
+.password-change-container input {
   width: 100%;
-  padding: var(--spacing-4);
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  padding: 0.875rem 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-xl);
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.password-change-container input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2);
+  background: white;
+}
+
+.password-change-container input:hover {
+  border-color: var(--secondary);
+}
+
+/* Style pour le bouton */
+.password-change-container button {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
   border: none;
-  border-radius: var(--border-radius-lg);
-  font-size: 1.1rem;
+  border-radius: var(--border-radius-xl);
+  font-size: 1.125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-base);
-  position: relative;
-  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   margin-top: var(--spacing-4);
-  text-transform: uppercase;
-  letter-spacing: 1px;
 }
 
-.change-password-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.change-password-btn:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-.change-password-btn:hover {
+.password-change-container button:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 10px 20px -5px rgba(78, 205, 196, 0.4);
 }
 
-.change-password-btn:active {
+.password-change-container button:active {
   transform: translateY(0);
+}
+
+.password-change-container button:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ===== ACCESSIBILITÉ ===== */
+
+/* Focus visible pour tout le conteneur lorsqu'un élément interne est focus */
+.password-change-container:focus-within {
+  outline: 3px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: var(--border-radius-2xl);
+}
+
+/* Réduction des animations */
+@media (prefers-reduced-motion: reduce) {
+  .password-change-container,
+  .password-change-container::before,
+  .password-change-container::after,
+  .password-change-container h2,
+  .password-change-container input,
+  .password-change-container button {
+    animation: none;
+    transition: none;
+  }
+  .password-change-container:hover {
+    transform: none;
+  }
+}
+
+/* ===== MODE SOMBRE ===== */
+@media (prefers-color-scheme: dark) {
+  .password-change-container {
+    background: rgba(30, 30, 40, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  }
+
+  .password-change-container h2 {
+    background: linear-gradient(135deg, #e0e0e0 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .password-change-container label {
+    color: #ccc;
+  }
+
+  .password-change-container input {
+    background: rgba(20, 20, 30, 0.9);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #eee;
+  }
+
+  .password-change-container input:focus {
+    background: #2a2a3a;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.3);
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .password-change-container {
+    padding: var(--spacing-6);
+    border-radius: var(--border-radius-xl);
+  }
+
+  .password-change-container h2 {
+    font-size: 1.75rem;
+    margin-bottom: var(--spacing-6);
+  }
 }
 
 /* ---------- MODULES EN DÉVELOPPEMENT ---------- */
@@ -1155,7 +1326,7 @@ background-color: #adb7e6;
 .dashboard-main {
     flex: 1;
     margin-left: 280px; /* Largeur de la sidebar */
-    padding: 20px;
+    padding: 50px;
     overflow-y: auto;
     background: #f8f9fa;
     height: calc(100vh - 70px); /* Hauteur moins la top navbar */

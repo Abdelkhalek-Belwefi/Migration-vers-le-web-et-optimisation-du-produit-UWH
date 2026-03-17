@@ -3,6 +3,8 @@ import { receptionService } from '../../services/receptionService';
 import ReceptionForm from './ReceptionForm';
 import ReceptionDetail from './ReceptionDetail';
 import './styles/ReceptionList.css';
+import { FaCheckCircle } from "react-icons/fa";
+import { FaBox } from "react-icons/fa";
 
 const ReceptionList = () => {
     const [receptions, setReceptions] = useState([]);
@@ -135,7 +137,7 @@ const ReceptionList = () => {
     return (
         <div className="reception-list-container">
             <div className="header">
-                <h2>📦 Gestion des Réceptions</h2>
+                <h2><FaBox /> Gestion des Réceptions</h2>
                 {!showForm && !selectedReceptionId && isOperateur && (
                     <button 
                         className="btn-add"
@@ -234,7 +236,7 @@ const ReceptionList = () => {
                                                     onClick={() => handleValider(rec.id)}
                                                     title="Valider la réception"
                                                 >
-                                                    ✅
+                                                    <FaCheckCircle />
                                                 </button>
                                             )}
                                         </td>

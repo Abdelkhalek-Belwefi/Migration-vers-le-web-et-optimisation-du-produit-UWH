@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { receptionService } from '../../services/receptionService';
 import ReceptionLineForm from './ReceptionLineForm';
 import './styles/ReceptionDetail.css';
+import { MdAdd } from "react-icons/md";
+import { MdEdit } from "react-icons/md";
+import { FaCheckCircle } from "react-icons/fa";
+import { FaClipboard } from "react-icons/fa";
 
 const ReceptionDetail = ({ receptionId, onBack, onValidate }) => {
     const [reception, setReception] = useState(null);
@@ -78,7 +82,7 @@ const ReceptionDetail = ({ receptionId, onBack, onValidate }) => {
     return (
         <div className="reception-detail-container">
             <div className="header">
-                <h2>📋 Réception {reception.numeroPO}</h2>
+                <h2><FaClipboard /> Réception {reception.numeroPO}</h2>
             </div>
 
             {error && <div className="alert error">{error}</div>}
@@ -135,7 +139,7 @@ const ReceptionDetail = ({ receptionId, onBack, onValidate }) => {
                                 setShowLineForm(true);
                             }}
                         >
-                            ➕ Ajouter un article
+                            <MdAdd /> Ajouter un article
                         </button>
                     )}
                 </div>
@@ -189,7 +193,7 @@ const ReceptionDetail = ({ receptionId, onBack, onValidate }) => {
                                                     setShowLineForm(true);
                                                 }}
                                             >
-                                                ✏️
+                                                <MdEdit />
                                             </button>
                                         </td>
                                     )}
@@ -206,7 +210,7 @@ const ReceptionDetail = ({ receptionId, onBack, onValidate }) => {
                         className="btn-validate-large"
                         onClick={handleValider}
                     >
-                        ✅ Valider la réception
+                        <FaCheckCircle /> Valider la réception
                     </button>
                     <p className="validation-info">
                         La validation générera automatiquement les tâches de rangement et mettra à jour le stock.

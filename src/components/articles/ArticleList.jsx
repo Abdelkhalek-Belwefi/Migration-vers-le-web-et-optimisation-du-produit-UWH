@@ -364,7 +364,7 @@ const ArticleList = () => {
             <div className="header">
                 <div className="header-title">
                     <h2>
-                        <FaBarcode /> Catalogue Articles
+                         Articles
                         {filteredArticles.length > 0 && (
                             <span className="item-count">({filteredArticles.length} article{filteredArticles.length > 1 ? 's' : ''})</span>
                         )}
@@ -398,27 +398,8 @@ const ArticleList = () => {
             {/* Formulaire de recherche */}
             <div className="search-section">
                 <form onSubmit={handleSearch} className="search-form">
-                    <div className="search-input-wrapper">
-                        <FaBarcode className="search-icon" />
-                        <input
-                            type="text"
-                            name="code"
-                            placeholder="🔍 Scanner / Code ERP / GTIN / N° Série"
-                            value={searchParams.code}
-                            onChange={handleInputChange}
-                            disabled={loading}
-                            className="search-input"
-                        />
-                    </div>
                     
-                    <input
-                        type="text"
-                        name="designation"
-                        placeholder="Nom article"
-                        value={searchParams.designation}
-                        onChange={handleInputChange}
-                        disabled={loading}
-                    />
+
                     
                     <input
                         type="text"

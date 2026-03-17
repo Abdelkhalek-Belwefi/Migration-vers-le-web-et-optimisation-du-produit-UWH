@@ -45,7 +45,7 @@ const TopNavbar = ({ userPrenom, userName, userRole, profileImage, onLogout, onP
         <nav className="top-navbar">
             <div className="navbar-left">
                 <div className="logo">
-                    <FaWarehouse className="logo-icon" />
+                    <FaWarehouse size={28} color="#1E88E5" style={{ marginRight: '8px' }} />
                     <span className="logo-text">WAREHOUSE</span>
                 </div>
                 

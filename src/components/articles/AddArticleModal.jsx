@@ -461,9 +461,7 @@ const AddArticleModal = ({
                         />
                         {scanning && <span className="scanning-indicator">🔍 Décodage...</span>}
                     </div>
-                    <small className="scan-hint">
-                        <strong>Exemple:</strong> (01)06123456789014(17)260330(10)LOT123(21)SER456
-                    </small>
+                 
                 </div>
 
                 <form onSubmit={handleSubmit} ref={formRef}>
