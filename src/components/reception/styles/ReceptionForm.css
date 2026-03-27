@@ -285,3 +285,38 @@
     color: #64748b;
     margin-top: 8px;
 }
+/* Styles pour la zone OCR */
+.ocr-scan-item .ocr-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ocr-focus-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 30px;
+    background-color: #fff;
+    text-align: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ocr-focus-input:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+}
+
+.scan-indicator {
+    font-size: 0.75rem;
+    color: #059669;
+    background: #d1fae5;
+    padding: 4px 8px;
+    border-radius: 20px;
+    text-align: center;
+    display: inline-block;
+    margin-top: 6px;
+}

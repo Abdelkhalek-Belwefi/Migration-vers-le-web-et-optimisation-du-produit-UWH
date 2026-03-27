@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import useBarcodeReceiver from "./hooks/useBarcodeReceiver"; // ✅ AJOUT
+
 import HowItWorks from "./pages/HowItWorks";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -11,9 +13,12 @@ import PrivateRoute from "./components/route/PrivateRoute";
 import ReceptionList from './components/reception/ReceptionList';
 import ReceptionForm from './components/reception/ReceptionForm';
 import ReceptionDetail from './components/reception/ReceptionDetail';
-import RangementList from './components/rangement/RangementList'; // ✅ AJOUTÉ
+import RangementList from './components/rangement/RangementList';
 
 function App() {
+
+  useBarcodeReceiver(); // ✅ AJOUT UNIQUE
+
   return (
     <Router>
       <Routes>

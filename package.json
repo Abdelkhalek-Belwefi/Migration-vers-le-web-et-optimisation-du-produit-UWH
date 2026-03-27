@@ -11,11 +11,14 @@
   },
   "dependencies": {
     "axios": "^1.13.5",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-dropzone": "^15.0.0",
     "react-icons": "^5.6.0",
-    "react-router-dom": "^7.13.0"
+    "react-router-dom": "^7.13.0",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -30,5 +33,18 @@
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"
-  }
+  },
+  "description": "��#\u0000 \u0000M\u0000i\u0000g\u0000r\u0000a\u0000t\u0000i\u0000o\u0000n\u0000-\u0000v\u0000e\u0000r\u0000s\u0000-\u0000l\u0000e\u0000-\u0000w\u0000e\u0000b\u0000-\u0000e\u0000t\u0000-\u0000o\u0000p\u0000t\u0000i\u0000m\u0000i\u0000s\u0000a\u0000t\u0000i\u0000o\u0000n\u0000-\u0000d\u0000u\u0000-\u0000p\u0000r\u0000o\u0000d\u0000u\u0000i\u0000t\u0000-\u0000U\u0000W\u0000H\u0000\r\u0000 \u0000",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abdelkhalek-Belwefi/Migration-vers-le-web-et-optimisation-du-produit-UWH.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Abdelkhalek-Belwefi/Migration-vers-le-web-et-optimisation-du-produit-UWH/issues"
+  },
+  "homepage": "https://github.com/Abdelkhalek-Belwefi/Migration-vers-le-web-et-optimisation-du-produit-UWH#readme"
 }

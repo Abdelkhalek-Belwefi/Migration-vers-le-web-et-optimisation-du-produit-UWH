@@ -119,20 +119,23 @@ const AddArticleModal = ({
 
     /**
      * ====================================================
-     * 🎯 VERSION FINALE CORRIGÉE - Décodage GS1
+     * 🎯 FONCTION CORRIGÉE - Décodage GS1
      * ====================================================
-     * Basé sur votre code scanné :
-     * (01)06123456789014(17)260330(10)61234567890141C(21)SER000317260330
+     * Modification : nettoyage des espaces avant extraction
+     * pour que le GTIN soit correctement trouvé.
      */
     const decodeBarcode = (barcode) => {
         console.log('🔍 DÉCODAGE - Code reçu:', barcode);
-        
+
         if (!barcode || barcode.length < 8) {
             return { error: 'Code trop court' };
         }
-        
-        // Garder la structure avec parenthèses pour mieux identifier les AI
-        let codeWithParens = barcode;
+
+        // Nettoyer le code : enlever les espaces et autres caractères de contrôle
+        // On garde les parenthèses car utiles pour l'extraction
+        let cleanBarcode = barcode.replace(/\s/g, ''); // enlever tous les espaces
+        console.log('🔍 Code nettoyé des espaces:', cleanBarcode);
+
         const result = {
             format: 'GS1',
             gtin: null,
@@ -141,91 +144,62 @@ const AddArticleModal = ({
             dateExpiration: null,
             dateObj: null
         };
-        
-        /**
-         * 🎯 Extraction séquentielle des identifiants d'application
-         * On parcourt le code caractère par caractère pour détecter les parenthèses
-         */
-        
-        // Méthode 1: Extraction par regex avec parenthèses
-        console.log('🔄 Extraction avec parenthèses...');
-        
-        // GTIN (01) - 14 chiffres après (01)
-        const gtinMatch = barcode.match(/\(01\)(\d{14})/);
+
+        // 1. Extraction avec parenthèses (utiliser le code nettoyé)
+        const gtinMatch = cleanBarcode.match(/\(01\)(\d{14})/);
         if (gtinMatch) {
             result.gtin = gtinMatch[1];
-            console.log('✅ GTIN trouvé (01):', result.gtin);
+            console.log('✅ GTIN trouvé (avec parenthèses):', result.gtin);
         }
-        
-        // Date expiration (17) - 6 chiffres après (17)
-        const expMatch = barcode.match(/\(17\)(\d{6})/);
+
+        const expMatch = cleanBarcode.match(/\(17\)(\d{6})/);
         if (expMatch) {
             const expDate = expMatch[1];
             result.dateExpiration = expDate;
-            
-            // Convertir YYMMDD en objet Date
             const year = 2000 + parseInt(expDate.substring(0, 2));
-            const month = parseInt(expDate.substring(2, 4)) - 1; // Mois 0-11
+            const month = parseInt(expDate.substring(2, 4)) - 1;
             const day = parseInt(expDate.substring(4, 6));
-            
             result.dateObj = new Date(year, month, day);
-            console.log('✅ Date expiration trouvée (17):', expDate, '→', result.dateObj.toISOString());
+            console.log('✅ Date expiration trouvée:', expDate);
         }
-        
-        // LOT (10) - jusqu'au prochain AI ou fin
-        const lotMatch = barcode.match(/\(10\)([^\(]+)/);
+
+        const lotMatch = cleanBarcode.match(/\(10\)([^\(]+)/);
         if (lotMatch) {
-            // Nettoyer le lot (enlever les parenthèses suivantes si présentes)
             let lot = lotMatch[1];
-            // Si le lot contient une parenthèse ouvrante, on coupe avant
-            if (lot.includes('(')) {
-                lot = lot.substring(0, lot.indexOf('('));
-            }
+            if (lot.includes('(')) lot = lot.substring(0, lot.indexOf('('));
             result.lot = lot.trim();
-            console.log('✅ LOT trouvé (10):', result.lot);
+            console.log('✅ LOT trouvé:', result.lot);
         }
-        
-        // Numéro série (21) - jusqu'au prochain AI ou fin
-        const snMatch = barcode.match(/\(21\)([^\(]+)/);
+
+        const snMatch = cleanBarcode.match(/\(21\)([^\(]+)/);
         if (snMatch) {
-            let numSerie = snMatch[1];
-            // Nettoyer
-            if (numSerie.includes('(')) {
-                numSerie = numSerie.substring(0, numSerie.indexOf('('));
-            }
-            result.numSerie = numSerie.trim();
-            console.log('✅ Numéro série trouvé (21):', result.numSerie);
+            let sn = snMatch[1];
+            if (sn.includes('(')) sn = sn.substring(0, sn.indexOf('('));
+            result.numSerie = sn.trim();
+            console.log('✅ Numéro série trouvé:', result.numSerie);
         }
-        
-        // Si on n'a rien trouvé avec parenthèses, essayer sans parenthèses
-        if (!result.gtin && !result.lot && !result.numSerie) {
-            console.log('🔄 Tentative sans parenthèses...');
-            let cleanCode = barcode.replace(/[()]/g, '');
-            
-            // GTIN (01) - commence par 01 suivi de 14 chiffres
-            const gtinRaw = cleanCode.match(/01(\d{14})/);
-            if (gtinRaw) result.gtin = gtinRaw[1];
-            
-            // Date (17)
-            const expRaw = cleanCode.match(/17(\d{6})/);
-            if (expRaw) {
-                result.dateExpiration = expRaw[1];
-                const year = 2000 + parseInt(expRaw[1].substring(0, 2));
-                const month = parseInt(expRaw[1].substring(2, 4)) - 1;
-                const day = parseInt(expRaw[1].substring(4, 6));
-                result.dateObj = new Date(year, month, day);
+
+        // 2. Fallback : extraction sans parenthèses (si GTIN manquant)
+        if (!result.gtin) {
+            console.log('🔄 Tentative sans parenthèses pour le GTIN...');
+            // Enlever aussi les parenthèses pour le fallback
+            const withoutParens = cleanBarcode.replace(/[()]/g, '');
+            // Recherche "01" suivi de 14 chiffres
+            const gtinRaw = withoutParens.match(/01(\d{14})/);
+            if (gtinRaw) {
+                result.gtin = gtinRaw[1];
+                console.log('✅ GTIN trouvé (sans parenthèses):', result.gtin);
+            } else {
+                // Essaye de prendre simplement 13 ou 14 chiffres consécutifs (EAN‑13 / GTIN‑14)
+                const digitsMatch = withoutParens.match(/\d{13,14}/);
+                if (digitsMatch) {
+                    result.gtin = digitsMatch[0];
+                    console.log('✅ GTIN extrait par digits:', result.gtin);
+                }
             }
-            
-            // LOT (10) - prend tout jusqu'à rencontrer un autre AI (2 chiffres)
-            const lotRaw = cleanCode.match(/10(\d+[A-Za-z]*?)(?=\d{2}|$)/);
-            if (lotRaw) result.lot = lotRaw[1];
-            
-            // Série (21)
-            const snRaw = cleanCode.match(/21([A-Za-z0-9]+?)(?=\d{2}|$)/);
-            if (snRaw) result.numSerie = snRaw[1];
         }
-        
-        console.log('✅ RÉSULTAT DÉCODAGE:', result);
+
+        console.log('✅ RÉSULTAT DÉCODAGE FINAL:', result);
         return result;
     };
 
@@ -290,13 +264,11 @@ const AddArticleModal = ({
             }
             
             if (decoded.lot) {
-                // Pour votre code, le LOT est "61234567890141C"
                 updates.lotDefaut = decoded.lot;
                 console.log('✅ Lot affecté:', decoded.lot);
             }
             
             if (decoded.numSerie) {
-                // Pour votre code, le N° SÉRIE est "SER000317260330"
                 updates.numSerie = decoded.numSerie;
                 console.log('✅ Numéro série affecté:', decoded.numSerie);
             }

@@ -33,7 +33,11 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
     const [scanEmplacementLoading, setScanEmplacementLoading] = useState(false);
     const [documentScanLoading, setDocumentScanLoading] = useState(false);
     const [ocrLoading, setOcrLoading] = useState(false);
-    const [showScanFields, setShowScanFields] = useState(false); // nouvel état
+    const [showScanFields, setShowScanFields] = useState(false);
+
+    // États pour le scan document via curseur
+    const [ocrFocusMode, setOcrFocusMode] = useState(false);
+    const ocrFocusInputRef = useRef(null);
 
     const documentScanRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -189,6 +193,74 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
             e.target.value = '';
         }
     };
+
+    // ===== TRAITEMENT DE L'IMAGE REÇUE VIA WEBSOCKET =====
+    const processOcrImage = async (base64Image) => {
+        setOcrLoading(true);
+        setError('');
+        try {
+            const byteCharacters = atob(base64Image);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'image/jpeg' });
+            const file = new File([blob], 'scan.jpg', { type: 'image/jpeg' });
+            
+            const extractedData = await ocrService.extractDocumentInfo(file);
+            setFormData(prev => ({
+                ...prev,
+                numeroPO: extractedData.numeroPO || prev.numeroPO,
+                fournisseur: extractedData.fournisseur || prev.fournisseur,
+                bonLivraison: extractedData.bonLivraison || prev.bonLivraison
+            }));
+            setSuccess('✅ Document analysé avec succès');
+            setTimeout(() => setSuccess(''), 3000);
+            setOcrFocusMode(false);
+        } catch (err) {
+            console.error('Erreur OCR:', err);
+            setError(err.message || 'Erreur lors de l\'analyse du document');
+        } finally {
+            setOcrLoading(false);
+        }
+    };
+
+    // 🔥 Écoute des messages WebSocket via événement personnalisé
+    useEffect(() => {
+        const handleWebSocketMessage = (event) => {
+            const message = event.detail;
+            console.log('📨 Message WebSocket reçu dans ReceptionForm:', message);
+            if (typeof message === 'string' && message.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(message);
+                    if (parsed.type === 'OCR_RESULT' && parsed.data) {
+                        setFormData(prev => ({
+                            ...prev,
+                            numeroPO: parsed.data.numeroPO || prev.numeroPO,
+                            fournisseur: parsed.data.fournisseur || prev.fournisseur,
+                            bonLivraison: parsed.data.bonLivraison || prev.bonLivraison
+                        }));
+                        setSuccess('✅ Document analysé avec succès');
+                        setTimeout(() => setSuccess(''), 3000);
+                    } else if (parsed.type === 'OCR_ERROR') {
+                        setError(parsed.error);
+                    }
+                } catch (e) {
+                    console.error('Erreur parsing JSON:', e);
+                }
+            } else if (ocrFocusMode && typeof message === 'string' && message.startsWith('OCR:')) {
+                const base64Image = message.substring(4);
+                processOcrImage(base64Image);
+            }
+        };
+
+        window.addEventListener('websocket-message', handleWebSocketMessage);
+
+        return () => {
+            window.removeEventListener('websocket-message', handleWebSocketMessage);
+        };
+    }, [ocrFocusMode]);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -352,30 +424,45 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                         </p>
                     </div>
 
-                    {/* ZONE D'ANALYSE DE DOCUMENT (OCR) */}
-                    <div className="scan-field-item">
+                    {/* ZONE D'ANALYSE DE DOCUMENT (OCR) avec les deux options */}
+                    <div className="scan-field-item ocr-scan-item">
                         <h3>📄 Analyser un document</h3>
-                        <div className="file-input-wrapper">
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*,application/pdf"
-                                onChange={handleFileSelect}
-                                disabled={ocrLoading}
-                                style={{ display: 'none' }}
-                            />
-                            <button
-                                type="button"
-                                className="btn-ocr"
-                                onClick={() => fileInputRef.current.click()}
-                                disabled={ocrLoading}
-                            >
-                                {ocrLoading ? 'Analyse en cours...' : 'Choisir une image ou un PDF'}
-                            </button>
-                            {ocrLoading && <span className="scan-spinner">🔍</span>}
+                        <div className="ocr-options">
+                            <div className="file-input-wrapper">
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*,application/pdf"
+                                    onChange={handleFileSelect}
+                                    disabled={ocrLoading}
+                                    style={{ display: 'none' }}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn-ocr"
+                                    onClick={() => fileInputRef.current.click()}
+                                    disabled={ocrLoading}
+                                >
+                                    {ocrLoading ? 'Analyse en cours...' : '📁 Choisir une image ou un PDF'}
+                                </button>
+                                {ocrLoading && <span className="scan-spinner">🔍</span>}
+                            </div>
+
+                            <div className="scan-cursor-wrapper">
+                                <input
+                                    ref={ocrFocusInputRef}
+                                    type="text"
+                                    placeholder="🔍 Cliquez ici puis scannez le document"
+                                    onFocus={() => setOcrFocusMode(true)}
+                                    onBlur={() => setTimeout(() => setOcrFocusMode(false), 5000)}
+                                    className="ocr-focus-input"
+                                    readOnly
+                                />
+                                {ocrFocusMode && <span className="scan-indicator">📷 Prêt à scanner un document</span>}
+                            </div>
                         </div>
                         <p className="scan-help">
-                            Sélectionnez une image scannée ou un PDF du bon de livraison ou de la facture.
+                            Soit téléchargez un fichier, soit placez le curseur dans le champ ci‑dessus et scannez un document avec l'application mobile.
                         </p>
                     </div>
                 </div>
@@ -537,9 +624,8 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                                         <th>Lot</th>
                                         <th>Expiration</th>
                                         <th>Emplacement</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
+                                        </tr>
+                                     </thead>
                                 <tbody>
                                     {formData.lignes.map((line, index) => (
                                         <tr key={index}>
