@@ -55,7 +55,7 @@ const TopNavbar = ({ userPrenom, userName, userRole, profileImage, onLogout, onP
             <div className="navbar-right">
                 <button className="notification-btn">
                     <FaBell />
-                    <span className="notification-badge">3</span>
+                    <span className="notification-badge">1</span>
                 </button>
 
                 {/* ✅ Menu utilisateur avec dropdown à droite */}

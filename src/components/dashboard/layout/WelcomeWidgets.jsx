@@ -160,7 +160,7 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
             {/* En-tête de bienvenue */}
             <div className="welcome-header">
                 <div>
-                    <h1>Bienvenue, {userPrenom} {userName} !</h1>
+                    <h1>Bienvenue, {userPrenom} {userName} </h1>
                     <p className="welcome-date">
                         {new Date().toLocaleDateString('fr-FR', { 
                             weekday: 'long', 
@@ -231,12 +231,7 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
                 </div>
             </div>
 
-            {/* Message d'erreur API si nécessaire */}
-            {(apiErrors.articles || apiErrors.stocks || apiErrors.mouvements) && (
-                <div className="api-warning">
-                    <p>⚠️ Certaines données ne sont pas disponibles. Vérifiez vos permissions.</p>
-                </div>
-            )}
+            
 
             {/* Tâches en cours */}
             <div className="tasks-in-progress">
@@ -272,66 +267,9 @@ const WelcomeWidgets = ({ userPrenom, userName, userRole }) => {
                 </div>
             </div>
 
-            {/* Derniers mouvements */}
-            <div className="recent-movements">
-                <h3>Derniers mouvements</h3>
-                <div className="movements-list">
-                    {recentMovements.length > 0 ? (
-                        recentMovements.map((movement, index) => (
-                            <div key={index} className="movement-item">
-                                <span className="movement-time">{formatTime(movement.dateMouvement)}</span>
-                                <span className={`movement-type ${getMovementClass(movement.type)}`}>
-                                    {getMovementTypeLabel(movement.type)}
-                                </span>
-                                <span className="movement-desc">
-                                    {movement.articleDesignation || 'Article'} - {movement.lot || 'Sans lot'}
-                                </span>
-                                <span className="movement-qty">
-                                    {movement.type === 'ENTREE' ? '+' : movement.type === 'SORTIE' ? '-' : '↻'} 
-                                    {movement.quantite}
-                                </span>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="no-movements">
-                            {apiErrors.mouvements 
-                                ? 'Impossible de charger les mouvements' 
-                                : 'Aucun mouvement récent'}
-                        </div>
-                    )}
-                </div>
-                <button className="view-all-btn" onClick={() => navigate('/mouvements')}>
-                    Voir tous les mouvements
-                </button>
-            </div>
+            
 
-            {/* Accès rapides aux modules */}
-            <div className="quick-modules">
-                <h3>Modules</h3>
-                <div className="modules-grid">
-                    <button className="module-btn" onClick={() => navigate('/stock')}>
-                        <FaBoxes /> Stock
-                    </button>
-                    <button className="module-btn" onClick={() => navigate('/mouvements')}>
-                        <FaChartLine /> Mouvements
-                    </button>
-                    <button className="module-btn" onClick={() => navigate('/reception')}>
-                        <FaBoxOpen /> Réception
-                    </button>
-                    <button className="module-btn" onClick={() => navigate('/rangement')}>
-                        <FaWarehouse /> Rangement
-                    </button>
-                    <button className="module-btn" onClick={() => navigate('/expedition')}>
-                        <FaTruck /> Expédition
-                    </button>
-                    <button className="module-btn" onClick={() => navigate('/documents')}>
-                        <FaPrint /> Documents
-                    </button>
-                    <button className="module-btn" onClick={() => navigate('/synchronisation')}>
-                        <FaSync /> Sync
-                    </button>
-                </div>
-            </div>
+            
         </div>
     );
 };

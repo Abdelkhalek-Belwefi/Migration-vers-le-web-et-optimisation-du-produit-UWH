@@ -1,0 +1,92 @@
+/* Configuration de base et police */
+.gallery-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 60px; /* Espace entre l'image et le texte */
+  max-width: 1200px;
+  margin: 50px auto;
+  padding: 0 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Style de l'image */
+.gallery-image-wrapper {
+  flex: 1; /* Prend 50% de l'espace */
+}
+
+.main-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 2px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Style du texte */
+.gallery-content {
+  flex: 1; /* Prend 50% de l'espace */
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-title {
+  font-size: 2.2rem;
+  font-weight: 300; /* Important pour l'aspect "UX Pro" léger */
+  color: #4a4a4a;
+  margin-bottom: 25px;
+  line-height: 1.2;
+}
+
+.gallery-text {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+/* Mise en avant des mots-clés */
+.highlight {
+  color: #0099cc;
+  font-weight: 600;
+}
+
+/* Bouton aligné à droite */
+.button-wrapper {
+  display: flex;
+  justify-content: flex-end; /* Aligne le bouton à droite du texte */
+}
+
+.btn-solution {
+  background-color: #0099cc;
+  color: #ffffff;
+  padding: 12px 35px;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-transform: none; /* Garde le texte tel quel ou mettez uppercase si besoin */
+}
+
+.btn-solution:hover {
+  background-color: #007ba3;
+}
+
+/* Responsive pour mobile */
+@media (max-width: 768px) {
+  .gallery-container {
+    flex-direction: column; /* Empilement vertical sur petit écran */
+    text-align: center;
+    gap: 30px;
+  }
+  
+  .button-wrapper {
+    justify-content: center; /* Centre le bouton sur mobile */
+  }
+  
+  .gallery-title {
+    font-size: 1.8rem;
+  }
+}

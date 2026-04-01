@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { rangementService } from '../../services/rangementService';
 import RangementTaskCard from './RangementTaskCard';
+
 import './styles/RangementList.css';
+import { FiPackage } from "react-icons/fi";
 
 const RangementList = () => {
     const [tasks, setTasks] = useState([]);
@@ -77,7 +79,7 @@ const RangementList = () => {
     return (
         <div className="rangement-container">
             <div className="header">
-                <h2>📦 Rangement en cours</h2>
+                <h2> <FiPackage />  Rangement en cours</h2>
                 {isResponsable && (
                     <div className="stats">
                         <div className="stat-card">

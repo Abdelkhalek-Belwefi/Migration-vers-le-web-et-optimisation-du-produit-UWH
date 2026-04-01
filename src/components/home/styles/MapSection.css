@@ -1,0 +1,113 @@
+/* Map container */
+.map-container {
+  background: var(--white);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eaeef2;
+  margin-top: 20px;
+}
+
+.map-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.map-background {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none; /* prevents interfering with the dots */
+}
+
+/* Dot styles */
+.map-dot {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: var(--dark-blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  border: 2px solid white;
+}
+
+/* Partner style (gray) */
+.map-dot.partner {
+  background: #888;
+  border-color: #ccc;
+}
+
+.map-dot:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  background: var(--primary-orange);
+  border-color: white;
+}
+
+/* Number inside the dot */
+.dot-number {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Label that appears on hover (like Avada tooltip) */
+.map-dot .dot-label {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 3;
+}
+
+.map-dot:hover .dot-label {
+  opacity: 1;
+}
+
+/* Legend */
+.map-legend {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.9);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  display: flex;
+  gap: 16px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 3;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.dot.blue {
+  background-color: var(--dark-blue);
+}
+.dot.gray {
+  background-color: #ccc;
+}

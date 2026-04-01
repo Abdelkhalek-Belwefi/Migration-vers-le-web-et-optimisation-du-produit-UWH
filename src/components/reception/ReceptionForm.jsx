@@ -3,6 +3,7 @@ import { receptionService } from '../../services/receptionService';
 import { articleService } from '../../services/articleService';
 import { gs1Service } from '../../services/gs1Service';
 import { ocrService } from '../../services/ocrService';
+import useBarcodeReceiver from '../../hooks/useBarcodeReceiver'; // ajout hooks
 import './styles/ReceptionForm.css';
 import { MdAdd } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
@@ -10,6 +11,7 @@ import { FaDownload } from "react-icons/fa";
 import { FaBarcode, FaQrcode } from "react-icons/fa";
 
 const ReceptionForm = ({ onSuccess, onCancel }) => {
+    useBarcodeReceiver(); // ajout hooks
     const [formData, setFormData] = useState({
         numeroPO: '',
         fournisseur: '',

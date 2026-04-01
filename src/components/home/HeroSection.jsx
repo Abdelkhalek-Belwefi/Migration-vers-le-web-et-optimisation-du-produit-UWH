@@ -3,9 +3,9 @@ const HeroSection = () => {
   return (
     <div className="hero">
       <div className="hero-content">
-        <h1>Votre Entrepôt. Plus Rapide. Plus Intelligent.</h1>
-        <p>Digitalisez vos opérations logistiques et améliorez la productivité de votre chaîne d’approvisionnement.</p>
-        <button> More</button>
+        <h1>Your Warehouse  Faster Smarter</h1>
+        <p>Digitize your logistics operations and improve your supply chain productivity.</p>
+        
       </div>
     </div>
   );

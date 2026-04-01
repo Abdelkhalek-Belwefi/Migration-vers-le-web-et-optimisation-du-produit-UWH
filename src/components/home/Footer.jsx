@@ -1,7 +1,7 @@
 const Footer = () => {
   return (
     <footer className="footer">
-      © 2026 Validus - All Rights Reserved
+     © Copyright 2026 - L-mobile | Solutions logicielles mobiles
     </footer>
   );
 };

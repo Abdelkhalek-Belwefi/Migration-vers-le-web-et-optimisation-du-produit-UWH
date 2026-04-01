@@ -1,0 +1,122 @@
+/* Styles de base pour le Footer */
+.footer-main {
+  background-color: #1b112d; /* Le violet profond de l'image */
+  color: #ffffff;
+  padding: 80px 40px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap; /* Pour le mobile */
+}
+
+/* Style des colonnes */
+.footer-col {
+  flex: 1;
+  min-width: 220px;
+}
+
+.brand-info {
+  flex: 1.5; /* Donne plus de place au logo et à la description */
+}
+
+.footer-logo img {
+  height: 70px; /* Ajustez selon votre image */
+  margin-bottom: 25px;
+}
+
+.description {
+  color: #a496b8; /* Gris clair avec une touche de violet */
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin-bottom: 30px;
+}
+
+/* Contact 24/7 */
+.emergency-contact {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.phone-icon {
+  font-size: 2rem;
+}
+
+.phone-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-details .label {
+  font-size: 0.8rem;
+  color: #a496b8;
+}
+
+.phone-details .number {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Titres des colonnes */
+.col-title {
+  font-size: 1.25rem;
+  margin-bottom: 35px;
+  font-weight: 500;
+}
+
+/* Listes */
+.footer-list, .contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-list li, .contact-list li {
+  margin-bottom: 18px;
+  color: #a496b8;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-list a {
+  color: #a496b8;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-list a:hover {
+  color: #ffffff;
+}
+
+/* Grille Instagram */
+.insta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 260px;
+}
+
+.grid-item {
+  aspect-ratio: 1 / 1;
+  background-color: #312546; /* Placeholder pour les images */
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+    padding: 20px;
+  }
+}

@@ -174,7 +174,7 @@
 .user-name {
     font-size: 14px;
     font-weight: 600;
-    color: #212529;
+    color: #f8fcff;
 }
 
 .user-role {
@@ -338,7 +338,7 @@
     align-items: center;
     gap: 12px;
     padding: 16px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: #1e293b;
     border-radius: 10px 10px 0 0;
 }
 
@@ -374,7 +374,7 @@
 
 .dropdown-user-name {
     font-weight: 600;
-    color: #212529;
+    color: #ffffff;
     font-size: 14px;
 }
 
