@@ -10,7 +10,8 @@ import {
     FaTruck,
     FaPrint,
     FaSync,
-    FaHistory
+    FaHistory,
+    FaShoppingCart  // ← icône pour le rôle commercial
 } from 'react-icons/fa';
 import Sidebar from "../components/dashboard/layout/Sidebar";
 import TopNavbar from "../components/dashboard/layout/TopNavbar";
@@ -21,6 +22,17 @@ import StockMovementForm from "../components/stock/StockMovementForm";
 import MouvementHistorique from "../components/stock/MouvementHistorique";
 import ReceptionList from "../components/reception/ReceptionList";
 import RangementList from "../components/rangement/RangementList";
+
+// ========== MODULES COMMERCIAUX ==========
+import ClientList from "../components/commercial/ClientList";
+import CommandeList from "../components/commercial/CommandeList";
+
+// ========== MODULE PRÉPARATION DE COMMANDES (picking) ==========
+import PreparationCommandes from "../components/entrepot/PreparationCommandes";
+
+// ========== MODULE EXPÉDITION (shipping) ==========
+import ExpedierCommandes from "../components/expedition/ExpedierCommandes";
+
 import "../styles/dashboard.css";
 
 const Dashboard_warehouse = () => {
@@ -36,19 +48,13 @@ const Dashboard_warehouse = () => {
 
   useEffect(() => {
     const savedImage = localStorage.getItem("profileImage");
-    if (savedImage) {
-      setProfileImage(savedImage);
-    }
+    if (savedImage) setProfileImage(savedImage);
 
     const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-    }
+    if (!token) navigate("/login");
 
     const role = localStorage.getItem("role");
-    if (role === "ADMINISTRATEUR") {
-      navigate("/admin");
-    }
+    if (role === "ADMINISTRATEUR") navigate("/admin");
   }, [navigate]);
 
   const handleLogout = () => {
@@ -56,9 +62,7 @@ const Dashboard_warehouse = () => {
     navigate("/login");
   };
 
-  const handleImageClick = () => {
-    fileInputRef.current.click();
-  };
+  const handleImageClick = () => fileInputRef.current.click();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -67,17 +71,14 @@ const Dashboard_warehouse = () => {
         alert("Veuillez sélectionner une image valide");
         return;
       }
-
       if (file.size > 2 * 1024 * 1024) {
         alert("L'image ne doit pas dépasser 2 Mo");
         return;
       }
-
       const reader = new FileReader();
       reader.onloadend = () => {
-        const imageDataUrl = reader.result;
-        setProfileImage(imageDataUrl);
-        localStorage.setItem("profileImage", imageDataUrl);
+        setProfileImage(reader.result);
+        localStorage.setItem("profileImage", reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -86,18 +87,11 @@ const Dashboard_warehouse = () => {
   const handleDeleteImage = () => {
     setProfileImage(null);
     localStorage.removeItem("profileImage");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleProfileClick = () => {
-    setActiveTab("profile");
-  };
-
-  const handlePasswordClick = () => {
-    setActiveTab("password");
-  };
+  const handleProfileClick = () => setActiveTab("profile");
+  const handlePasswordClick = () => setActiveTab("password");
 
   const handleStockClick = (stock) => {
     setSelectedStock(stock);
@@ -107,11 +101,10 @@ const Dashboard_warehouse = () => {
   const handleMovementSuccess = () => {
     setShowMovementForm(false);
     setSelectedStock(null);
-    if (activeTab === "stock") {
-      window.location.reload();
-    }
+    if (activeTab === "stock") window.location.reload();
   };
 
+  // Construction du menu latéral selon le rôle
   const getMenuItems = () => {
     const baseItems = [
       { id: "dashboard", label: "Tableau de bord", icon: <FaTachometerAlt /> }
@@ -123,7 +116,7 @@ const Dashboard_warehouse = () => {
           ...baseItems,
           { id: "reception", label: "Réception", icon: <FaBoxes /> },
           { id: "rangement", label: "Rangement", icon: <FaClipboardList /> },
-          { id: "picking", label: "Préparation de commandes", icon: <FaClipboardList /> },
+          { id: "preparation", label: "Préparation de commandes", icon: <FaClipboardList /> },  // ← picking
           { id: "transfert", label: "Transfert", icon: <FaExchangeAlt /> }
         ];
 
@@ -134,9 +127,16 @@ const Dashboard_warehouse = () => {
           { id: "mouvements", label: "Historique mouvements", icon: <FaHistory /> },
           { id: "reception", label: "Validation Réception", icon: <FaCheckCircle /> },
           { id: "rangement", label: "Suivi Rangement", icon: <FaClipboardList /> },
-          { id: "expedition", label: "Validation Expédition", icon: <FaTruck /> },
+          { id: "expedier", label: "Expéditions", icon: <FaTruck /> },               // ← shipping
           { id: "documents", label: "Impression Documents", icon: <FaPrint /> },
           { id: "synchronisation", label: "Synchronisation ERP", icon: <FaSync /> }
+        ];
+
+      case "SERVICE_COMMERCIAL":
+        return [
+          ...baseItems,
+          { id: "commandes", label: "Commandes", icon: <FaShoppingCart /> },
+          { id: "clients", label: "Clients", icon: <FaBoxOpen /> }
         ];
 
       case "OPERATOR":
@@ -151,6 +151,7 @@ const Dashboard_warehouse = () => {
       RESPONSABLE_ENTREPOT: "Responsable Entrepôt",
       OPERATEUR_ENTREPOT: "Opérateur Entrepôt",
       OPERATOR: "Opérateur (en attente)",
+      SERVICE_COMMERCIAL: "Service Commercial"   // ← ajout
     };
     return labels[role] || role;
   };
@@ -158,15 +159,17 @@ const Dashboard_warehouse = () => {
   const getModuleTitle = (tabId) => {
     const titles = {
       articles: "Articles du catalogue",
-      picking: "Module Préparation de commandes",
+      preparation: "Préparation de commandes",   // ← picking
       transfert: "Module Transfert",
       reception: "Module Réception",
       rangement: "Gestion du rangement",
       stock: "Consultation des stocks",
       mouvements: "Historique des mouvements",
-      expedition: "Module Expédition",
+      expedier: "Expéditions",                  // ← shipping
       documents: "Impression de documents",
       synchronisation: "Synchronisation ERP",
+      commandes: "Gestion des commandes",
+      clients: "Gestion des clients"
     };
     return titles[tabId] || tabId;
   };
@@ -297,6 +300,21 @@ const Dashboard_warehouse = () => {
 
       case "rangement":
         return <RangementList />;
+
+      // ========== MODULES COMMERCIAUX ==========
+      case "commandes":
+        return <CommandeList />;
+
+      case "clients":
+        return <ClientList />;
+
+      // ========== MODULE PRÉPARATION DE COMMANDES ==========
+      case "preparation":
+        return <PreparationCommandes />;
+
+      // ========== MODULE EXPÉDITION ==========
+      case "expedier":
+        return <ExpedierCommandes />;
 
       default:
         return (
