@@ -364,3 +364,7 @@
     cursor: default;
     white-space: nowrap;
 }
+.role-badge.commercial {
+    background: #9c27b0;
+    color: white;
+}

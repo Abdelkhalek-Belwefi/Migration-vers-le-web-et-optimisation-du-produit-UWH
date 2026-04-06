@@ -16,6 +16,16 @@ const RangementList = () => {
     const isOperateur = userRole === 'OPERATEUR_ENTREPOT' || userRole === 'ADMINISTRATEUR';
     const isResponsable = userRole === 'RESPONSABLE_ENTREPOT' || userRole === 'ADMINISTRATEUR';
 
+    // 🔹 Fonction utilitaire pour trier les tâches par date décroissante (la plus récente en premier)
+    const sortTasksByDateDesc = (tasksArray) => {
+        return [...tasksArray].sort((a, b) => {
+            // Utiliser createdAt si disponible, sinon l'ID (plus récent = ID plus grand)
+            const dateA = a.createdAt ? new Date(a.createdAt) : new Date(a.id);
+            const dateB = b.createdAt ? new Date(b.createdAt) : new Date(b.id);
+            return dateB - dateA; // Décroissant
+        });
+    };
+
     useEffect(() => {
         loadTasks();
     }, [filter]);
@@ -35,7 +45,8 @@ const RangementList = () => {
             }
             
             console.log('✅ Données reçues:', data);
-            setTasks(Array.isArray(data) ? data : []);
+            const sortedData = sortTasksByDateDesc(Array.isArray(data) ? data : []);
+            setTasks(sortedData);
             
             // Mettre à jour les statistiques
             const allTasks = await rangementService.getAllTasks().catch(() => []);

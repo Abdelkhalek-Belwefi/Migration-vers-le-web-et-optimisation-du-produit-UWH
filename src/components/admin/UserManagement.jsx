@@ -7,7 +7,6 @@ import {
     FaEdit, 
     FaTrash,
     FaUserCheck,
-    FaUserClock,
     FaCrown
 } from 'react-icons/fa';
 import { adminService } from '../../services/adminService';
@@ -52,14 +51,18 @@ const UserManagement = () => {
     const fetchRoles = async () => {
         try {
             const data = await adminService.getAllRoles();
-            // ✅ Filtrer pour exclure ADMINISTRATEUR de la liste déroulante
-            const filteredRoles = data.filter(role => role !== 'ADMINISTRATEUR');
-            setRoles(filteredRoles);
+            // Ajout manuel de SERVICE_COMMERCIAL si absent
+            let rolesList = data.filter(role => role !== 'ADMINISTRATEUR');
+            if (!rolesList.includes('SERVICE_COMMERCIAL')) {
+                rolesList.push('SERVICE_COMMERCIAL');
+            }
+            setRoles(rolesList);
         } catch (err) {
             console.error('Erreur lors du chargement des rôles:', err);
+            // Fallback : fournir une liste par défaut
+            setRoles(['RESPONSABLE_ENTREPOT', 'OPERATEUR_ENTREPOT', 'OPERATOR', 'SERVICE_COMMERCIAL']);
         }
     };
-
     const handleActiverCompte = async (userId) => {
         try {
             await adminService.activerCompte(userId);
@@ -145,7 +148,8 @@ const UserManagement = () => {
             'ADMINISTRATEUR': 'role-badge admin',
             'RESPONSABLE_ENTREPOT': 'role-badge manager',
             'OPERATEUR_ENTREPOT': 'role-badge operator',
-            'OPERATOR': 'role-badge pending'
+            'OPERATOR': 'role-badge pending',
+            'SERVICE_COMMERCIAL': 'role-badge commercial'
         };
         return roleClasses[role] || 'role-badge';
     };
@@ -155,7 +159,8 @@ const UserManagement = () => {
             'ADMINISTRATEUR': 'Administrateur',
             'RESPONSABLE_ENTREPOT': 'Responsable Entrepôt',
             'OPERATEUR_ENTREPOT': 'Opérateur Entrepôt',
-            'OPERATOR': 'En attente'
+            'OPERATOR': 'En attente',
+            'SERVICE_COMMERCIAL': 'Service Commercial'
         };
         return labels[role] || role;
     };
@@ -220,7 +225,6 @@ const UserManagement = () => {
                                 </td>
                                 <td className="actions">
                                     {editingUserId === user.id ? (
-                                        // Mode édition
                                         <>
                                             <button
                                                 className="btn-save"
@@ -241,7 +245,6 @@ const UserManagement = () => {
                                             </button>
                                         </>
                                     ) : (
-                                        // Mode normal
                                         <>
                                             {user.email === 'admin@gmail.com' ? (
                                                 <span className="admin-badge" title="Compte système protégé">

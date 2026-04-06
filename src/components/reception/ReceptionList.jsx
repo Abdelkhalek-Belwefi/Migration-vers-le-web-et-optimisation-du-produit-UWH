@@ -24,6 +24,16 @@ const ReceptionList = () => {
     const isOperateur = userRole === 'OPERATEUR_ENTREPOT' || userRole === 'ADMINISTRATEUR';
     const isResponsable = userRole === 'RESPONSABLE_ENTREPOT' || userRole === 'ADMINISTRATEUR';
 
+    // 🔹 Fonction utilitaire pour trier les réceptions par date décroissante (la plus récente en premier)
+    const sortReceptionsByDateDesc = (data) => {
+        return [...data].sort((a, b) => {
+            // Utiliser createdAt si disponible, sinon l'ID (plus récent = ID plus grand)
+            const dateA = a.createdAt ? new Date(a.createdAt) : new Date(a.id);
+            const dateB = b.createdAt ? new Date(b.createdAt) : new Date(b.id);
+            return dateB - dateA; // Décroissant
+        });
+    };
+
     useEffect(() => {
         loadReceptions();
     }, []);
@@ -32,8 +42,9 @@ const ReceptionList = () => {
         try {
             setLoading(true);
             const data = await receptionService.getAllReceptions();
-            setReceptions(data);
-            setFilteredReceptions(data);
+            const sortedData = sortReceptionsByDateDesc(data);
+            setReceptions(sortedData);
+            setFilteredReceptions(sortedData);
             setError('');
         } catch (err) {
             setError('Erreur lors du chargement des réceptions');
@@ -53,7 +64,8 @@ const ReceptionList = () => {
             if (searchParams.statut) params.statut = searchParams.statut;
             
             const data = await receptionService.searchReceptions(params);
-            setFilteredReceptions(data);
+            const sortedData = sortReceptionsByDateDesc(data);
+            setFilteredReceptions(sortedData);
             setError('');
         } catch (err) {
             setError('Erreur lors de la recherche');
@@ -75,16 +87,16 @@ const ReceptionList = () => {
             fournisseur: '',
             statut: ''
         });
+        // On trie à nouveau la liste originale (déjà triée)
         setFilteredReceptions(receptions);
     };
 
-    // MODIFICATION ICI : amélioration de la gestion d'erreur
     const handleValider = async (id) => {
         if (!window.confirm('Valider cette réception ? Cette action est irréversible.')) return;
         
         try {
             await receptionService.validerReception(id);
-            loadReceptions();
+            loadReceptions(); // recharge et trie
             setSelectedReceptionId(null);
             setSuccess('✅ Réception validée avec succès !');
             setTimeout(() => setSuccess(''), 3000);
@@ -97,7 +109,7 @@ const ReceptionList = () => {
 
     const handleFormSuccess = (newReception) => {
         setShowForm(false);
-        loadReceptions();
+        loadReceptions(); // recharge et trie
     };
 
     const handleFormCancel = () => {
