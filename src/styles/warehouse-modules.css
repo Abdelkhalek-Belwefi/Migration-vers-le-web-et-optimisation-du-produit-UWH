@@ -1,0 +1,560 @@
+/* ============================================
+   STYLES PROFESSIONNELS – Commandes / Picking / Shipping
+   Animations, transitions et design moderne
+   ============================================ */
+
+/* Variables globales */
+:root {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --success: #10b981;
+    --success-dark: #059669;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #8b5cf6;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --radius: 0.75rem;
+  }
+  
+  /* Conteneurs principaux */
+  .commande-management,
+  .expedition-page,
+  .preparation-commandes {
+    padding: 1.5rem;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.4s ease-out;
+  }
+  
+  /* Titres */
+  .commande-management h2,
+  .expedition-page h2,
+  .preparation-commandes h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--gray-200);
+    position: relative;
+  }
+  
+  .commande-management h2::after,
+  .expedition-page h2::after,
+  .preparation-commandes h2::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+  
+  /* ===== TABLES ===== */
+  .commande-table,
+  .expedition-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9rem;
+    overflow: hidden;
+    border-radius: var(--radius);
+  }
+  
+  .commande-table th,
+  .expedition-table th {
+    background: var(--gray-50);
+    color: var(--gray-700);
+    font-weight: 600;
+    padding: 1rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  
+  .commande-table td,
+  .expedition-table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+    transition: background 0.2s ease;
+  }
+  
+  .commande-table tr:hover td,
+  .expedition-table tr:hover td {
+    background: #fffbeb;
+  }
+  
+  /* Animation d'entrée des lignes */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* ===== BOUTONS ===== */
+  button,
+  .btn-preparer,
+  .btn-expedier,
+  .btn-details,
+  .btn-edit,
+  .btn-delete,
+  .btn-cancel,
+  .btn-submit,
+  .btn-add-ligne,
+  .btn-remove,
+  .modal-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--gray-100);
+    color: var(--gray-700);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Effet ripple au clic */
+  button::after,
+  .btn-preparer::after,
+  .btn-expedier::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+  }
+  
+  button:active::after,
+  .btn-preparer:active::after,
+  .btn-expedier:active::after {
+    width: 200%;
+    height: 200%;
+  }
+  
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  /* Boutons spécifiques */
+  .btn-preparer {
+    background: var(--success);
+    color: white;
+  }
+  .btn-preparer:hover {
+    background: var(--success-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-expedier {
+    background: var(--primary);
+    color: white;
+  }
+  .btn-expedier:hover {
+    background: var(--primary-dark);
+  }
+  
+  .btn-details {
+    background: var(--info);
+    color: white;
+  }
+  .btn-details:hover {
+    background: #7c3aed;
+  }
+  
+  .btn-edit {
+    background: var(--warning);
+    color: white;
+  }
+  .btn-edit:hover {
+    background: #d97706;
+  }
+  
+  .btn-delete {
+    background: var(--danger);
+    color: white;
+  }
+  .btn-delete:hover {
+    background: #dc2626;
+  }
+  
+  .btn-cancel {
+    background: var(--gray-200);
+    color: var(--gray-700);
+  }
+  .btn-cancel:hover {
+    background: var(--gray-300);
+  }
+  
+  .btn-submit {
+    background: var(--success);
+    color: white;
+    padding: 0.6rem 1.2rem;
+  }
+  .btn-submit:hover {
+    background: var(--success-dark);
+  }
+  
+  .btn-add-ligne {
+    background: var(--primary);
+    color: white;
+    margin: 1rem 0;
+  }
+  .btn-add-ligne:hover {
+    background: var(--primary-dark);
+  }
+  
+  .btn-remove {
+    background: var(--danger);
+    color: white;
+    padding: 0.4rem 0.8rem;
+  }
+  .btn-remove:hover {
+    background: #dc2626;
+  }
+  
+  /* ===== FORMULAIRES ===== */
+  .commande-form {
+    padding: 1rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--gray-700);
+    font-size: 0.9rem;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--gray-200);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    background: white;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Lignes de formulaire en flex */
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  
+  .form-row .form-group {
+    flex: 1;
+    min-width: 150px;
+  }
+  
+  /* Lignes d'articles */
+  .ligne-commande-form {
+    background: var(--gray-50);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s;
+  }
+  .ligne-commande-form:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--gray-300);
+  }
+  
+  /* ===== MODALE ===== */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 1rem;
+    max-width: 700px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+  }
+  
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .modal-close {
+    background: none;
+    font-size: 1.5rem;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: 9999px;
+  }
+  .modal-close:hover {
+    background: var(--gray-100);
+    transform: none;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+  
+  /* Tableau des détails */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+  }
+  .detail-table th,
+  .detail-table td {
+    border: 1px solid var(--gray-200);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  .detail-table th {
+    background: var(--gray-50);
+    font-weight: 600;
+  }
+  
+  /* ===== BADGES DE STATUT ===== */
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    transition: transform 0.2s;
+  }
+  .badge:hover {
+    transform: scale(1.05);
+  }
+  
+  .badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .badge-success {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  .badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  .badge-secondary {
+    background: var(--gray-200);
+    color: var(--gray-700);
+  }
+  
+  /* ===== LOADING & ERREUR ===== */
+  .loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--gray-700);
+    font-style: italic;
+    position: relative;
+  }
+  .loading::after {
+    content: '';
+    display: inline-block;
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 2px solid var(--gray-300);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    margin-left: 0.5rem;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .error-message {
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--danger);
+    animation: shake 0.3s ease;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+  
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .commande-table,
+    .expedition-table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+  
+    .form-row {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+  
+    .modal-content {
+      width: 95%;
+      max-height: 90vh;
+    }
+  
+    .btn-preparer,
+    .btn-expedier,
+    .btn-details {
+      padding: 0.3rem 0.7rem;
+      font-size: 0.75rem;
+    }
+  }
+  /* MODALE */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  border-radius: 1rem;
+  max-width: 700px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.modal-body {
+  padding: 1.5rem;
+}
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+.detail-table th, .detail-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  text-align: left;
+}

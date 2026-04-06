@@ -4,9 +4,7 @@ const API_URL = 'http://localhost:8080/api/articles';
 
 const getAuthHeader = () => {
     const token = localStorage.getItem('token');
-    if (!token) {
-        console.warn('⚠️ Token manquant dans localStorage');
-    }
+    if (!token) console.warn('⚠️ Token manquant dans localStorage');
     return {
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -15,49 +13,28 @@ const getAuthHeader = () => {
     };
 };
 
-/**
- * Nettoie un code GS1 brut en supprimant les caractères de contrôle (ex: séparateur GS \u001D)
- * et ne garde que les caractères imprimables.
- * @param {string} code - Le code brut scanné
- * @returns {string} Code nettoyé
- */
+// Nettoyage GS1
 const cleanGS1Code = (code) => {
     if (!code) return '';
-    // Enlever le caractère GS (ASCII 29) et autres caractères de contrôle, garder imprimables
     return code.replace(/\u001D/g, '').replace(/[^\x20-\x7E]/g, '').trim();
 };
 
-/**
- * Extrait le GTIN (14 chiffres) d'un code GS1 complet
- * @param {string} code - Code GS1 (avec ou sans parenthèses)
- * @returns {string|null} Le GTIN s'il est trouvé, sinon null
- */
+// Extraction GTIN
 const extractGTIN = (code) => {
     if (!code) return null;
-    // Nettoyer d'abord
     let clean = cleanGS1Code(code);
-    // Chercher (01) suivi de 14 chiffres
     const gtinMatch = clean.match(/(?:01|\(01\))?(\d{14})/);
-    if (gtinMatch) {
-        return gtinMatch[1];
-    }
-    // Chercher simplement 13 ou 14 chiffres consécutifs (pour EAN-13 ou GTIN-14)
+    if (gtinMatch) return gtinMatch[1];
     const digitsMatch = clean.match(/\d{13,14}/);
-    if (digitsMatch) {
-        return digitsMatch[0];
-    }
+    if (digitsMatch) return digitsMatch[0];
     return null;
 };
 
 export const articleService = {
-    // Récupérer tous les articles
     getAllArticles: async () => {
         try {
             const response = await axios.get(API_URL, getAuthHeader());
             console.log('📦 Données reçues du backend:', response.data);
-            response.data.forEach(article => {
-                console.log(`Article ${article.id}: numSerie =`, article.numSerie);
-            });
             return response.data;
         } catch (error) {
             console.error('❌ Erreur API getAllArticles:', error.response?.data || error.message);
@@ -65,7 +42,6 @@ export const articleService = {
         }
     },
 
-    // Récupérer un article par ID
     getArticleById: async (id) => {
         try {
             const response = await axios.get(`${API_URL}/${id}`, getAuthHeader());
@@ -76,7 +52,6 @@ export const articleService = {
         }
     },
 
-    // Récupérer un article par code ERP
     getArticleByCodeERP: async (codeERP) => {
         try {
             const response = await axios.get(`${API_URL}/code/${encodeURIComponent(codeERP)}`, getAuthHeader());
@@ -87,66 +62,57 @@ export const articleService = {
         }
     },
 
-    // Rechercher un article par GTIN
     findByGTIN: async (gtin) => {
         try {
             const response = await axios.get(`${API_URL}/gs1/${encodeURIComponent(gtin)}`, getAuthHeader());
             return response.data;
         } catch (error) {
-            if (error.response?.status === 404) {
-                return null;
-            }
+            if (error.response?.status === 404 || error.response?.status === 400) return null;
             console.error('❌ Erreur API findByGTIN:', error.response?.data || error.message);
             throw error;
         }
     },
 
-    // 🔥 MÉTHODE CORRIGÉE : Recherche un article par code scanné (ERP ou GS1) avec extraction du GTIN
     findByCode: async (code) => {
         const cleanedCode = cleanGS1Code(code);
-        if (!cleanedCode) {
-            console.log('⚠️ Code vide après nettoyage');
-            return null;
-        }
-
-        console.log('🔍 Recherche article par code nettoyé:', cleanedCode);
-
-        // Étape 1 : essayer d'extraire le GTIN (si c'est un code GS1)
+        if (!cleanedCode) return null;
         const gtin = extractGTIN(cleanedCode);
         if (gtin) {
-            console.log('🔢 GTIN extrait:', gtin);
-            try {
-                const article = await articleService.findByGTIN(gtin);
-                if (article) {
-                    console.log('✅ Article trouvé par GTIN:', article);
-                    return article;
-                }
-            } catch (err) {
-                console.error('Erreur recherche par GTIN:', err);
-            }
+            const article = await articleService.findByGTIN(gtin);
+            if (article) return article;
         }
-
-        // Étape 2 : si pas de GTIN ou non trouvé, essayer par code ERP
         try {
-            const article = await articleService.getArticleByCodeERP(cleanedCode);
-            console.log('✅ Article trouvé par code ERP:', article);
-            return article;
-        } catch (err) {
-            if (err.response?.status !== 404) {
-                console.error('Erreur recherche par code ERP:', err);
-            }
-            // Pas trouvé non plus
+            return await articleService.getArticleByCodeERP(cleanedCode);
+        } catch {
+            return null;
         }
-
-        console.log('❌ Aucun article trouvé pour le code:', cleanedCode);
-        return null;
     },
 
-    // Créer un article (admin)
+    // Création d'article – envoie à la fois 'code' et 'codeArticleERP'
     createArticle: async (articleData) => {
         try {
-            console.log('📤 Envoi article avec numSerie:', articleData.numSerie);
-            const response = await axios.post(API_URL, articleData, getAuthHeader());
+            const codeValue = articleData.code || articleData.codeArticleERP;
+            if (!codeValue) {
+                throw new Error('Le code de l’article est obligatoire');
+            }
+            const payload = {
+                code: codeValue,
+                codeArticleERP: codeValue,
+                designation: articleData.designation,
+                gtin: articleData.gtin || '',
+                numSerie: articleData.numSerie || '',
+                description: articleData.description || '',
+                category: articleData.category || '',
+                uniteMesure: articleData.uniteMesure || '',
+                poids: articleData.poids || 0,
+                volume: articleData.volume || 0,
+                lotDefaut: articleData.lotDefaut || '',
+                dureeExpirationJours: articleData.dureeExpirationJours || null,
+                actif: articleData.actif !== undefined ? articleData.actif : true,
+                prixUnitaire: articleData.prixUnitaire || 0
+            };
+            console.log('📤 Envoi article avec payload:', payload);
+            const response = await axios.post(API_URL, payload, getAuthHeader());
             console.log('✅ Réponse création:', response.data);
             return response.data;
         } catch (error) {
@@ -155,11 +121,24 @@ export const articleService = {
         }
     },
 
-    // Mettre à jour un article (admin)
     updateArticle: async (id, articleData) => {
         try {
-            console.log('📤 Mise à jour article avec numSerie:', articleData.numSerie);
-            const response = await axios.put(`${API_URL}/${id}`, articleData, getAuthHeader());
+            const payload = {
+                designation: articleData.designation,
+                gtin: articleData.gtin || '',
+                numSerie: articleData.numSerie || '',
+                description: articleData.description || '',
+                category: articleData.category || '',
+                uniteMesure: articleData.uniteMesure || '',
+                poids: articleData.poids || 0,
+                volume: articleData.volume || 0,
+                lotDefaut: articleData.lotDefaut || '',
+                dureeExpirationJours: articleData.dureeExpirationJours || null,
+                actif: articleData.actif !== undefined ? articleData.actif : true,
+                prixUnitaire: articleData.prixUnitaire || 0
+            };
+            console.log('📤 Mise à jour article (sans code) :', payload);
+            const response = await axios.put(`${API_URL}/${id}`, payload, getAuthHeader());
             console.log('✅ Réponse mise à jour:', response.data);
             return response.data;
         } catch (error) {
@@ -168,10 +147,9 @@ export const articleService = {
         }
     },
 
-    // Activer un article
     activerArticle: async (id) => {
         try {
-            const response = await axios.put(`${API_URL}/${id}/activer`, {}, getAuthHeader());
+            const response = await axios.patch(`${API_URL}/${id}/activer`, {}, getAuthHeader());
             return response.data;
         } catch (error) {
             console.error('❌ Erreur API activerArticle:', error.response?.data || error.message);
@@ -179,10 +157,9 @@ export const articleService = {
         }
     },
 
-    // Désactiver un article
     desactiverArticle: async (id) => {
         try {
-            const response = await axios.put(`${API_URL}/${id}/desactiver`, {}, getAuthHeader());
+            const response = await axios.patch(`${API_URL}/${id}/desactiver`, {}, getAuthHeader());
             return response.data;
         } catch (error) {
             console.error('❌ Erreur API desactiverArticle:', error.response?.data || error.message);
@@ -190,7 +167,6 @@ export const articleService = {
         }
     },
 
-    // Supprimer un article (admin)
     deleteArticle: async (id) => {
         try {
             console.log('🗑️ Suppression article id:', id);
@@ -198,15 +174,11 @@ export const articleService = {
             console.log('✅ Réponse suppression:', response.status, response.data);
             return response.data;
         } catch (error) {
-            console.error('❌ Erreur API deleteArticle:');
-            console.error('Status:', error.response?.status);
-            console.error('Data:', error.response?.data);
-            console.error('Message:', error.message);
+            console.error('❌ Erreur API deleteArticle:', error.response?.data || error.message);
             throw error;
         }
     },
 
-    // Recherche avancée
     searchArticles: async (params) => {
         try {
             const response = await axios.get(`${API_URL}/search`, {
@@ -220,3 +192,16 @@ export const articleService = {
         }
     }
 };
+
+// Exports nommés pour compatibilité avec `import { getAllArticles }`
+export const getAllArticles = articleService.getAllArticles;
+export const getArticleById = articleService.getArticleById;
+export const getArticleByCodeERP = articleService.getArticleByCodeERP;
+export const findByGTIN = articleService.findByGTIN;
+export const findByCode = articleService.findByCode;
+export const createArticle = articleService.createArticle;
+export const updateArticle = articleService.updateArticle;
+export const activerArticle = articleService.activerArticle;
+export const desactiverArticle = articleService.desactiverArticle;
+export const deleteArticle = articleService.deleteArticle;
+export const searchArticles = articleService.searchArticles;
