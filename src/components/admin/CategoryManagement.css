@@ -1,0 +1,255 @@
+/* === Catégorie Management - Styles modernes === */
+
+.cat-mgt-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #f8fafc;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* En-tête */
+.cat-mgt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.cat-mgt-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+/* Bouton Ajouter */
+.cat-mgt-btn-add {
+    background: linear-gradient(135deg, #8598b6, #2c3038);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.cat-mgt-btn-add:hover {
+    background: linear-gradient(135deg, #353b47, #8591b4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Alertes */
+.cat-mgt-alert {
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.cat-mgt-alert.error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-left: 4px solid #dc2626;
+}
+
+.cat-mgt-alert.success {
+    background: #d1fae5;
+    color: #065f46;
+    border-left: 4px solid #10b981;
+}
+
+/* Carte formulaire */
+.cat-mgt-form-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    padding: 28px;
+    margin-bottom: 32px;
+    border: 1px solid #e2e8f0;
+}
+
+.cat-mgt-form-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 0;
+    margin-bottom: 24px;
+}
+
+.cat-mgt-form-group {
+    margin-bottom: 20px;
+}
+
+.cat-mgt-form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #334155;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.cat-mgt-form-group input,
+.cat-mgt-form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    transition: 0.2s;
+    background: #ffffff;
+}
+
+.cat-mgt-form-group input:focus,
+.cat-mgt-form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.cat-mgt-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.cat-mgt-btn-cancel,
+.cat-mgt-btn-submit {
+    padding: 10px 24px;
+    border-radius: 40px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.cat-mgt-btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.cat-mgt-btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.cat-mgt-btn-submit {
+    background: #1e293b;
+    color: white;
+}
+
+.cat-mgt-btn-submit:hover {
+    background: #0f172a;
+    transform: translateY(-1px);
+}
+
+/* Tableau */
+.cat-mgt-table-wrapper {
+    background: white;
+    border-radius: 20px;
+    overflow-x: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.cat-mgt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.cat-mgt-table th {
+    background: #f8fafc;
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #334155;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.cat-mgt-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+}
+
+.cat-mgt-table tr:hover {
+    background: #f9fafb;
+}
+
+/* Boutons action */
+.cat-mgt-btn-edit,
+.cat-mgt-btn-delete {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin: 0 4px;
+    padding: 6px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.cat-mgt-btn-edit {
+    color: #3b82f6;
+}
+
+.cat-mgt-btn-edit:hover {
+    background: #e0f2fe;
+    transform: scale(1.05);
+}
+
+.cat-mgt-btn-delete {
+    color: #ef4444;
+}
+
+.cat-mgt-btn-delete:hover {
+    background: #fee2e2;
+    transform: scale(1.05);
+}
+
+/* Loading */
+.cat-mgt-loading {
+    text-align: center;
+    padding: 60px;
+    font-size: 1.1rem;
+    color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cat-mgt-container {
+        padding: 16px;
+    }
+    .cat-mgt-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .cat-mgt-btn-add {
+        justify-content: center;
+    }
+    .cat-mgt-form-card {
+        padding: 20px;
+    }
+    .cat-mgt-table th,
+    .cat-mgt-table td {
+        padding: 12px 10px;
+    }
+}

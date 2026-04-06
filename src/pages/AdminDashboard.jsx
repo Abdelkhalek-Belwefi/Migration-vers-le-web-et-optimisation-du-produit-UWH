@@ -8,13 +8,15 @@ import {
     FaSignOutAlt,
     FaTachometerAlt,
     FaBoxes,
-    FaHome
+    FaHome,
+    FaList  // Ajout pour l'icône des catégories
 } from 'react-icons/fa';
 import Sidebar from '../components/dashboard/layout/Sidebar';
 import UserManagement from '../components/admin/UserManagement';
 import ArticleList from '../components/articles/ArticleList';
 import StockList from '../components/stock/StockList';
 import AdminStats from '../components/admin/stats/AdminStats';
+import CategoryManagement from '../components/admin/CategoryManagement'; // Nouveau composant
 import '../styles/admin-dashboard.css';
 
 const AdminDashboard = () => {
@@ -39,14 +41,12 @@ const AdminDashboard = () => {
         navigate('/login');
     };
 
-    // ✅ Menu simplifié - "Journaux" et "Dashboard principal" supprimés
     const menuItems = [
         { id: 'dashboard', label: 'Tableau de bord', icon: <FaHome /> },
         { id: 'users', label: 'Utilisateurs', icon: <FaUsers /> },
-       
+        { id: 'categories', label: 'Catégories', icon: <FaList /> }, // Nouvel élément
         { id: 'articles', label: 'Catalogue articles', icon: <FaBoxOpen /> },
         { id: 'stocks', label: 'Gestion des Stocks', icon: <FaBoxes /> },
-        
         { id: 'logout', label: 'Déconnexion', icon: <FaSignOutAlt />, action: handleLogout }
     ];
 
@@ -61,56 +61,11 @@ const AdminDashboard = () => {
                 onTabChange={setActiveTab}
             />
             <div className="admin-main">
-                {/* Tableau de bord avec statistiques */}
                 {activeTab === 'dashboard' && <AdminStats />}
-                
                 {activeTab === 'users' && <UserManagement />}
-                
-                {activeTab === 'roles' && (
-                    <div className="roles-management">
-                        <h2>Gestion des Rôles</h2>
-                        <div className="roles-grid">
-                            <div className="role-card admin">
-                                <h3>Administrateur</h3>
-                                <p>Accès complet à toutes les fonctionnalités</p>
-                                <ul>
-                                    <li>Gestion des utilisateurs</li>
-                                    <li>Gestion des rôles</li>
-                                    <li>Configuration système</li>
-                                </ul>
-                            </div>
-                            <div className="role-card manager">
-                                <h3>Responsable Entrepôt</h3>
-                                <p>Gestion des opérations d'entrepôt</p>
-                                <ul>
-                                    <li>Consultation stock</li>
-                                    <li>Validation réception</li>
-                                    <li>Validation expédition</li>
-                                </ul>
-                            </div>
-                          
-                            <div className="role-card effector">
-                                <h3>Effecteur Transfert</h3>
-                                <p>Gestion des transferts</p>
-                                <ul>
-                                    <li>Création picking</li>
-                                    <li>Validation picking</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                
+                {activeTab === 'categories' && <CategoryManagement />}
                 {activeTab === 'articles' && <ArticleList />}
-                
                 {activeTab === 'stocks' && <StockList />}
-                
-                {activeTab === 'stats' && (
-                    <div className="stats-container">
-                        <h2>Statistiques</h2>
-                        <p>En cours de développement...</p>
-                    </div>
-                )}
             </div>
         </div>
     );
