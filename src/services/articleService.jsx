@@ -121,31 +121,34 @@ export const articleService = {
         }
     },
 
-    updateArticle: async (id, articleData) => {
-        try {
-            const payload = {
-                designation: articleData.designation,
-                gtin: articleData.gtin || '',
-                numSerie: articleData.numSerie || '',
-                description: articleData.description || '',
-                category: articleData.category || '',
-                uniteMesure: articleData.uniteMesure || '',
-                poids: articleData.poids || 0,
-                volume: articleData.volume || 0,
-                lotDefaut: articleData.lotDefaut || '',
-                dureeExpirationJours: articleData.dureeExpirationJours || null,
-                actif: articleData.actif !== undefined ? articleData.actif : true,
-                prixUnitaire: articleData.prixUnitaire || 0
-            };
-            console.log('📤 Mise à jour article (sans code) :', payload);
-            const response = await axios.put(`${API_URL}/${id}`, payload, getAuthHeader());
-            console.log('✅ Réponse mise à jour:', response.data);
-            return response.data;
-        } catch (error) {
-            console.error('❌ Erreur API updateArticle:', error.response?.data || error.message);
-            throw error;
-        }
-    },
+    // src/services/articleService.jsx – extrait de updateArticle
+
+updateArticle: async (id, articleData) => {
+    try {
+        const payload = {
+            codeArticleERP: articleData.codeArticleERP,   // ← AJOUTÉ
+            designation: articleData.designation,
+            gtin: articleData.gtin || '',
+            numSerie: articleData.numSerie || '',
+            description: articleData.description || '',
+            category: articleData.category || '',
+            uniteMesure: articleData.uniteMesure || '',
+            poids: articleData.poids || 0,
+            volume: articleData.volume || 0,
+            lotDefaut: articleData.lotDefaut || '',
+            dureeExpirationJours: articleData.dureeExpirationJours || null,
+            actif: articleData.actif !== undefined ? articleData.actif : true,
+            prixUnitaire: articleData.prixUnitaire || 0
+        };
+        console.log('📤 Mise à jour article avec payload:', payload);
+        const response = await axios.put(`${API_URL}/${id}`, payload, getAuthHeader());
+        console.log('✅ Réponse mise à jour:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('❌ Erreur API updateArticle:', error.response?.data || error.message);
+        throw error;
+    }
+},
 
     activerArticle: async (id) => {
         try {
