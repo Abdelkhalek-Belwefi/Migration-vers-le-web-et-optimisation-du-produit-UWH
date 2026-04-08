@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAllCommandes, updateStatut, deleteCommande } from '../../services/commandeService';
 import CommandeForm from './CommandeForm';
-import '../../styles/warehouse-modules.css';
+import './styles/commande.css';
 
 const CommandeList = () => {
   const [commandes, setCommandes] = useState([]);

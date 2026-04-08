@@ -1,4 +1,5 @@
 import React from 'react';
+import './styles/commande.css';
 
 const LigneCommandeForm = ({ ligne, index, articles, onChange, onRemove }) => (
   <div className="ligne-commande-form">

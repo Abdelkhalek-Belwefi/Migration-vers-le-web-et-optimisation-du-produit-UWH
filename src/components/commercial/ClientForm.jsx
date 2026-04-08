@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { createClient, updateClient } from '../../services/clientService';
+import '../../styles/warehouse-modules.css';
 
 
 const ClientForm = ({ client, onSuccess, onCancel }) => {

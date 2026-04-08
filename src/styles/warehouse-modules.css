@@ -1,560 +1,615 @@
-/* ============================================
-   STYLES PROFESSIONNELS – Commandes / Picking / Shipping
-   Animations, transitions et design moderne
-   ============================================ */
-
-/* Variables globales */
+/* --- Variables de Design --- */
 :root {
-    --primary: #3b82f6;
-    --primary-dark: #2563eb;
-    --success: #10b981;
-    --success-dark: #059669;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --info: #8b5cf6;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-700: #374151;
-    --gray-900: #111827;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    --radius: 0.75rem;
-  }
-  
-  /* Conteneurs principaux */
-  .commande-management,
-  .expedition-page,
-  .preparation-commandes {
-    padding: 1.5rem;
-    background: white;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
-    margin-bottom: 2rem;
-    animation: fadeInUp 0.4s ease-out;
-  }
-  
-  /* Titres */
-  .commande-management h2,
-  .expedition-page h2,
-  .preparation-commandes h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 2px solid var(--gray-200);
-    position: relative;
-  }
-  
-  .commande-management h2::after,
-  .expedition-page h2::after,
-  .preparation-commandes h2::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 60px;
-    height: 2px;
-    background: var(--primary);
-    border-radius: 2px;
-  }
-  
-  /* ===== TABLES ===== */
-  .commande-table,
-  .expedition-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 0.9rem;
-    overflow: hidden;
-    border-radius: var(--radius);
-  }
-  
-  .commande-table th,
-  .expedition-table th {
-    background: var(--gray-50);
-    color: var(--gray-700);
-    font-weight: 600;
-    padding: 1rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--gray-200);
-  }
-  
-  .commande-table td,
-  .expedition-table td {
-    padding: 0.9rem 1rem;
-    border-bottom: 1px solid var(--gray-100);
-    vertical-align: middle;
-    transition: background 0.2s ease;
-  }
-  
-  .commande-table tr:hover td,
-  .expedition-table tr:hover td {
-    background: #fffbeb;
-  }
-  
-  /* Animation d'entrée des lignes */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* ===== BOUTONS ===== */
-  button,
-  .btn-preparer,
-  .btn-expedier,
-  .btn-details,
-  .btn-edit,
-  .btn-delete,
-  .btn-cancel,
-  .btn-submit,
-  .btn-add-ligne,
-  .btn-remove,
-  .modal-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    background: var(--gray-100);
-    color: var(--gray-700);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  /* Effet ripple au clic */
-  button::after,
-  .btn-preparer::after,
-  .btn-expedier::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    transform: translate(-50%, -50%);
-    transition: width 0.3s, height 0.3s;
-  }
-  
-  button:active::after,
-  .btn-preparer:active::after,
-  .btn-expedier:active::after {
-    width: 200%;
-    height: 200%;
-  }
-  
-  button:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-  }
-  
-  /* Boutons spécifiques */
-  .btn-preparer {
-    background: var(--success);
-    color: white;
-  }
-  .btn-preparer:hover {
-    background: var(--success-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-  
-  .btn-expedier {
-    background: var(--primary);
-    color: white;
-  }
-  .btn-expedier:hover {
-    background: var(--primary-dark);
-  }
-  
-  .btn-details {
-    background: var(--info);
-    color: white;
-  }
-  .btn-details:hover {
-    background: #7c3aed;
-  }
-  
-  .btn-edit {
-    background: var(--warning);
-    color: white;
-  }
-  .btn-edit:hover {
-    background: #d97706;
-  }
-  
-  .btn-delete {
-    background: var(--danger);
-    color: white;
-  }
-  .btn-delete:hover {
-    background: #dc2626;
-  }
-  
-  .btn-cancel {
-    background: var(--gray-200);
-    color: var(--gray-700);
-  }
-  .btn-cancel:hover {
-    background: var(--gray-300);
-  }
-  
-  .btn-submit {
-    background: var(--success);
-    color: white;
-    padding: 0.6rem 1.2rem;
-  }
-  .btn-submit:hover {
-    background: var(--success-dark);
-  }
-  
-  .btn-add-ligne {
-    background: var(--primary);
-    color: white;
-    margin: 1rem 0;
-  }
-  .btn-add-ligne:hover {
-    background: var(--primary-dark);
-  }
-  
-  .btn-remove {
-    background: var(--danger);
-    color: white;
-    padding: 0.4rem 0.8rem;
-  }
-  .btn-remove:hover {
-    background: #dc2626;
-  }
-  
-  /* ===== FORMULAIRES ===== */
-  .commande-form {
-    padding: 1rem;
-  }
-  
-  .form-group {
-    margin-bottom: 1rem;
-  }
-  
-  .form-group label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    color: var(--gray-700);
-    font-size: 0.9rem;
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    width: 100%;
-    padding: 0.6rem 0.8rem;
-    border: 1px solid var(--gray-200);
-    border-radius: 0.5rem;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-    background: white;
-  }
-  
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-  
-  /* Lignes de formulaire en flex */
-  .form-row {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-  }
-  
-  .form-row .form-group {
-    flex: 1;
-    min-width: 150px;
-  }
-  
-  /* Lignes d'articles */
-  .ligne-commande-form {
-    background: var(--gray-50);
-    padding: 1rem;
-    border-radius: 0.75rem;
-    margin-bottom: 0.75rem;
-    border: 1px solid var(--gray-200);
-    transition: all 0.2s;
-  }
-  .ligne-commande-form:hover {
-    box-shadow: var(--shadow-sm);
-    border-color: var(--gray-300);
-  }
-  
-  /* ===== MODALE ===== */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.2s ease;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  .modal-content {
-    background: white;
-    border-radius: 1rem;
-    max-width: 700px;
-    width: 90%;
-    max-height: 85vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-    animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
-  }
-  
-  @keyframes modalSlideIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95) translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-  
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--gray-200);
-  }
-  
-  .modal-header h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-  }
-  
-  .modal-close {
-    background: none;
-    font-size: 1.5rem;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    border-radius: 9999px;
-  }
-  .modal-close:hover {
-    background: var(--gray-100);
-    transform: none;
-  }
-  
-  .modal-body {
-    padding: 1.5rem;
-  }
-  
-  .modal-footer {
-    padding: 1rem 1.5rem;
-    border-top: 1px solid var(--gray-200);
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-  }
-  
-  /* Tableau des détails */
-  .detail-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-    font-size: 0.85rem;
-  }
-  .detail-table th,
-  .detail-table td {
-    border: 1px solid var(--gray-200);
-    padding: 0.5rem 0.75rem;
-    text-align: left;
-  }
-  .detail-table th {
-    background: var(--gray-50);
-    font-weight: 600;
-  }
-  
-  /* ===== BADGES DE STATUT ===== */
-  .badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    transition: transform 0.2s;
-  }
-  .badge:hover {
-    transform: scale(1.05);
-  }
-  
-  .badge-warning {
-    background: #fef3c7;
-    color: #92400e;
-  }
-  .badge-success {
-    background: #d1fae5;
-    color: #065f46;
-  }
-  .badge-info {
-    background: #dbeafe;
-    color: #1e40af;
-  }
-  .badge-secondary {
-    background: var(--gray-200);
-    color: var(--gray-700);
-  }
-  
-  /* ===== LOADING & ERREUR ===== */
-  .loading {
-    text-align: center;
-    padding: 3rem;
-    color: var(--gray-700);
-    font-style: italic;
-    position: relative;
-  }
-  .loading::after {
-    content: '';
-    display: inline-block;
-    width: 1.2rem;
-    height: 1.2rem;
-    border: 2px solid var(--gray-300);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    margin-left: 0.5rem;
-    animation: spin 0.6s linear infinite;
-  }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  .error-message {
-    background: #fee2e2;
-    color: #b91c1c;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-    border-left: 4px solid var(--danger);
-    animation: shake 0.3s ease;
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-4px); }
-    75% { transform: translateX(4px); }
-  }
-  
-  /* ===== RESPONSIVE ===== */
-  @media (max-width: 768px) {
-    .commande-table,
-    .expedition-table {
-      display: block;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-  
-    .form-row {
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-  
-    .modal-content {
-      width: 95%;
-      max-height: 90vh;
-    }
-  
-    .btn-preparer,
-    .btn-expedier,
-    .btn-details {
-      padding: 0.3rem 0.7rem;
-      font-size: 0.75rem;
-    }
-  }
-  /* MODALE */
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+  --success-color: #10b981;
+  --success-hover: #059669;
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --radius: 8px;
+}
+
+/* --- Container Principal --- */
+.client-management, .commande-management, .expedition-page {
+  padding: 2rem;
+  background-color: var(--bg-main);
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--text-main);
+}
+
+.client-management h2, .commande-management h2, .expedition-page h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--text-main);
+  letter-spacing: -0.025em;
+}
+
+/* --- Alertes & Chargement --- */
+.error-message {
+  background-color: #fee2e2;
+  color: var(--danger-color);
+  padding: 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--danger-color);
+}
+
+/* --- Boutons --- */
+.btn-add {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-add:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* --- Table Styles --- */
+.client-table, .commande-table, .expedition-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.client-table th, .commande-table th, .expedition-table th {
+  background-color: #f1f5f9;
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.client-table td, .commande-table td, .expedition-table td {
+  padding: 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.15s ease;
+}
+
+.client-table tr:last-child td, .commande-table tr:last-child td, .expedition-table tr:last-child td {
+  border-bottom: none;
+}
+
+.client-table tr:hover td, .commande-table tr:hover td, .expedition-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* --- Boutons d'action dans la table --- */
+.btn-edit, .btn-delete, .btn-details, .btn-preparer, .btn-expedier {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  transition: all 0.2s;
+  font-size: 0.8rem;
+}
+
+.btn-edit:hover {
+  background-color: #eff6ff;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-delete:hover {
+  background-color: #fef2f2;
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+.btn-details {
+  background-color: #f0fdf4;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.btn-details:hover {
+  background-color: #dcfce7;
+  transform: translateY(-1px);
+}
+
+.btn-preparer {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+  color: white;
+}
+
+.btn-preparer:hover {
+  background-color: var(--success-hover);
+  transform: translateY(-1px);
+}
+
+.btn-expedier {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.btn-expedier:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-expedier:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- Modal & Overlay --- */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease;
 }
+
 .modal-content {
   background: white;
-  border-radius: 1rem;
-  max-width: 700px;
-  width: 90%;
+  padding: 0;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 550px;
   max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s ease-out;
 }
+
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-card);
 }
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
 .modal-close {
   background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s;
 }
+
+.modal-close:hover {
+  color: var(--danger-color);
+}
+
 .modal-body {
   padding: 1.5rem;
 }
+
 .modal-footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+  background: var(--bg-card);
 }
+
+/* --- Detail Tables --- */
 .detail-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 0.5rem;
 }
+
 .detail-table th, .detail-table td {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   padding: 0.5rem;
   text-align: left;
+  font-size: 0.875rem;
+}
+
+.detail-table th {
+  background-color: #f1f5f9;
+  font-weight: 600;
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ============================================
+   STYLES MODERNES POUR FORMULAIRES (Ajout Client & Commande)
+   ============================================ */
+
+/* Container principal du formulaire */
+.client-form, .commande-form {
+  background: white;
+  padding: 1.75rem;
+}
+
+/* Titre du formulaire */
+.client-form h3, .commande-form h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border-color);
+  position: relative;
+}
+
+.client-form h3::after, .commande-form h3::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 50px;
+  height: 2px;
+  background: var(--primary-color);
+  border-radius: 2px;
+}
+
+/* Sous-titre pour les articles */
+.commande-form h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 1rem 0 0.75rem 0;
+  padding-top: 0.5rem;
+}
+
+/* Structure du formulaire */
+.client-form form, .commande-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Lignes flexibles */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: 130px;
+}
+
+/* Groupes de champs */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Labels */
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+/* Astérisque pour champs requis */
+.form-group label::after {
+  content: ' *';
+  color: var(--danger-color);
+  opacity: 0.8;
+}
+
+/* Supprimer astérisque pour champs non requis */
+.form-group:has(input:not([required])) label::after,
+.form-group:has(select:not([required])) label::after,
+.form-group:has(textarea:not([required])) label::after {
+  content: '';
+}
+
+/* Champs de saisie */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.7rem 0.875rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+  border-color: #94a3b8;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Message d'erreur dans le formulaire */
+.client-form .error-message,
+.commande-form .error-message {
+  background-color: #fee2e2;
+  color: var(--danger-color);
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--danger-color);
+  font-size: 0.8rem;
+}
+
+/* Ligne de commande (article individuel) */
+.ligne-commande-form {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.ligne-commande-form:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.ligne-commande-form .form-row {
+  margin-bottom: 0;
+}
+
+/* Bouton d'ajout de ligne */
+.btn-add-ligne {
+  background-color: white;
+  color: var(--primary-color);
+  border: 1.5px dashed var(--primary-color);
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0.5rem 0 1rem 0;
+  width: 100%;
+}
+
+.btn-add-ligne:hover {
+  background-color: #eff6ff;
+  transform: translateY(-1px);
+}
+
+/* Bouton de suppression de ligne */
+.btn-remove {
+  background-color: white;
+  color: var(--danger-color);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.btn-remove:hover {
+  background-color: #fee2e2;
+  border-color: var(--danger-color);
+  color: #b91c1c;
+}
+
+/* Actions du formulaire (boutons) */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Bouton Enregistrer */
+.form-actions button[type="submit"] {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-actions button[type="submit"]:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-actions button[type="submit"]:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.form-actions button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Bouton Annuler */
+.form-actions button[type="button"], .btn-cancel {
+  background: white;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border-color);
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-actions button[type="button"]:hover, .btn-cancel:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+/* Loading spinner sur le bouton submit */
+.form-actions button[type="submit"]:disabled::before {
+  content: '';
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid white;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Champ transporteur dans la modale d'expédition */
+.search-input {
+  width: 100%;
+  padding: 0.7rem 0.875rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Loading général */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .client-management, .commande-management, .expedition-page {
+    padding: 1rem;
+  }
+  
+  .client-table, .commande-table, .expedition-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .modal-content {
+    max-width: 95%;
+    margin: 1rem;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .form-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .btn-add-ligne {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .client-form, .commande-form {
+    padding: 1.25rem;
+  }
+  
+  .client-form h3, .commande-form h3 {
+    font-size: 1.2rem;
+  }
+  
+  .ligne-commande-form .form-row {
+    flex-direction: column;
+  }
+  
+  .btn-remove {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
 }

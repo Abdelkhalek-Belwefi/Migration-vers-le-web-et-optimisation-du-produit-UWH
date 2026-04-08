@@ -1,0 +1,636 @@
+/* ============================================
+   commande.css – Gestion des commandes (style SaaS moderne)
+   Composants : CommandeList, CommandeForm, LigneCommandeForm
+   ============================================ */
+
+/* Variables globales (cohérence avec les autres modules) */
+:root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-light: #eef2ff;
+    --success: #10b981;
+    --success-hover: #059669;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --radius-lg: 1rem;
+    --radius-md: 0.75rem;
+    --radius-sm: 0.5rem;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+    --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ========== COMMANDE LIST (page principale) ========== */
+.commande-management {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.commande-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.commande-management h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.02em;
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--gray-200);
+    display: inline-block;
+    position: relative;
+}
+
+.commande-management h2::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 48px;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+.btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-add:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.error-message {
+    background: #fef2f2;
+    color: #b91c1c;
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius-md);
+    margin: 1rem 0;
+    border-left: 4px solid var(--danger);
+    font-size: 0.875rem;
+    font-weight: 500;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+/* Conteneur de la table avec scroll horizontal si nécessaire */
+.commande-table-container {
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    background: white;
+}
+
+.commande-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+    min-width: 800px;
+}
+
+.commande-table thead {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.commande-table th {
+    text-align: left;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.commande-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+    transition: background 0.15s ease;
+}
+
+.commande-table tbody tr:hover {
+    background: var(--primary-light);
+}
+
+/* Badges de statut */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    transition: transform 0.1s ease;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-secondary {
+    background: var(--gray-200);
+    color: var(--gray-700);
+}
+
+/* Actions dans la table */
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-edit, .btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    background: transparent;
+}
+
+.btn-edit {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.btn-edit:hover {
+    background: var(--primary);
+    color: white;
+    transform: scale(0.98);
+}
+
+.btn-delete {
+    color: var(--danger);
+    background: #fee2e2;
+}
+
+.btn-delete:hover {
+    background: var(--danger);
+    color: white;
+    transform: scale(0.98);
+}
+
+/* Sélecteur de statut inline */
+.statut-select {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    background: white;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.statut-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+/* ========== FORMULAIRE COMMANDE (CommandeForm) ========== */
+.commande-form {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    animation: fadeInScale 0.25s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.commande-form h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--gray-200);
+    position: relative;
+}
+
+.commande-form h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 48px;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+.commande-form h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 1.5rem 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.commande-form h4::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+.commande-form .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.commande-form .form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.375rem;
+}
+
+.commande-form .form-group label::after {
+    content: ' *';
+    color: var(--danger);
+    opacity: 0.8;
+}
+
+.commande-form .form-group:has(input:not([required])) label::after,
+.commande-form .form-group:has(select:not([required])) label::after,
+.commande-form .form-group:has(textarea:not([required])) label::after {
+    content: '';
+}
+
+.commande-form input,
+.commande-form select,
+.commande-form textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    background: white;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.commande-form input:focus,
+.commande-form select:focus,
+.commande-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.btn-add-ligne {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    color: var(--primary);
+    border: 1px dashed var(--primary);
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    margin: 0.5rem 0 1rem 0;
+}
+
+.btn-add-ligne:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.btn-submit {
+    background: var(--primary);
+    color: white;
+    padding: 0.625rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-submit:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-cancel {
+    background: white;
+    color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+    padding: 0.625rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-cancel:hover {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+    transform: translateY(-1px);
+}
+
+/* ========== LIGNE DE COMMANDE (LigneCommandeForm) ========== */
+.ligne-commande-form {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: var(--transition);
+}
+
+.ligne-commande-form:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--gray-300);
+}
+
+.ligne-commande-form .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.ligne-commande-form .form-group {
+    flex: 1;
+    min-width: 120px;
+    margin-bottom: 0;
+}
+
+.ligne-commande-form .form-group label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--gray-600);
+    margin-bottom: 0.25rem;
+}
+
+.ligne-commande-form .form-group input,
+.ligne-commande-form .form-group select {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.813rem;
+}
+
+.btn-remove {
+    background: white;
+    color: var(--danger);
+    border: 1px solid var(--gray-200);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.5rem;
+}
+
+.btn-remove:hover {
+    background: #fee2e2;
+    border-color: var(--danger);
+    color: #b91c1c;
+}
+
+/* ========== MODALE ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.modal-content.large {
+    max-width: 900px;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ========== LOADING ========== */
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--gray-500);
+    font-size: 0.875rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    display: inline-block;
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 2px solid var(--gray-200);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    margin-left: 0.5rem;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .commande-management {
+        padding: 0 1rem;
+        margin: 1rem auto;
+    }
+
+    .commande-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-add {
+        justify-content: center;
+    }
+
+    .commande-table-container {
+        border-radius: var(--radius-md);
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .statut-select {
+        width: 100%;
+    }
+
+    .commande-form {
+        padding: 1.25rem;
+    }
+
+    .ligne-commande-form .form-row {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-remove {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-add-ligne {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+}

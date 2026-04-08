@@ -4,6 +4,7 @@ import * as clientService from '../../services/clientService';   // ← import n
 import * as articleService from '../../services/articleService'; // ← import namespace
 import { createCommande, updateCommande } from '../../services/commandeService';
 import LigneCommandeForm from './LigneCommandeForm';
+import './styles/commande.css';
 
 const CommandeForm = ({ commande, onSuccess, onCancel }) => {
     const [clients, setClients] = useState([]);
