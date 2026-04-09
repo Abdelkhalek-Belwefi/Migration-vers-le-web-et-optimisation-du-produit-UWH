@@ -9,7 +9,6 @@ const ExpedierCommandes = () => {
   const [error, setError] = useState('');
   const [expeditionInProgress, setExpeditionInProgress] = useState(null);
   
-  // État pour la modale
   const [showModal, setShowModal] = useState(false);
   const [selectedCommande, setSelectedCommande] = useState(null);
   const [transporteur, setTransporteur] = useState('');
@@ -42,6 +41,23 @@ const ExpedierCommandes = () => {
     setTransporteur('');
   };
 
+  // Sauvegarde du BL dans localStorage pour la section "Impression Documents"
+  const sauvegarderBl = (expedition) => {
+    const bl = {
+      id: expedition.id,
+      numeroBL: expedition.numeroBL,
+      commandeNumero: expedition.commandeNumero,
+      clientNom: expedition.clientNom,
+      dateExpedition: expedition.dateExpedition
+    };
+    const existing = JSON.parse(localStorage.getItem('bonsLivraison') || '[]');
+    if (!existing.some(b => b.id === bl.id)) {
+      existing.push(bl);
+      localStorage.setItem('bonsLivraison', JSON.stringify(existing));
+      window.dispatchEvent(new Event('storage'));
+    }
+  };
+
   const handleExpedier = async () => {
     if (!transporteur.trim()) {
       alert('Veuillez saisir le nom du transporteur');
@@ -49,9 +65,10 @@ const ExpedierCommandes = () => {
     }
     setExpeditionInProgress(selectedCommande.id);
     try {
-      await expedierCommande(selectedCommande.id, transporteur);
+      const expeditionCreee = await expedierCommande(selectedCommande.id, transporteur);
+      sauvegarderBl(expeditionCreee);
       closeModal();
-      loadCommandes(); // recharge la liste
+      loadCommandes();
     } catch (err) {
       alert('Erreur lors de l’expédition : ' + (err.response?.data?.message || err.message));
     } finally {
@@ -98,7 +115,6 @@ const ExpedierCommandes = () => {
         </table>
       )}
 
-      {/* MODALE DE CONFIRMATION D'EXPÉDITION */}
       {showModal && selectedCommande && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -117,8 +133,8 @@ const ExpedierCommandes = () => {
                     <th>Code</th>
                     <th>Désignation</th>
                     <th>Quantité</th>
-                    </tr>
-                  </thead>
+                  </tr>
+                </thead>
                 <tbody>
                   {selectedCommande.lignes?.map((ligne, idx) => (
                     <tr key={idx}>
@@ -129,7 +145,6 @@ const ExpedierCommandes = () => {
                   ))}
                 </tbody>
               </table>
-
               <div className="form-group" style={{ marginTop: '1rem' }}>
                 <label>Transporteur *</label>
                 <input

@@ -7,7 +7,10 @@ import {
     FaBarcode,
     FaTimes,
     FaFilter,
-    FaQrcode
+    FaQrcode,
+    FaBoxes,
+    FaChevronDown,
+    FaChevronUp
 } from 'react-icons/fa';
 import { stockService } from '../../services/stockService';
 import { articleService } from '../../services/articleService';
@@ -37,8 +40,8 @@ const StockList = () => {
     });
 
     // États pour le mode de filtre
-    const [filterMode, setFilterMode] = useState('normal'); // 'normal' ou 'scan'
-    const [showFilterPanel, setShowFilterPanel] = useState(false); // pour mobile éventuellement, mais on garde simple
+    const [filterMode, setFilterMode] = useState('normal');
+    const [showFilterPanel, setShowFilterPanel] = useState(false);
     const [scanParams, setScanParams] = useState({
         lotScan: '',
         emplacementScan: '',
@@ -48,6 +51,12 @@ const StockList = () => {
     const lotScanRef = useRef(null);
     const emplacementScanRef = useRef(null);
     const articleScanRef = useRef(null);
+
+    // ========== NOUVEAUX ÉTATS POUR L'AMÉLIORATION SCAN ARTICLE ==========
+    const [scannedArticle, setScannedArticle] = useState(null);        // { id, code, designation, quantiteTotale }
+    const [scannedArticleStocks, setScannedArticleStocks] = useState([]); // liste des stocks détaillés
+    const [showStockTableForScanned, setShowStockTableForScanned] = useState(false);
+    // ====================================================================
 
     const userRole = localStorage.getItem('role');
     const isResponsable = userRole === 'RESPONSABLE_ENTREPOT' || userRole === 'ADMINISTRATEUR';
@@ -127,6 +136,7 @@ const StockList = () => {
         });
     };
 
+    // Réinitialisation complète (y compris le nouveau scan article)
     const handleReset = () => {
         setSearchParams({
             articleId: '',
@@ -139,33 +149,66 @@ const StockList = () => {
             emplacementScan: '',
             articleCodeScan: ''
         });
+        // Réinitialiser les états du scan article amélioré
+        setScannedArticle(null);
+        setScannedArticleStocks([]);
+        setShowStockTableForScanned(false);
         fetchStocks();
     };
 
-    // Gestion du scan
+    // ========== GESTION DU SCAN AVEC AMÉLIORATION POUR L'ARTICLE ==========
     const handleScan = async (field, value) => {
         if (!value || value.trim() === '') return;
         setScanLoading(true);
         try {
             setScanParams(prev => ({ ...prev, [field]: value }));
 
-            const params = {};
-            if (field === 'lotScan') params.lot = value;
-            if (field === 'emplacementScan') params.emplacement = value;
+            // Cas du scan par CODE ARTICLE (amélioration demandée)
             if (field === 'articleCodeScan') {
+                // 1. Récupérer l'article via son code barre
                 const article = await articleService.findByCode(value);
-                if (article) {
-                    params.articleId = article.id;
-                } else {
+                if (!article) {
                     setError('Aucun article trouvé avec ce code');
                     setScanLoading(false);
                     return;
                 }
+
+                // 2. Récupérer tous les stocks de cet article
+                const stocksByArticle = await stockService.getStocksByArticle(article.id);
+                
+                // 3. Calculer la quantité totale
+                const quantiteTotale = stocksByArticle.reduce((sum, s) => sum + s.quantite, 0);
+                
+                // 4. Mettre à jour les états : afficher la carte récap
+                setScannedArticle({
+                    id: article.id,
+                    code: article.codeArticleERP,
+                    designation: article.designation,
+                    quantiteTotale: quantiteTotale
+                });
+                setScannedArticleStocks(stocksByArticle);
+                setShowStockTableForScanned(false);  // tableau caché au départ
+                setError('');
+                
+                // Optionnel : vider le champ après scan
+                if (articleScanRef.current) articleScanRef.current.value = '';
+                return;
             }
+
+            // Pour les scans LOT ou EMPLACEMENT : comportement inchangé
+            const params = {};
+            if (field === 'lotScan') params.lot = value;
+            if (field === 'emplacementScan') params.emplacement = value;
 
             const data = await stockService.searchStocks(params);
             setStocks(data);
             setError('');
+            
+            // Réinitialiser l'affichage du scan article amélioré
+            setScannedArticle(null);
+            setScannedArticleStocks([]);
+            setShowStockTableForScanned(false);
+
         } catch (err) {
             setError('Erreur lors de la recherche par scan');
             console.error(err);
@@ -187,6 +230,19 @@ const StockList = () => {
             e.target.value = '';
         }
     };
+
+    // Afficher le tableau détaillé au clic sur la carte récap
+    const handleScannedArticleClick = () => {
+        setShowStockTableForScanned(true);
+    };
+
+    // Fermer le détail du scan article
+    const handleCloseScannedSummary = () => {
+        setScannedArticle(null);
+        setScannedArticleStocks([]);
+        setShowStockTableForScanned(false);
+    };
+    // ==================================================================
 
     // Autres fonctions (inchangées)
     const handleRowClick = (stock) => {
@@ -358,7 +414,7 @@ const StockList = () => {
             {error && <div className="alert error">{error}</div>}
             {success && <div className="alert success">{success}</div>}
 
-            {/* Sélecteur de mode de filtre - à droite, petits boutons */}
+            {/* Sélecteur de mode de filtre */}
             <div className="filter-mode-bar">
                 <button
                     className={`filter-mode-btn ${filterMode === 'normal' ? 'active' : ''}`}
@@ -471,81 +527,159 @@ const StockList = () => {
                 )}
             </div>
 
-            {/* Tableau des stocks (inchangé) */}
-            <div className="table-container">
-                <table className="stock-table">
-                    <thead>
-                        <tr>
-                            <th onClick={() => handleSort('id')}>
-                                ID {getSortIcon('id')}
-                            </th>
-                            <th onClick={() => handleSort('articleDesignation')}>
-                                Article {getSortIcon('articleDesignation')}
-                            </th>
-                            <th onClick={() => handleSort('articleCode')}>
-                                Code {getSortIcon('articleCode')}
-                            </th>
-                            <th onClick={() => handleSort('lot')}>
-                                Lot {getSortIcon('lot')}
-                            </th>
-                            <th onClick={() => handleSort('emplacement')}>
-                                Emplacement {getSortIcon('emplacement')}
-                            </th>
-                            <th onClick={() => handleSort('quantite')}>
-                                Qté {getSortIcon('quantite')}
-                            </th>
-                            <th onClick={() => handleSort('statut')}>
-                                Statut {getSortIcon('statut')}
-                            </th>
-                            <th onClick={() => handleSort('dateReception')}>
-                                Réception {getSortIcon('dateReception')}
-                            </th>
-                            <th onClick={() => handleSort('dateExpiration')}>
-                                Expiration {getSortIcon('dateExpiration')}
-                            </th>
-                            {isResponsable && <th>Actions</th>}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredStocks.map(stock => (
-                            <tr 
-                                key={stock.id} 
-                                onClick={() => handleRowClick(stock)}
-                                className="clickable-row"
-                            >
-                                <td>{stock.id}</td>
-                                <td>{stock.articleDesignation}</td>
-                                <td>{stock.articleCode}</td>
-                                <td>{stock.lot}</td>
-                                <td>{stock.emplacement}</td>
-                                <td>{stock.quantite}</td>
-                                <td>
-                                    <span className={`badge ${getStatutClass(stock.statut)}`}>
-                                        {getStatutLabel(stock.statut)}
-                                    </span>
-                                </td>
-                                <td>{stock.dateReception ? new Date(stock.dateReception).toLocaleDateString() : '-'}</td>
-                                <td>{stock.dateExpiration ? new Date(stock.dateExpiration).toLocaleDateString() : '-'}</td>
-                                {isResponsable && (
-                                    <td onClick={(e) => e.stopPropagation()}>
-                                        <select
-                                            onChange={(e) => handleChangerStatut(stock.id, e.target.value)}
-                                            defaultValue=""
-                                            className="statut-select"
-                                        >
-                                            <option value="" disabled>Changer</option>
-                                            <option value="DISPONIBLE">Disponible</option>
-                                            <option value="RESERVE">Réservé</option>
-                                            <option value="BLOQUE">Bloqué</option>
-                                            <option value="QUALITE">Contrôle qualité</option>
-                                        </select>
-                                    </td>
+            {/* ========== CARTE RÉCAPITULATIVE APRÈS SCAN ARTICLE ========== */}
+            {scannedArticle && (
+                <div className="scanned-article-summary" onClick={handleScannedArticleClick}>
+                    <div className="summary-icon">
+                        <FaBoxes />
+                    </div>
+                    <div className="summary-details">
+                        <h3>{scannedArticle.designation}</h3>
+                        <p>Code : {scannedArticle.code}</p>
+                        <p className="total-quantity">Quantité totale en stock : <strong>{scannedArticle.quantiteTotale}</strong></p>
+                    </div>
+                    <div className="summary-action">
+                        <span className="click-hint">Cliquez pour voir le détail des emplacements</span>
+                        {showStockTableForScanned ? <FaChevronUp /> : <FaChevronDown />}
+                    </div>
+                    <button 
+                        className="close-summary" 
+                        onClick={(e) => { e.stopPropagation(); handleCloseScannedSummary(); }}
+                        title="Fermer"
+                    >
+                        <FaTimes />
+                    </button>
+                </div>
+            )}
+
+            {/* ========== TABLEAU DÉTAILLÉ DES STOCKS POUR L'ARTICLE SCANNÉ ========== */}
+            {scannedArticle && showStockTableForScanned && (
+                <div className="scanned-stock-table-container">
+                    <div className="scanned-stock-header">
+                        <h4>Détail des stocks pour {scannedArticle.designation}</h4>
+                        <button className="btn-close-table" onClick={() => setShowStockTableForScanned(false)}>
+                            <FaTimes /> Masquer
+                        </button>
+                    </div>
+                    <div className="table-container">
+                        <table className="stock-table">
+                            <thead>
+                                <tr>
+                                    <th>Lot</th>
+                                    <th>Emplacement</th>
+                                    <th>Quantité</th>
+                                    <th>Statut</th>
+                                    <th>Date réception</th>
+                                    <th>Date expiration</th>
+                                    {isResponsable && <th>Actions</th>}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {scannedArticleStocks.map(stock => (
+                                    <tr 
+                                        key={stock.id} 
+                                        onClick={() => handleRowClick(stock)}
+                                        className="clickable-row"
+                                    >
+                                        <td>{stock.lot}</td>
+                                        <td>{stock.emplacement}</td>
+                                        <td>{stock.quantite}</td>
+                                        <td>
+                                            <span className={`badge ${getStatutClass(stock.statut)}`}>
+                                                {getStatutLabel(stock.statut)}
+                                            </span>
+                                        </td>
+                                        <td>{stock.dateReception ? new Date(stock.dateReception).toLocaleDateString() : '-'}</td>
+                                        <td>{stock.dateExpiration ? new Date(stock.dateExpiration).toLocaleDateString() : '-'}</td>
+                                        {isResponsable && (
+                                            <td onClick={(e) => e.stopPropagation()}>
+                                                <select
+                                                    onChange={(e) => handleChangerStatut(stock.id, e.target.value)}
+                                                    defaultValue=""
+                                                    className="statut-select"
+                                                >
+                                                    <option value="" disabled>Changer</option>
+                                                    <option value="DISPONIBLE">Disponible</option>
+                                                    <option value="RESERVE">Réservé</option>
+                                                    <option value="BLOQUE">Bloqué</option>
+                                                    <option value="QUALITE">Contrôle qualité</option>
+                                                </select>
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))}
+                                {scannedArticleStocks.length === 0 && (
+                                    <tr>
+                                        <td colSpan={isResponsable ? 7 : 6} className="no-data">
+                                            Aucun stock trouvé pour cet article.
+                                        </td>
+                                    </tr>
                                 )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Tableau principal des stocks - affiché uniquement si aucun scan article n'est actif */}
+            {!scannedArticle && (
+                <div className="table-container">
+                    <table className="stock-table">
+                        <thead>
+                            <tr>
+                                <th onClick={() => handleSort('id')}>ID {getSortIcon('id')}</th>
+                                <th onClick={() => handleSort('articleDesignation')}>Article {getSortIcon('articleDesignation')}</th>
+                                <th onClick={() => handleSort('articleCode')}>Code {getSortIcon('articleCode')}</th>
+                                <th onClick={() => handleSort('lot')}>Lot {getSortIcon('lot')}</th>
+                                <th onClick={() => handleSort('emplacement')}>Emplacement {getSortIcon('emplacement')}</th>
+                                <th onClick={() => handleSort('quantite')}>Qté {getSortIcon('quantite')}</th>
+                                <th onClick={() => handleSort('dateReception')}>Réception {getSortIcon('dateReception')}</th>
+                                <th onClick={() => handleSort('dateExpiration')}>Expiration {getSortIcon('dateExpiration')}</th>
+                                <th onClick={() => handleSort('statut')}>Statut {getSortIcon('statut')}</th>
+                                {isResponsable && <th>Actions</th>}
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {filteredStocks.map(stock => (
+                                <tr 
+                                    key={stock.id} 
+                                    onClick={() => handleRowClick(stock)}
+                                    className="clickable-row"
+                                >
+                                    <td>{stock.id}</td>
+                                    <td>{stock.articleDesignation}</td>
+                                    <td>{stock.articleCode}</td>
+                                    <td>{stock.lot}</td>
+                                    <td>{stock.emplacement}</td>
+                                    <td>{stock.quantite}</td>
+                                    <td>{stock.dateReception ? new Date(stock.dateReception).toLocaleDateString() : '-'}</td>
+                                    <td>{stock.dateExpiration ? new Date(stock.dateExpiration).toLocaleDateString() : '-'}</td>
+                                    <td>
+                                        <span className={`badge ${getStatutClass(stock.statut)}`}>
+                                            {getStatutLabel(stock.statut)}
+                                        </span>
+                                    </td>
+                                    {isResponsable && (
+                                        <td onClick={(e) => e.stopPropagation()}>
+                                            <select
+                                                onChange={(e) => handleChangerStatut(stock.id, e.target.value)}
+                                                defaultValue=""
+                                                className="statut-select"
+                                            >
+                                                <option value="" disabled>Changer</option>
+                                                <option value="DISPONIBLE">Disponible</option>
+                                                <option value="RESERVE">Réservé</option>
+                                                <option value="BLOQUE">Bloqué</option>
+                                                <option value="QUALITE">Contrôle qualité</option>
+                                            </select>
+                                        </td>
+                                    )}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             {/* Modals (inchangés) */}
             {showDetailModal && (

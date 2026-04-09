@@ -33,6 +33,9 @@ import PreparationCommandes from "../components/entrepot/PreparationCommandes";
 // ========== MODULE EXPÉDITION (shipping) ==========
 import ExpedierCommandes from "../components/expedition/ExpedierCommandes";
 
+// ========== AJOUT : MODULE IMPRESSION DOCUMENTS ==========
+import ImpressionDocuments from "../components/expedition/ImpressionDocuments";
+
 import "../styles/dashboard.css";
 
 const Dashboard_warehouse = () => {
@@ -315,6 +318,10 @@ const Dashboard_warehouse = () => {
       // ========== MODULE EXPÉDITION ==========
       case "expedier":
         return <ExpedierCommandes />;
+
+      // ========== AJOUT : IMPRESSION DOCUMENTS ==========
+      case "documents":
+        return <ImpressionDocuments />;
 
       default:
         return (

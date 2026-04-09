@@ -15,7 +15,7 @@ const connectWebSocket = () => {
       return;
     }
 
-    const WS_URL = "ws://192.168.1.15:3001";
+    const WS_URL = "ws://10.130.12.167:3001";
     const ws = new WebSocket(WS_URL);
     globalWs = ws;
 
