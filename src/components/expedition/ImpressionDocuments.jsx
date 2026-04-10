@@ -1,21 +1,35 @@
 import React, { useState, useEffect } from 'react';
+import { getMesExpeditions } from '../../services/expeditionService';
+import { FaFileAlt, FaPrint, FaBox } from 'react-icons/fa';
 
 const ImpressionDocuments = () => {
   const [bls, setBls] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const loadBls = () => {
-    const stored = localStorage.getItem('bonsLivraison');
-    if (stored) {
-      setBls(JSON.parse(stored));
-    } else {
-      setBls([]);
+  const loadExpeditions = async () => {
+    try {
+      setLoading(true);
+      const data = await getMesExpeditions();
+      const formattedBls = data.map(exp => ({
+        id: exp.id,
+        numeroBL: exp.numeroBL,
+        commandeNumero: exp.commandeNumero,
+        clientNom: exp.clientNom,
+        dateExpedition: exp.dateExpedition
+      }));
+      setBls(formattedBls);
+      setError('');
+    } catch (err) {
+      console.error('Erreur chargement expéditions:', err);
+      setError('Impossible de charger la liste des expéditions');
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadBls();
-    window.addEventListener('storage', loadBls);
-    return () => window.removeEventListener('storage', loadBls);
+    loadExpeditions();
   }, []);
 
   const imprimerBl = async (expeditionId) => {
@@ -23,7 +37,7 @@ const ImpressionDocuments = () => {
     try {
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // si votre API est sécurisée
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       if (!response.ok) {
@@ -39,18 +53,30 @@ const ImpressionDocuments = () => {
     }
   };
 
-  const supprimerBl = (id) => {
-    const nouveaux = bls.filter(bl => bl.id !== id);
-    localStorage.setItem('bonsLivraison', JSON.stringify(nouveaux));
-    setBls(nouveaux);
-  };
+  if (loading) {
+    return (
+      <div className="module-container">
+        <h2>Impression des documents</h2>
+        <div className="loading">Chargement des expéditions...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="module-container">
+        <h2>Impression des documents</h2>
+        <div className="error-message">{error}</div>
+      </div>
+    );
+  }
 
   if (bls.length === 0) {
     return (
       <div className="module-container">
         <h2>Impression des documents</h2>
         <div className="coming-soon">
-          <div className="coming-soon-icon">🖨️</div>
+          <div className="coming-soon-icon"><FaPrint size={48} /></div>
           <h3>Aucun bon de livraison généré</h3>
           <p>Les bons de livraison apparaîtront ici après chaque expédition.</p>
         </div>
@@ -60,7 +86,7 @@ const ImpressionDocuments = () => {
 
   return (
     <div className="module-container">
-      <h2>📄 Bons de livraison générés</h2>
+      <h2><FaFileAlt style={{ marginRight: '8px' }} /> Bons de livraison générés</h2>
       <table className="expedition-table">
         <thead>
           <tr>
@@ -84,13 +110,7 @@ const ImpressionDocuments = () => {
                   onClick={() => imprimerBl(bl.id)}
                   style={{ marginRight: '8px' }}
                 >
-                  🖨️ Imprimer
-                </button>
-                <button
-                  className="btn-cancel"
-                  onClick={() => supprimerBl(bl.id)}
-                >
-                  🗑️ Supprimer
+                  <FaPrint style={{ marginRight: '5px' }} /> Imprimer
                 </button>
               </td>
             </tr>

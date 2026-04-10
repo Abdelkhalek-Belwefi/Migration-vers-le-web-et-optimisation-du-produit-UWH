@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getCommandesAExpedier } from '../../services/commandeService';
-import { expedierCommande } from '../../services/expeditionService';
+import { expedierCommande, getMesExpeditions, deleteExpedition } from '../../services/expeditionService';
 import '../../styles/warehouse-modules.css';
+import { FaBox, FaHistory, FaTruck, FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
 
 const ExpedierCommandes = () => {
   const [commandes, setCommandes] = useState([]);
+  const [expeditions, setExpeditions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingExpeditions, setLoadingExpeditions] = useState(true);
   const [error, setError] = useState('');
   const [expeditionInProgress, setExpeditionInProgress] = useState(null);
   
@@ -25,8 +28,21 @@ const ExpedierCommandes = () => {
     }
   };
 
+  const loadExpeditions = async () => {
+    try {
+      setLoadingExpeditions(true);
+      const data = await getMesExpeditions();
+      setExpeditions(data);
+    } catch (err) {
+      console.error('Erreur chargement expéditions:', err);
+    } finally {
+      setLoadingExpeditions(false);
+    }
+  };
+
   useEffect(() => {
     loadCommandes();
+    loadExpeditions();
   }, []);
 
   const openModal = (commande) => {
@@ -41,23 +57,6 @@ const ExpedierCommandes = () => {
     setTransporteur('');
   };
 
-  // Sauvegarde du BL dans localStorage pour la section "Impression Documents"
-  const sauvegarderBl = (expedition) => {
-    const bl = {
-      id: expedition.id,
-      numeroBL: expedition.numeroBL,
-      commandeNumero: expedition.commandeNumero,
-      clientNom: expedition.clientNom,
-      dateExpedition: expedition.dateExpedition
-    };
-    const existing = JSON.parse(localStorage.getItem('bonsLivraison') || '[]');
-    if (!existing.some(b => b.id === bl.id)) {
-      existing.push(bl);
-      localStorage.setItem('bonsLivraison', JSON.stringify(existing));
-      window.dispatchEvent(new Event('storage'));
-    }
-  };
-
   const handleExpedier = async () => {
     if (!transporteur.trim()) {
       alert('Veuillez saisir le nom du transporteur');
@@ -65,14 +64,26 @@ const ExpedierCommandes = () => {
     }
     setExpeditionInProgress(selectedCommande.id);
     try {
-      const expeditionCreee = await expedierCommande(selectedCommande.id, transporteur);
-      sauvegarderBl(expeditionCreee);
+      await expedierCommande(selectedCommande.id, transporteur);
       closeModal();
       loadCommandes();
+      loadExpeditions();
     } catch (err) {
       alert('Erreur lors de l’expédition : ' + (err.response?.data?.message || err.message));
     } finally {
       setExpeditionInProgress(null);
+    }
+  };
+
+  const handleDeleteExpedition = async (expeditionId) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette expédition ?')) {
+      try {
+        await deleteExpedition(expeditionId);
+        loadExpeditions();
+        alert('Expédition supprimée avec succès');
+      } catch (err) {
+        alert('Erreur lors de la suppression : ' + (err.response?.data?.message || err.message));
+      }
     }
   };
 
@@ -82,6 +93,9 @@ const ExpedierCommandes = () => {
     <div className="expedition-page">
       <h2>Expéditions</h2>
       {error && <div className="error-message">{error}</div>}
+
+      {/* SECTION 1 : COMMANDES À EXPÉDIER */}
+      <h3><FaBox style={{ marginRight: '8px' }} /> Commandes à expédier</h3>
       {commandes.length === 0 ? (
         <p>Aucune commande à expédier.</p>
       ) : (
@@ -106,7 +120,7 @@ const ExpedierCommandes = () => {
                     onClick={() => openModal(cmd)}
                     disabled={expeditionInProgress === cmd.id}
                   >
-                    {expeditionInProgress === cmd.id ? 'Expédition...' : '🚚 Expédier'}
+                    {expeditionInProgress === cmd.id ? 'Expédition...' : <><FaTruck style={{ marginRight: '5px' }} /> Expédier</>}
                   </button>
                 </td>
               </tr>
@@ -115,6 +129,47 @@ const ExpedierCommandes = () => {
         </table>
       )}
 
+      {/* SECTION 2 : HISTORIQUE DES EXPÉDITIONS */}
+      <h3 style={{ marginTop: '30px' }}><FaHistory style={{ marginRight: '8px' }} /> Historique des expéditions</h3>
+      {loadingExpeditions ? (
+        <div className="loading">Chargement des expéditions...</div>
+      ) : expeditions.length === 0 ? (
+        <p>Aucune expédition effectuée.</p>
+      ) : (
+        <table className="expedition-table">
+          <thead>
+            <tr>
+              <th>N° BL</th>
+              <th>Commande N°</th>
+              <th>Client</th>
+              <th>Transporteur</th>
+              <th>Date d'expédition</th>
+              <th>Actions</th>
+              </tr>
+            </thead>
+          <tbody>
+            {expeditions.map(exp => (
+              <tr key={exp.id}>
+                <td>{exp.numeroBL}</td>
+                <td>{exp.commandeNumero}</td>
+                <td>{exp.clientNom}</td>
+                <td>{exp.transporteur || 'Non spécifié'}</td>
+                <td>{new Date(exp.dateExpedition).toLocaleDateString()}</td>
+                <td>
+                  <button
+                    className="btn-cancel"
+                    onClick={() => handleDeleteExpedition(exp.id)}
+                  >
+                    <FaTrash style={{ marginRight: '5px' }} /> Supprimer
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {/* MODALE DE CONFIRMATION D'EXPÉDITION */}
       {showModal && selectedCommande && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -159,9 +214,11 @@ const ExpedierCommandes = () => {
             </div>
             <div className="modal-footer">
               <button className="btn-expedier" onClick={handleExpedier} disabled={!transporteur.trim()}>
-                ✅ Confirmer l'expédition
+                <FaCheck style={{ marginRight: '5px' }} /> Confirmer l'expédition
               </button>
-              <button className="btn-cancel" onClick={closeModal}>Annuler</button>
+              <button className="btn-cancel" onClick={closeModal}>
+                <FaTimes style={{ marginRight: '5px' }} /> Annuler
+              </button>
             </div>
           </div>
         </div>
@@ -170,4 +227,4 @@ const ExpedierCommandes = () => {
   );
 };
 
-export default ExpedierCommandes;
+export default ExpedierCommandes; 
