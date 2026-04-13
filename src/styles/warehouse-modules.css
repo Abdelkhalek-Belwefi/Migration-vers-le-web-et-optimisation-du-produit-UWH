@@ -366,7 +366,7 @@
 }
 
 .modal-header h3::before {
-  content: '🚚';
+  content: '';
 }
 
 .modal-close {

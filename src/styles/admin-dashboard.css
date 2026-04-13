@@ -1,8 +1,91 @@
-admin-dashboard.admin-dashboard {
+.admin-dashboard.admin-dashboard {
     display: flex;
     min-height: 100vh;
     background: #f5f7fa;
 }
+
+/* ✅ SIDEBAR AJOUTÉ */
+.dashboard-sidebar {
+    width: 280px;
+    background: #2c3e50;
+    color: white;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding-top: 20px;
+}
+
+.sidebar-header {
+    padding: 20px;
+    margin-top: 40px;
+}
+
+.sidebar-header h2 {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.user-name {
+    font-weight: bold;
+    color: white;
+}
+
+.user-role {
+    font-size: 12px;
+    opacity: 0.7;
+    color: white;
+}
+
+/* NAVIGATION */
+.sidebar-nav {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ✅ STYLE DES LIENS (comme image) */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 15px;
+    margin: 8px 15px;
+    border-radius: 20px;
+    border: none;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    font-size: 14px;
+}
+
+/* Hover */
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Active (Dashboard sélectionné) */
+.nav-item.active {
+    background: #dbe7f3;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+/* Logout */
+.nav-item.logout {
+    margin-top: auto;
+    color: #ff6b6b;
+}
+
+.nav-item.logout:hover {
+    background: rgba(255, 107, 107, 0.2);
+}
+
+/* ======================== */
+/* TON CODE ORIGINAL (inchangé) */
+/* ======================== */
 
 .admin-main {
     flex: 1;
@@ -94,6 +177,7 @@ admin-dashboard.admin-dashboard {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
+/* Responsive */
 @media (max-width: 768px) {
     .admin-main {
         margin-left: 0;
