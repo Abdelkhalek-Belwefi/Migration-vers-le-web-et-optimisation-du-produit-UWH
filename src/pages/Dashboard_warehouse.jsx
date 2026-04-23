@@ -1,3 +1,4 @@
+// src/pages/Dashboard_warehouse.jsx (version nettoyée)
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -11,7 +12,7 @@ import {
     FaPrint,
     FaSync,
     FaHistory,
-    FaShoppingCart  // ← icône pour le rôle commercial
+    FaShoppingCart
 } from 'react-icons/fa';
 import Sidebar from "../components/dashboard/layout/Sidebar";
 import TopNavbar from "../components/dashboard/layout/TopNavbar";
@@ -22,18 +23,10 @@ import StockMovementForm from "../components/stock/StockMovementForm";
 import MouvementHistorique from "../components/stock/MouvementHistorique";
 import ReceptionList from "../components/reception/ReceptionList";
 import RangementList from "../components/rangement/RangementList";
-
-// ========== MODULES COMMERCIAUX ==========
 import ClientList from "../components/commercial/ClientList";
 import CommandeList from "../components/commercial/CommandeList";
-
-// ========== MODULE PRÉPARATION DE COMMANDES (picking) ==========
 import PreparationCommandes from "../components/entrepot/PreparationCommandes";
-
-// ========== MODULE EXPÉDITION (shipping) ==========
 import ExpedierCommandes from "../components/expedition/ExpedierCommandes";
-
-// ========== AJOUT : MODULE IMPRESSION DOCUMENTS ==========
 import ImpressionDocuments from "../components/expedition/ImpressionDocuments";
 
 import "../styles/dashboard.css";
@@ -58,6 +51,9 @@ const Dashboard_warehouse = () => {
 
     const role = localStorage.getItem("role");
     if (role === "ADMINISTRATEUR") navigate("/admin");
+    
+    // Rediriger les transporteurs vers leur dashboard dédié
+    if (role === "TRANSPORTEUR") navigate("/transporteur");
   }, [navigate]);
 
   const handleLogout = () => {
@@ -107,7 +103,7 @@ const Dashboard_warehouse = () => {
     if (activeTab === "stock") window.location.reload();
   };
 
-  // Construction du menu latéral selon le rôle
+  // Construction du menu latéral selon le rôle (sans TRANSPORTEUR)
   const getMenuItems = () => {
     const baseItems = [
       { id: "dashboard", label: "Tableau de bord", icon: <FaTachometerAlt /> }
@@ -119,8 +115,7 @@ const Dashboard_warehouse = () => {
           ...baseItems,
           { id: "reception", label: "Réception", icon: <FaBoxes /> },
           { id: "rangement", label: "Rangement", icon: <FaClipboardList /> },
-          { id: "preparation", label: "Préparation de commandes", icon: <FaClipboardList /> },  // ← picking
-          { id: "transfert", label: "Transfert", icon: <FaExchangeAlt /> }
+          { id: "preparation", label: "Préparation de commandes", icon: <FaClipboardList /> }
         ];
 
       case "RESPONSABLE_ENTREPOT":
@@ -130,7 +125,7 @@ const Dashboard_warehouse = () => {
           { id: "mouvements", label: "Historique mouvements", icon: <FaHistory /> },
           { id: "reception", label: "Validation Réception", icon: <FaCheckCircle /> },
           { id: "rangement", label: "Suivi Rangement", icon: <FaClipboardList /> },
-          { id: "expedier", label: "Expéditions", icon: <FaTruck /> },               // ← shipping
+          { id: "expedier", label: "Expéditions", icon: <FaTruck /> },
           { id: "documents", label: "Impression Documents", icon: <FaPrint /> },
           { id: "synchronisation", label: "Synchronisation ERP", icon: <FaSync /> }
         ];
@@ -154,7 +149,7 @@ const Dashboard_warehouse = () => {
       RESPONSABLE_ENTREPOT: "Responsable Entrepôt",
       OPERATEUR_ENTREPOT: "Opérateur Entrepôt",
       OPERATOR: "Opérateur (en attente)",
-      SERVICE_COMMERCIAL: "Service Commercial"   // ← ajout
+      SERVICE_COMMERCIAL: "Service Commercial"
     };
     return labels[role] || role;
   };
@@ -162,13 +157,13 @@ const Dashboard_warehouse = () => {
   const getModuleTitle = (tabId) => {
     const titles = {
       articles: "Articles du catalogue",
-      preparation: "Préparation de commandes",   // ← picking
+      preparation: "Préparation de commandes",
       transfert: "Module Transfert",
       reception: "Module Réception",
       rangement: "Gestion du rangement",
       stock: "Consultation des stocks",
       mouvements: "Historique des mouvements",
-      expedier: "Expéditions",                  // ← shipping
+      expedier: "Expéditions",
       documents: "Impression de documents",
       synchronisation: "Synchronisation ERP",
       commandes: "Gestion des commandes",
@@ -304,22 +299,18 @@ const Dashboard_warehouse = () => {
       case "rangement":
         return <RangementList />;
 
-      // ========== MODULES COMMERCIAUX ==========
       case "commandes":
         return <CommandeList />;
 
       case "clients":
         return <ClientList />;
 
-      // ========== MODULE PRÉPARATION DE COMMANDES ==========
       case "preparation":
         return <PreparationCommandes />;
 
-      // ========== MODULE EXPÉDITION ==========
       case "expedier":
         return <ExpedierCommandes />;
 
-      // ========== AJOUT : IMPRESSION DOCUMENTS ==========
       case "documents":
         return <ImpressionDocuments />;
 
@@ -357,6 +348,7 @@ const Dashboard_warehouse = () => {
           menuItems={getMenuItems()}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          profileImage={profileImage}
         />
 
         <div className="dashboard-main">

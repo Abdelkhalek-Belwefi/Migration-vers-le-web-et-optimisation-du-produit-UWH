@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCommandesAExpedier } from '../../services/commandeService';
-import { expedierCommande, getMesExpeditions, deleteExpedition } from '../../services/expeditionService';
+import { expedierCommandeAvecId, getMesExpeditions, deleteExpedition, getTransporteurs } from '../../services/expeditionService';
 import '../../styles/warehouse-modules.css';
 import { FaBox, FaHistory, FaTruck, FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
 
@@ -14,7 +14,9 @@ const ExpedierCommandes = () => {
   
   const [showModal, setShowModal] = useState(false);
   const [selectedCommande, setSelectedCommande] = useState(null);
-  const [transporteur, setTransporteur] = useState('');
+  const [transporteurId, setTransporteurId] = useState('');
+  const [transporteurs, setTransporteurs] = useState([]);
+  const [loadingTransporteurs, setLoadingTransporteurs] = useState(false);
 
   const loadCommandes = async () => {
     try {
@@ -40,31 +42,46 @@ const ExpedierCommandes = () => {
     }
   };
 
+  const loadTransporteurs = async () => {
+    setLoadingTransporteurs(true);
+    try {
+      const data = await getTransporteurs();
+      setTransporteurs(data);
+    } catch (err) {
+      console.error('Erreur chargement transporteurs:', err);
+      setTransporteurs([]);
+    } finally {
+      setLoadingTransporteurs(false);
+    }
+  };
+
   useEffect(() => {
     loadCommandes();
     loadExpeditions();
+    loadTransporteurs();
   }, []);
 
   const openModal = (commande) => {
     setSelectedCommande(commande);
-    setTransporteur('');
+    setTransporteurId('');
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
     setSelectedCommande(null);
-    setTransporteur('');
+    setTransporteurId('');
   };
 
   const handleExpedier = async () => {
-    if (!transporteur.trim()) {
-      alert('Veuillez saisir le nom du transporteur');
+    if (!transporteurId) {
+      alert('Veuillez sélectionner un transporteur');
       return;
     }
     setExpeditionInProgress(selectedCommande.id);
     try {
-      await expedierCommande(selectedCommande.id, transporteur);
+      // Appel de la nouvelle méthode avec l'ID du transporteur
+      await expedierCommandeAvecId(selectedCommande.id, transporteurId);
       closeModal();
       loadCommandes();
       loadExpeditions();
@@ -94,7 +111,6 @@ const ExpedierCommandes = () => {
       <h2>Expéditions</h2>
       {error && <div className="error-message">{error}</div>}
 
-      {/* SECTION 1 : COMMANDES À EXPÉDIER */}
       <h3><FaBox style={{ marginRight: '8px' }} /> Commandes à expédier</h3>
       {commandes.length === 0 ? (
         <p>Aucune commande à expédier.</p>
@@ -106,8 +122,8 @@ const ExpedierCommandes = () => {
               <th>Client</th>
               <th>Date</th>
               <th>Actions</th>
-              </tr>
-            </thead>
+            </tr>
+          </thead>
           <tbody>
             {commandes.map(cmd => (
               <tr key={cmd.id}>
@@ -129,7 +145,6 @@ const ExpedierCommandes = () => {
         </table>
       )}
 
-      {/* SECTION 2 : HISTORIQUE DES EXPÉDITIONS */}
       <h3 style={{ marginTop: '30px' }}><FaHistory style={{ marginRight: '8px' }} /> Historique des expéditions</h3>
       {loadingExpeditions ? (
         <div className="loading">Chargement des expéditions...</div>
@@ -145,8 +160,8 @@ const ExpedierCommandes = () => {
               <th>Transporteur</th>
               <th>Date d'expédition</th>
               <th>Actions</th>
-              </tr>
-            </thead>
+            </tr>
+          </thead>
           <tbody>
             {expeditions.map(exp => (
               <tr key={exp.id}>
@@ -169,7 +184,6 @@ const ExpedierCommandes = () => {
         </table>
       )}
 
-      {/* MODALE DE CONFIRMATION D'EXPÉDITION */}
       {showModal && selectedCommande && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -200,20 +214,37 @@ const ExpedierCommandes = () => {
                   ))}
                 </tbody>
               </table>
+              
               <div className="form-group" style={{ marginTop: '1rem' }}>
                 <label>Transporteur *</label>
-                <input
-                  type="text"
-                  value={transporteur}
-                  onChange={(e) => setTransporteur(e.target.value)}
-                  placeholder="Ex: DHL, UPS, Colissimo..."
-                  className="search-input"
-                  autoFocus
-                />
+                {loadingTransporteurs ? (
+                  <div className="loading">Chargement des transporteurs...</div>
+                ) : transporteurs.length === 0 ? (
+                  <div className="error-message">Aucun transporteur disponible. Veuillez contacter l’administrateur.</div>
+                ) : (
+                  <select
+                    value={transporteurId}
+                    onChange={(e) => setTransporteurId(e.target.value)}
+                    className="search-input"
+                    required
+                    autoFocus
+                  >
+                    <option value="">-- Sélectionnez un transporteur --</option>
+                    {transporteurs.map(t => (
+                      <option key={t.id} value={t.id}>
+                        {t.prenom} {t.nom}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn-expedier" onClick={handleExpedier} disabled={!transporteur.trim()}>
+              <button
+                className="btn-expedier"
+                onClick={handleExpedier}
+                disabled={!transporteurId || loadingTransporteurs || transporteurs.length === 0}
+              >
                 <FaCheck style={{ marginRight: '5px' }} /> Confirmer l'expédition
               </button>
               <button className="btn-cancel" onClick={closeModal}>
@@ -227,4 +258,4 @@ const ExpedierCommandes = () => {
   );
 };
 
-export default ExpedierCommandes; 
+export default ExpedierCommandes;

@@ -1,71 +1,82 @@
 import React from 'react';
+import { FiPhone, FiMail, FiMapPin, FiLinkedin, FiInstagram, FiArrowRight } from 'react-icons/fi';
 import './styles/FeaturesSection.css';
 
 const FeaturesSection = () => {
   return (
-    <footer className="footer-main">
-      <div className="footer-container">
-        
-        {/* Colonne 1 : Logo & Description */}
-        <div className="footer-col brand-info">
-          <div className="footer-logo">
-            <img src="images/logo.png" alt="L-Mobile Logo" />
-          </div>
-          <p className="description">
-            L-Mobile est un leader des solutions logicielles mobiles pour l'industrie et la logistique. 
-            Nous nous spécialisons dans la numérisation des processus métier pour offrir 
-            une efficacité maximale à nos clients, désormais présents en Tunisie.
-          </p>
-          <div className="emergency-contact">
-            <span className="phone-icon">📞</span>
-            <div className="phone-details">
-              <span className="label">CONTACTEZ-NOUS 24/7</span>
-              {/* Numéros de téléphone format Tunisie */}
-              <span className="number">+216 72 000 000</span>
-              <span className="number">+216 20 000 000</span>
+    <footer className="modern-footer">
+      <div className="footer-top-wave"></div>
+      
+      <div className="footer-main-container">
+        <div className="footer-grid">
+          
+          {/* Brand Identity */}
+          <div className="footer-brand">
+            <img src="images/logo.png" alt="L-Mobile" className="footer-logo-img" />
+            <p className="footer-tagline">
+              Leader des solutions logicielles mobiles pour l'industrie 4.0. 
+              Nous transformons vos flux logistiques en avantages compétitifs.
+            </p>
+            <div className="social-links">
+              <a href="#" className="social-icon"><FiLinkedin /></a>
+              <a href="#" className="social-icon"><FiInstagram /></a>
             </div>
           </div>
+
+          {/* Quick Links */}
+          <div className="footer-links-group">
+            <h4 className="footer-heading">Navigation</h4>
+            <ul className="footer-nav">
+              <li><a href="#mission">Mission & Vision</a></li>
+              <li><a href="#pourquoi">Pourquoi nous choisir</a></li>
+              <li><a href="#solutions">Nos Solutions</a></li>
+            </ul>
+          </div>
+
+          {/* Contact Tunisia */}
+          <div className="footer-contact-group">
+            <h4 className="footer-heading">L-mobile Tunisie</h4>
+            <div className="contact-item">
+              <FiPhone className="c-icon" />
+              <div>
+                <p>+216 72 123 456</p>
+                <p className="sub-contact">Support: +216 20 000 000</p>
+              </div>
+            </div>
+            <div className="contact-item">
+              <FiMail className="c-icon" />
+              <p>info.tn@l-mobile.com</p>
+            </div>
+            <div className="contact-item">
+              <FiMapPin className="c-icon" />
+              <p>Ave. Habib Bourguiba, Nabeul</p>
+            </div>
+          </div>
+
+          {/* Emergency Support */}
+          <div className="footer-emergency">
+            <div className="emergency-card">
+              <span className="emergency-label">Besoin d'aide ?</span>
+              <h3 className="emergency-title">Support 24/7 Disponible</h3>
+              <p>Nos experts sont à votre écoute pour toute urgence technique.</p>
+              <button className="emergency-btn">
+                Nous Contacter <FiArrowRight />
+              </button>
+            </div>
+          </div>
+
         </div>
 
-        {/* Colonne 2 : Liens Utiles */}
-        <div className="footer-col">
-          <h3 className="col-title">Liens Utiles</h3>
-          <ul className="footer-list">
-            <li><a href="#mission">Mission & Vision</a></li>
-            <li><a href="#pourquoi">Pourquoi nous choisir</a></li>
-            {/* Ajout du lien LinkedIn ici pour plus de visibilité */}
-            <li>
-              <a href="https://www.linkedin.com/company/l-mobile/" target="_blank" rel="noreferrer" className="linkedin-link">
-                <span>🔗</span> LinkedIn L-mobile
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        {/* Colonne 3 : Solutions & Contact Tunisie */}
-        <div className="footer-col">
-          <h3 className="col-title">Solutions</h3>
-          <ul className="contact-list">
-            <li><span>📞</span> +216 72 123 456</li>
-            <li><span>✉️</span> info.tn@l-mobile.com</li>
-            <li><span>✉️</span> support@l-mobile.com</li>
-            <li><span>📍</span> Avenue Habib Bourguiba, 8000 Nabeul, Tunisie</li>
-          </ul>
-        </div>
-
-        {/* Colonne 4 : Instagram Grid */}
-        <div className="footer-col">
-          <h3 className="col-title">Instagram</h3>
-          <div className="insta-grid">
-            <div className="grid-item"></div>
-            <div className="grid-item"></div>
-            <div className="grid-item"></div>
-            <div className="grid-item"></div>
-            <div className="grid-item"></div>
-            <div className="grid-item"></div>
+        <div className="footer-bottom-bar">
+          <div className="copyright">
+            © 2026 <strong>L-mobile Group</strong>. All rights reserved.
+          </div>
+          <div className="footer-legal-links">
+            <a href="#">Confidentialité</a>
+            <span className="separator"></span>
+            <a href="#">Mentions légales</a>
           </div>
         </div>
-
       </div>
     </footer>
   );

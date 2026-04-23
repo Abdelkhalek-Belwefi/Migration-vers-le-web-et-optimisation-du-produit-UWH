@@ -1,10 +1,22 @@
 import React from 'react';
+import DashboardPhotoItem from './DashboardPhotoItem';
 
-const Sidebar = ({ userName, userPrenom, userRole, menuItems, activeTab, onTabChange }) => {
+const Sidebar = ({ userName, userPrenom, userRole, menuItems, activeTab, onTabChange, profileImage }) => {
   return (
     <div className="dashboard-sidebar">
       <div className="sidebar-header">
-        <h2>Dashboard</h2>
+        {/* Affichage conditionnel : photo ou titre */}
+        {profileImage ? (
+          <DashboardPhotoItem
+            profileImage={profileImage}
+            isActive={activeTab === 'dashboard'}
+            onClick={() => onTabChange('dashboard')}
+            userPrenom={userPrenom}
+            userName={userName}
+          />
+        ) : (
+          <h2>Dashboard</h2>   // ← comportement original pour AdminDashboard
+        )}
         <div className="user-info">
           <p className="user-name">{userPrenom} {userName}</p>
           <p className="user-role">{userRole}</p>

@@ -19,8 +19,21 @@ export const getMesExpeditions = async () => {
   return response.data;
 };
 
-// ========== NOUVELLE FONCTION POUR SUPPRIMER UNE EXPÉDITION ==========
 export const deleteExpedition = async (expeditionId) => {
   const response = await axios.delete(`${API_URL}/${expeditionId}`, getAuthHeader());
+  return response.data;
+};
+
+export const getTransporteurs = async () => {
+  const response = await axios.get(`${API_URL}/transporteurs`, getAuthHeader());
+  return response.data;
+};
+
+// NOUVELLE FONCTION
+export const expedierCommandeAvecId = async (commandeId, transporteurId) => {
+  const response = await axios.post(`${API_URL}/expedier-avec-id`, null, {
+    params: { commandeId, transporteurId },
+    ...getAuthHeader()
+  });
   return response.data;
 };

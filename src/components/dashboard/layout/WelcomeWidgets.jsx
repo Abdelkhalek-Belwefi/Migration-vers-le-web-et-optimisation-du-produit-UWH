@@ -1,155 +1,188 @@
 import React, { useState, useEffect } from 'react';
 import { 
     FaBoxes, FaWarehouse, FaBoxOpen, FaTruck, 
-    FaArrowUp, FaChartLine 
+    FaArrowUp, FaCalendarAlt 
 } from 'react-icons/fa';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
-    ResponsiveContainer, PieChart, Pie, Cell 
+    ResponsiveContainer 
 } from 'recharts';
-import { stockService } from '../../../services/stockService';
+
+// Importation de vos services
 import { articleService } from '../../../services/articleService';
+import { stockService } from '../../../services/stockService';
+import { receptionService } from '../../../services/receptionService';
+import * as expeditionService from '../../../services/expeditionService';
+
 import './WelcomeWidgets.css';
 
-const WelcomeWidgets = ({ userPrenom, userName }) => {
+const WelcomeWidgets = ({ userPrenom }) => {
     const [stats, setStats] = useState({
         totalArticles: 0,
         stockCount: 0,
-        receptions: 3,
-        expeditions: 2
+        receptionsCount: 0,
+        expeditionsCount: 0
     });
     const [loading, setLoading] = useState(true);
+    const [currentWeek, setCurrentWeek] = useState([]);
 
-    // Données réelles pour les graphiques (Exemple Flux)
-    const dataFlux = [
-        { name: 'Jan', entrees: 2400, sorties: 1800 },
-        { name: 'Fév', entrees: 3000, sorties: 3966 },
-        { name: 'Mar', entrees: 2000, sorties: 2800 },
-        { name: 'Avr', entrees: 2780, sorties: 3500 },
-        { name: 'Mai', entrees: 1890, sorties: 2100 },
-    ];
+    // 1. Initialisation du calendrier hebdomadaire
+    useEffect(() => {
+        const today = new Date();
+        const week = [];
+        const firstDay = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // Lundi
 
-    // Données Taux d'Occupation
-    const dataOccupation = [
-        { name: 'Occupé', value: 75, color: '#10b981' },
-        { name: 'Vide', value: 25, color: '#f1f5f9' },
-    ];
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(firstDay);
+            day.setDate(firstDay.getDate() + i);
+            week.push({
+                name: day.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', ''),
+                number: day.getDate(),
+                isToday: day.toDateString() === new Date().toDateString()
+            });
+        }
+        setCurrentWeek(week);
+    }, []);
 
+    // 2. Récupération des données API
     useEffect(() => {
         const loadDashboardData = async () => {
             try {
-                const [articles, stocks] = await Promise.all([
+                // Exécution parallèle pour ne pas bloquer l'affichage
+                const [articles, stocks, receptions, expeditions] = await Promise.all([
                     articleService.getAllArticles().catch(() => []),
-                    stockService.getAllStocks().catch(() => [])
+                    stockService.getAllStocks().catch(() => []),
+                    receptionService.getAllReceptions().catch(() => []),
+                    expeditionService.getMesExpeditions().catch(() => [])
                 ]);
-                setStats(prev => ({
-                    ...prev,
-                    totalArticles: articles.length,
-                    stockCount: stocks.length
-                }));
+
+                setStats({
+                    totalArticles: articles.length || 0,
+                    stockCount: stocks.length || 0,
+                    receptionsCount: receptions.length || 0,
+                    expeditionsCount: expeditions.length || 0
+                });
+            } catch (error) {
+                console.error("Erreur lors du chargement des statistiques:", error);
             } finally {
                 setLoading(false);
             }
         };
+
         loadDashboardData();
     }, []);
 
-    if (loading) return <div className="expert-loader">Chargement du système expert...</div>;
+    // Données fictives pour le graphique (basées partiellement sur le réel)
+    const dataFlux = [
+        { name: 'Lun', flux: 400 },
+        { name: 'Mar', flux: 300 },
+        { name: 'Mer', flux: stats.receptionsCount * 50 }, // Dynamisé
+        { name: 'Jeu', flux: 200 },
+        { name: 'Ven', flux: stats.expeditionsCount * 40 }, // Dynamisé
+    ];
+
+    if (loading) {
+        return (
+            <div className="premium-loader-container">
+                <div className="premium-spinner"></div>
+                <p>Synchronisation avec l'entrepôt...</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="expert-dashboard">
-            {/* BANDEAU DE BIENVENUE ALIGNÉ (FULL WIDTH) */}
-            <header className="dashboard-header-bandeau">
-                <div className="welcome-section">
-                    <h1>Tableau de Bord Logistique</h1>
-                    <p>Bienvenue, {userPrenom} {userName}. Voici l'activité de votre entrepôt.</p>
+        <div className="premium-dashboard">
+            {/* BANDEAU DE BIENVENUE */}
+            <header className="welcome-banner">
+                <div className="banner-content">
+                    <div className="date-badge">
+                        <FaCalendarAlt /> {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                    <h1>Bonjour, {userPrenom || 'Belwefi'} !</h1>
+                    <p>Votre catalogue contient actuellement <strong>{stats.totalArticles}</strong> articles référencés.</p>
                 </div>
-                <div className="header-status">
-                    <span className="status-dot pulse"></span>
-                    Système En Direct
+                <div className="banner-status">
+                    <div className="status-pill">
+                        <span className="pulse-dot"></span> Système Connecté
+                    </div>
                 </div>
             </header>
 
-            {/* SECTION KPI */}
-            <div className="kpi-grid">
-                <div className="kpi-card main-highlight">
-                    <div className="kpi-content">
-                        <span className="kpi-label">Volume Total Articles</span>
-                        <h2 className="kpi-value">{stats.totalArticles}</h2>
-                        <div className="kpi-trend"><FaArrowUp /> +12.5% ce mois</div>
+            {/* GRILLE DE KPI DYNAMIQUE */}
+            <div className="stats-grid">
+                <div className="stat-card main-highlight">
+                    <div className="stat-info">
+                        <label>Total Articles</label>
+                        <h3>{stats.totalArticles}</h3>
+                        <div className="trend"><FaArrowUp /> Catalogue</div>
                     </div>
-                    <FaChartLine className="kpi-bg-icon" />
+                    <FaBoxes className="card-icon-bg" />
                 </div>
 
-                <div className="kpi-mini-card">
-                    <div className="mini-icon orange"><FaBoxOpen /></div>
-                    <div className="mini-data">
-                        <span className="mini-label">Réceptions</span>
-                        <span className="mini-value">{stats.receptions}</span>
+                <div className="stat-card">
+                    <div className="icon-box orange">
+                        <FaBoxOpen />
                     </div>
-                </div>
-
-                <div className="kpi-mini-card">
-                    <div className="mini-icon blue"><FaWarehouse /></div>
-                    <div className="mini-data">
-                        <span className="mini-label">Lignes Stock</span>
-                        <span className="mini-value">{stats.stockCount}</span>
+                    <div className="stat-info">
+                        <label>Réceptions</label>
+                        <h3>{stats.receptionsCount}</h3>
                     </div>
                 </div>
 
-                <div className="kpi-mini-card">
-                    <div className="mini-icon purple"><FaTruck /></div>
-                    <div className="mini-data">
-                        <span className="mini-label">Expéditions</span>
-                        <span className="mini-value">{stats.expeditions}</span>
+                <div className="stat-card">
+                    <div className="icon-box blue">
+                        <FaWarehouse />
+                    </div>
+                    <div className="stat-info">
+                        <label>Lignes Stock</label>
+                        <h3>{stats.stockCount}</h3>
+                    </div>
+                </div>
+
+                <div className="stat-card">
+                    <div className="icon-box purple">
+                        <FaTruck />
+                    </div>
+                    <div className="stat-info">
+                        <label>Expéditions</label>
+                        <h3>{stats.expeditionsCount}</h3>
                     </div>
                 </div>
             </div>
 
-            {/* SECTION GRAPHIQUES */}
-            <div className="charts-main-row">
-                {/* Graphique des Flux */}
-                <div className="chart-box flux-box">
-                    <div className="chart-header-text">
-                        <h3>Mouvements de Stock</h3>
-                        <p>Analyse comparative Entrées / Sorties</p>
+            {/* SECTION GRAPHIQUE ET CALENDRIER */}
+            <div className="dashboard-main-row">
+                <div className="glass-card chart-section">
+                    <div className="card-header">
+                        <h3>Mouvements Récents</h3>
                     </div>
-                    <ResponsiveContainer width="100%" height={280}>
+                    <ResponsiveContainer width="100%" height={250}>
                         <BarChart data={dataFlux}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                            <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                            <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px rgba(0,0,0,0.1)'}} />
-                            <Bar dataKey="entrees" fill="#10b981" radius={[4, 4, 0, 0]} name="Entrées" barSize={15} />
-                            <Bar dataKey="sorties" fill="#94a3b8" radius={[4, 4, 0, 0]} name="Sorties" barSize={15} />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                            <YAxis axisLine={false} tickLine={false} />
+                            <Tooltip cursor={{ fill: '#f8fafc' }} />
+                            <Bar dataKey="flux" fill="#4f46e5" radius={[6, 6, 0, 0]} barSize={20} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Graphique Donut */}
-                <div className="chart-box donut-box">
-                    <div className="chart-header-text">
-                        <h3>Occupation Sol</h3>
-                    </div>
-                    <div className="donut-container">
-                        <ResponsiveContainer width="100%" height={200}>
-                            <PieChart>
-                                <Pie data={dataOccupation} innerRadius={65} outerRadius={85} paddingAngle={5} dataKey="value" stroke="none">
-                                    {dataOccupation.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="donut-info">
-                            <span className="donut-perc">75%</span>
-                            <span className="donut-txt">Capacité</span>
+                <div className="mini-calendar-card">
+                    <div className="calendar-header-blue">
+                        <h3>CALENDRIER</h3>
+                        <div className="month-select">
+                            {new Date().toLocaleDateString('fr-FR', { month: 'long' })}
                         </div>
                     </div>
-                    <div className="custom-legend">
-                        <div className="leg-item"><span className="dot g"></span> Occupé</div>
-                        <div className="leg-item"><span className="dot s"></span> Libre</div>
+                    <div className="calendar-body">
+                        <div className="days-timeline">
+                            {currentWeek.map((day, index) => (
+                                <div key={index} className={`day-col ${day.isToday ? 'active' : ''}`}>
+                                    <span className="d-name">{day.name}</span>
+                                    <span className="d-num">{day.number}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

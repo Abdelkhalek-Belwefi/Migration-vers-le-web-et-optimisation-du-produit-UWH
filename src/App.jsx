@@ -14,6 +14,8 @@ import ReceptionList from './components/reception/ReceptionList';
 import ReceptionForm from './components/reception/ReceptionForm';
 import ReceptionDetail from './components/reception/ReceptionDetail';
 import RangementList from './components/rangement/RangementList';
+// ✅ Import corrigé vers le nouveau dashboard transporteur
+import TransporteurDashboard from "./pages/TransporteurDashboard";
 
 function App() {
 
@@ -102,6 +104,15 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/transporteur"
+          element={
+            <PrivateRoute requiredRole="TRANSPORTEUR">
+              <TransporteurDashboard />
+            </PrivateRoute>
+          }
+        />
+        
       </Routes>
     </Router>
   );

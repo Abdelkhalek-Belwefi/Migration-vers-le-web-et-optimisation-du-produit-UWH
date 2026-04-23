@@ -1,0 +1,73 @@
+/* src/components/Transporteur/ValidationModal.css */
+
+.td-modal-overlay {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(15px);
+  z-index: 10000;
+}
+
+.td-modal-content {
+  background: white;
+  border-radius: 35px;
+  padding: 40px;
+  max-width: 500px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.4);
+}
+
+.td-modal-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.td-modal-header h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.td-otp-input-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 25px 0;
+}
+
+.td-modal-input {
+  height: 60px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  border-radius: 18px;
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  transition: all 0.3s;
+}
+
+.td-modal-input:focus {
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* GPS Button Animated */
+.td-btn-gps {
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  width: 100%;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+}
+
+.td-btn-gps:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}

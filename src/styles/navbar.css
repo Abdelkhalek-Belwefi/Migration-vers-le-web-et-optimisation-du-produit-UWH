@@ -1,97 +1,96 @@
-/* ==================== NAVBAR ==================== */
-.navbar {
+/* ==================== NAVBAR CAPSULE ARROUNDIE ==================== */
+.navbar-outer-wrapper {
+  width: 100%;
+  height: 120px; /* Hauteur encore plus généreuse */
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
-  padding: 1px 1px;
-  border-radius: 50px;
-  margin: 9px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-  position: relative;
-  z-index: 10;
-  transition: background 0.4s ease, box-shadow 0.4s ease;
+  background: transparent; /* Pour laisser voir le fond du site */
+  padding: 10px 0;
 }
 
-/* Hover effect on navbar */
-.navbar:hover {
-  background: linear-gradient(135deg, #1a1a1a, #0f0f0f);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-}
-
-/* ==================== LOGO ==================== */
-.logo {
+.navbar-capsule {
+  width: 96%;           /* Correction longueur : presque toute la page */
+  height: 70px;         /* Hauteur de la barre elle-même */
+  background: #0f172a; 
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  /* BORDER RADIUS 50px POUR L'EFFET CAPSULE */
+  border-radius: 50px; 
+  
   display: flex;
+  justify-content: space-between; /* Logo à gauche, Liens à droite */
   align-items: center;
-  gap: 10px;
-  color: #ffffff;
-  font-weight: 900;
-  font-size: 1rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  transition: transform 0.3s ease, color 0.3s ease;
+  padding: 0 40px;      /* Espace interne pour que le texte ne touche pas les bords arrondis */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-.logo:hover {
-  color: #f65e00;
-  transform: scale(1.05);
-}
-
-/* Ajustement image logo */
-.logo img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 50%;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-}
-
-/* Animation image hover */
-.logo:hover img {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 5px 15px rgba(246, 94, 0, 0.6);
-}
-
-/* ==================== NAV LINKS ==================== */
-.nav-links {
+/* ==================== LOGO & BRAND ==================== */
+.nav-brand-left {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-.nav-links a {
-  text-decoration: none;
-
-  color: #fff;
-  padding: 10px 22px;
-  border-radius: 25px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.4s ease;
-  text-transform: uppercase;
+.logo-img-v3 {
+  width: 50px;
+  height: 50px;
 }
 
-.nav-links a:hover {
-  background: #e37200;
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(255, 76, 96, 0.5);
+.brand-name-v3 {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.orange-span {
+  color: #ff6600;
+}
+
+/* ==================== NAVIGATION ==================== */
+.nav-links-right {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.nav-links-right a {
+  text-decoration: none;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 1.05rem;
+  transition: color 0.3s ease;
+}
+
+.nav-links-right a:hover, 
+.link-active {
+  color: #ffffff !important;
+}
+
+/* BOUTON SIGNUP ADAPTÉ AU STYLE ARRONDI */
+.signup-btn-capsule {
+  background: #ff6600;
+  color: white !important;
+  padding: 12px 30px;
+  border-radius: 40px; /* Harmonisé avec la navbar */
+  font-weight: 800;
+  box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
+  transition: all 0.3s ease !important;
+}
+
+.signup-btn-capsule:hover {
+  background: #ff8533;
+  transform: scale(1.05);
 }
 
 /* ==================== RESPONSIVE ==================== */
-@media screen and (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    padding: 20px;
+@media (max-width: 1024px) {
+  .navbar-capsule {
+    padding: 0 25px;
   }
-
-  .nav-links {
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  .nav-links a {
-    width: 100%;
-    text-align: center;
+  .brand-name-v3 {
+    display: none;
   }
 }

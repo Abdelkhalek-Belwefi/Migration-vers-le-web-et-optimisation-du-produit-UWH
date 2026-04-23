@@ -1,122 +1,207 @@
-/* Styles de base pour le Footer */
-.footer-main {
-  background-color: #1b112d; /* Le violet profond de l'image */
-  color: #ffffff;
-  padding: 80px 40px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.modern-footer {
+  --bg-deep: #020617; /* Fond presque noir ultra profond */
+  --bg-card: #0f172a; /* Fond des cartes un peu plus clair */
+  --accent: #ff6600;  /* Orange L-mobile */
+  --text-dim: #94a3b8;
+  --text-bright: #f8fafc;
+  --border: rgba(255, 255, 255, 0.05);
+
+  background-color: var(--bg-deep);
+  color: var(--text-bright);
+  font-family: 'Inter', sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
-.footer-container {
-  max-width: 1200px;
+.footer-main-container {
+  max-width: 1280px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 40px;
-  flex-wrap: wrap; /* Pour le mobile */
+  padding: 100px 40px 40px;
 }
 
-/* Style des colonnes */
-.footer-col {
-  flex: 1;
-  min-width: 220px;
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 0.8fr 1fr 1.2fr;
+  gap: 60px;
+  margin-bottom: 80px;
 }
 
-.brand-info {
-  flex: 1.5; /* Donne plus de place au logo et à la description */
-}
-
-.footer-logo img {
-  height: 70px; /* Ajustez selon votre image */
+/* Brand Section */
+.footer-logo-img {
+  height: 45px;
   margin-bottom: 25px;
+  filter: brightness(1.2);
 }
 
-.description {
-  color: #a496b8; /* Gris clair avec une touche de violet */
-  line-height: 1.6;
+.footer-tagline {
+  color: var(--text-dim);
+  line-height: 1.7;
   font-size: 0.95rem;
   margin-bottom: 30px;
+  max-width: 320px;
 }
 
-/* Contact 24/7 */
-.emergency-contact {
+.social-links {
   display: flex;
-  align-items: center;
   gap: 15px;
 }
 
-.phone-icon {
-  font-size: 2rem;
-}
-
-.phone-details {
+.social-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--bg-card);
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-bright);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border);
 }
 
-.phone-details .label {
-  font-size: 0.8rem;
-  color: #a496b8;
+.social-icon:hover {
+  background: var(--accent);
+  transform: translateY(-3px);
+  border-color: var(--accent);
 }
 
-.phone-details .number {
-  font-weight: bold;
+/* Headings */
+.footer-heading {
   font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  position: relative;
+  color: var(--text-bright);
 }
 
-/* Titres des colonnes */
-.col-title {
-  font-size: 1.25rem;
-  margin-bottom: 35px;
-  font-weight: 500;
-}
-
-/* Listes */
-.footer-list, .contact-list {
+/* Nav Links */
+.footer-nav {
   list-style: none;
   padding: 0;
-  margin: 0;
 }
 
-.footer-list li, .contact-list li {
-  margin-bottom: 18px;
-  color: #a496b8;
+.footer-nav li {
+  margin-bottom: 15px;
+}
+
+.footer-nav a {
+  text-decoration: none;
+  color: var(--text-dim);
+  transition: 0.3s;
   font-size: 0.95rem;
+}
+
+.footer-nav a:hover {
+  color: var(--accent);
+  padding-left: 5px;
+}
+
+/* Contact Items */
+.contact-item {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+
+.c-icon {
+  color: var(--accent);
+  font-size: 1.2rem;
+  margin-top: 3px;
+}
+
+.sub-contact {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* Emergency Card */
+.emergency-card {
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  padding: 30px;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+}
+
+.emergency-label {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.emergency-title {
+  font-size: 1.3rem;
+  margin: 10px 0;
+}
+
+.emergency-card p {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+.emergency-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 10px;
+  cursor: pointer;
+  transition: transform 0.3s;
 }
 
-.footer-list a {
-  color: #a496b8;
+.emergency-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Bottom Bar */
+.footer-bottom-bar {
+  border-top: 1px solid var(--border);
+  padding-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.footer-legal-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.footer-legal-links a {
+  color: var(--text-dim);
   text-decoration: none;
-  transition: color 0.3s ease;
 }
 
-.footer-list a:hover {
-  color: #ffffff;
+.footer-legal-links a:hover {
+  color: var(--text-bright);
 }
 
-/* Grille Instagram */
-.insta-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  max-width: 260px;
+.separator {
+  width: 4px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 50%;
 }
 
-.grid-item {
-  aspect-ratio: 1 / 1;
-  background-color: #312546; /* Placeholder pour les images */
-  border-radius: 4px;
-  background-size: cover;
-  background-position: center;
+/* Responsive */
+@media (max-width: 1024px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .footer-container {
-    flex-direction: column;
-    padding: 20px;
-  }
+@media (max-width: 640px) {
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-bottom-bar { flex-direction: column; gap: 20px; text-align: center; }
 }
