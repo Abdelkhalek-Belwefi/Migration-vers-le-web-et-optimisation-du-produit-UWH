@@ -1,54 +1,73 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { FiCheck, FiNavigation, FiClock } from 'react-icons/fi';
 import './LivraisonList.css';
 
-const LivraisonList = ({ livraisons, onValider, readonly = false }) => {
-  if (!livraisons.length) return <div className="text-center p-10 text-slate-400">Aucune mission trouvée</div>;
+const LivraisonList = ({ livraisons, onValider, onRowClick, readonly = false }) => {
+  if (!livraisons.length) {
+    return <div className="empty-state">Aucune livraison trouvée</div>;
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '—';
+    return new Date(dateString).toLocaleString('fr-FR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  };
+
+  const getStatusBadge = (statut) => {
+    const statusConfig = {
+      ASSIGNEE: { label: 'Assignée', class: 'status-assignee' },
+      EN_COURS: { label: 'En cours', class: 'status-en-cours' },
+      LIVREE: { label: 'Livrée', class: 'status-livree' },
+      ECHOUEE: { label: 'Échouée', class: 'status-echouee' }
+    };
+    const config = statusConfig[statut] || { label: statut, class: '' };
+    return <span className={`status-badge ${config.class}`}>{config.label}</span>;
+  };
+
+  const handleRowClick = (livraison) => {
+    if (onRowClick) onRowClick(livraison);
+  };
 
   return (
-    <div className="td-livraison-list">
-      <div className="td-table-wrapper">
-        <table className="td-livraison-table">
+    <div className="livraison-list-container">
+      <div className="table-responsive">
+        <table className="livraison-table">
           <thead>
             <tr>
-              <th>Référence</th>
-              <th>Destination</th>
-              <th>Code OTP</th>
-              <th>État</th>
+              <th>N° BL</th>
+              <th>Client</th>
+              <th>Adresse</th>
+              <th>Statut</th>
+              <th>Date assignation</th>
               {!readonly && <th>Action</th>}
             </tr>
           </thead>
           <tbody>
-            {livraisons.map((liv, idx) => (
-              <motion.tr 
-                key={liv.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.05 }}
+            {livraisons.map(liv => (
+              <tr 
+                key={liv.id} 
+                onClick={() => handleRowClick(liv)}
+                className="clickable-row"
+                style={{ cursor: onRowClick ? 'pointer' : 'default' }}
               >
-                <td><span className="font-bold">#{liv.numeroBL}</span></td>
-                <td>
-                  <div className="flex flex-col">
-                    <span className="font-bold">{liv.clientNom}</span>
-                    <span className="text-xs text-slate-500">{liv.adresseLivraison}</span>
-                  </div>
-                </td>
-                <td><span className="td-otp-display">{liv.codeOtp}</span></td>
-                <td>
-                  <span className={`td-status-badge ${liv.statut.toLowerCase()}`}>
-                    {liv.statut === 'LIVREE' ? <FiCheck /> : <FiClock />}
-                    {liv.statut}
-                  </span>
-                </td>
+                <td className="bl-number">{liv.numeroBL}</td>
+                <td>{liv.clientNom}</td>
+                <td className="address-cell">{liv.adresseLivraison}</td>
+                <td>{getStatusBadge(liv.statut)}</td>
+                <td>{formatDate(liv.dateAssignation)}</td>
                 {!readonly && (
-                  <td>
-                    <button onClick={() => onValider(liv)} className="td-btn-validate">
-                      Valider <FiNavigation />
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="btn-valider"
+                      onClick={() => onValider(liv)}
+                      disabled={liv.statut === 'LIVREE'}
+                    >
+                      {liv.statut === 'LIVREE' ? 'Déjà livrée' : 'Valider'}
                     </button>
                   </td>
                 )}
-              </motion.tr>
+              </tr>
             ))}
           </tbody>
         </table>

@@ -1,103 +1,149 @@
-/* src/components/Transporteur/LivraisonList.css */
+/* LivraisonList.css */
 
-.td-livraison-list {
-  padding: 10px;
+.livraison-list-container {
+  width: 100%;
+  overflow-x: auto;
 }
 
-.td-table-wrapper {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  border-radius: 24px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  overflow: hidden;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+.table-responsive {
+  overflow-x: auto;
 }
 
-.td-livraison-table {
+.livraison-table {
   width: 100%;
   border-collapse: collapse;
-}
-
-.td-livraison-table thead th {
-  padding: 20px;
-  background: #f8fafc;
-  color: #64748b;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-align: left;
-}
-
-.td-livraison-table tbody tr {
-  transition: all 0.3s ease;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.td-livraison-table tbody tr:hover {
-  background: white !important;
-  transform: scale(1.005);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-  z-index: 10;
-}
-
-.td-livraison-table td {
-  padding: 18px 20px;
   font-size: 0.9rem;
-  font-weight: 500;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.livraison-table thead tr {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.livraison-table th {
+  text-align: left;
+  padding: 1rem;
+  font-weight: 600;
   color: #1e293b;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Status Badges Glow */
-.td-status-badge {
-  padding: 6px 14px;
-  border-radius: 12px;
+.livraison-table td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #edf2f7;
+  vertical-align: middle;
+  color: #334155;
+}
+
+.livraison-table tbody tr:hover {
+  background: #fef9f0;
+}
+
+.bl-number {
+  font-weight: 600;
+  color: #1e40af;
+  font-family: monospace;
+}
+
+.address-cell {
+  max-width: 250px;
+  white-space: normal;
+  word-break: break-word;
+  font-size: 0.85rem;
+}
+
+.otp-code {
+  font-family: monospace;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #0f172a;
+}
+
+/* Badges de statut */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 30px;
   font-size: 0.75rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  font-weight: 600;
+  text-align: center;
 }
 
-.td-status-badge.assignee {
-  background: #eff6ff;
-  color: #3b82f6;
-  border: 1px solid #dbeafe;
+.status-assignee {
+  background: #e0f2fe;
+  color: #0369a1;
 }
 
-.td-status-badge.livree {
-  background: #f0fdf4;
-  color: #10b981;
-  border: 1px solid #dcfce7;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+.status-en-cours {
+  background: #fef3c7;
+  color: #b45309;
 }
 
-/* Button Premium */
-.td-btn-validate {
-  background: #0f172a;
-  color: white;
+.status-livree {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-echouee {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Bouton valider */
+.btn-valider {
+  background: linear-gradient(135deg, #10b981, #059669);
   border: none;
-  padding: 10px 18px;
-  border-radius: 14px;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  transition: all 0.2s;
 }
 
-.td-btn-validate:hover {
-  background: #3b82f6;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(59, 130, 246, 0.3);
+.btn-valider:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.td-otp-display {
-  font-family: 'JetBrains Mono', monospace;
-  background: #f1f5f9;
-  padding: 4px 8px;
-  border-radius: 8px;
-  color: #475569;
-  font-weight: 700;
+.btn-valider:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .livraison-table th,
+  .livraison-table td {
+    padding: 0.7rem;
+    font-size: 0.8rem;
+  }
+  .address-cell {
+    max-width: 150px;
+  }
+}
+.clickable-row {
+  transition: background 0.2s;
+}
+
+.clickable-row:hover {
+  background-color: #fef9f0 !important;
+  cursor: pointer;
 }

@@ -1,0 +1,206 @@
+.NavbarTransporteur-modern-dark-nav {
+    background: #0d1117;
+    border-bottom: 1px solid #30363d;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+}
+
+.NavbarTransporteur-nav-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Logo */
+.NavbarTransporteur-nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.NavbarTransporteur-accent-bar {
+    width: 30px;
+    height: 4px;
+    background: #ff6b00;
+    border-radius: 2px;
+}
+
+.NavbarTransporteur-logo-text {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+/* Actions */
+.NavbarTransporteur-nav-right-section {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.NavbarTransporteur-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.NavbarTransporteur-nav-icon-btn {
+    background: transparent;
+    border: none;
+    color: #8b949e;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.NavbarTransporteur-nav-icon-btn span {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.NavbarTransporteur-nav-icon-btn:hover {
+    color: #ffffff;
+}
+
+.NavbarTransporteur-notification-wrapper {
+    position: relative;
+}
+
+.NavbarTransporteur-nav-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff6b00;
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 10px;
+    border: 2px solid #0d1117;
+}
+
+.NavbarTransporteur-nav-divider {
+    width: 1px;
+    height: 30px;
+    background: #30363d;
+}
+
+/* Profil Utilisateur */
+.NavbarTransporteur-profile-trigger {
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.NavbarTransporteur-profile-trigger:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.NavbarTransporteur-avatar-wrapper img, .NavbarTransporteur-avatar-initials {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #30363d;
+}
+
+.NavbarTransporteur-avatar-initials {
+    width: 38px;
+    height: 38px;
+    background: #ff6b00;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.NavbarTransporteur-user-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.NavbarTransporteur-user-name {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.NavbarTransporteur-user-role {
+    color: #8b949e;
+    font-size: 0.75rem;
+}
+
+.NavbarTransporteur-arrow-icon {
+    color: #8b949e;
+    font-size: 0.8rem;
+    transition: 0.3s;
+}
+
+.NavbarTransporteur-arrow-icon.NavbarTransporteur-rotate {
+    transform: rotate(180deg);
+}
+
+/* Dropdown */
+.NavbarTransporteur-premium-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    min-width: 200px;
+    padding: 8px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+    z-index: 1000;
+}
+
+.NavbarTransporteur-drop-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 15px;
+    background: transparent;
+    border: none;
+    color: #c9d1d9;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.NavbarTransporteur-drop-item:hover {
+    background: #21262d;
+    color: #ffffff;
+}
+
+.NavbarTransporteur-drop-item.NavbarTransporteur-logout {
+    color: #ff6b00;
+}
+
+.NavbarTransporteur-drop-divider {
+    height: 1px;
+    background: #30363d;
+    margin: 8px 0;
+}

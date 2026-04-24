@@ -1,31 +1,42 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
-  FaTachometerAlt, FaTruck, FaHistory, FaMapMarkerAlt, 
-  FaRoad, FaWeightHanging, FaCube, FaRuler 
+  FaTachometerAlt, FaTruck, FaHistory, FaPlus, 
+  FaSearch, FaCheckCircle, FaCircle
 } from 'react-icons/fa';
 import { MapContainer, TileLayer } from 'react-leaflet';
-import L from 'leaflet';
+import { LineChart, Line, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, AreaChart, Area } from 'recharts';
 import 'leaflet/dist/leaflet.css';
+
+// Services & Composants
 import { getLivraisonsEnCours, getHistoriqueLivraisons } from '../services/transporteurService';
 import LivraisonList from '../components/Transporteur/LivraisonList';
 import ValidationModal from '../components/Transporteur/ValidationModal';
-import TopNavbar from '../components/dashboard/layout/TopNavbar';
+import LivraisonDetailModal from '../components/Transporteur/LivraisonDetailModal';
+import NavbarTransporteur from '../components/Transporteur/NavbarTransporteur';
 import '../styles/TransporteurDashboard.css';
 
-const vanImage = "/images/volkswagen-transporter.png";
-
 const TransporteurDashboard = () => {
+  const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [livraisons, setLivraisons] = useState([]);
   const [historique, setHistorique] = useState([]);
   const [selectedLivraison, setSelectedLivraison] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [userName] = useState(localStorage.getItem('prenom') || 'Transporteur');
+
+  // Infos utilisateur depuis localStorage
+  const [userName] = useState(localStorage.getItem('nom') || '');
+  const [userPrenom] = useState(localStorage.getItem('prenom') || '');
+  const [userRole] = useState(localStorage.getItem('role') || 'TRANSPORTEUR');
+  const [profileImage, setProfileImage] = useState(null);
 
   useEffect(() => {
+    const savedImage = localStorage.getItem('profileImage');
+    if (savedImage) setProfileImage(savedImage);
     loadData();
-  }, [activeMenu]);
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -34,8 +45,8 @@ const TransporteurDashboard = () => {
         getLivraisonsEnCours(),
         getHistoriqueLivraisons()
       ]);
-      setLivraisons(encours);
-      setHistorique(histo);
+      setLivraisons(encours || []);
+      setHistorique(histo || []);
     } catch (error) {
       console.error("Erreur chargement", error);
     } finally {
@@ -43,138 +54,192 @@ const TransporteurDashboard = () => {
     }
   };
 
-  const handleValider = (livraison) => {
+  const handleOpenValidation = (livraison) => {
     setSelectedLivraison(livraison);
-    setShowModal(true);
+    setShowValidationModal(true);
+  };
+
+  const handleOpenDetail = (livraison) => {
+    setSelectedLivraison(livraison);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseModals = () => {
+    setShowValidationModal(false);
+    setShowDetailModal(false);
+    setSelectedLivraison(null);
   };
 
   const handleValidationSuccess = () => {
-    setShowModal(false);
+    handleCloseModals();
     loadData();
   };
 
-  const currentDelivery = livraisons.find(l => l.statut !== 'LIVREE') || livraisons[0];
-
-  const driverStats = {
-    categories: [
-      { name: 'En route', percent: 45, color: '#3b82f6' },
-      { name: 'Chargement', percent: 30, color: '#10b981' },
-      { name: 'Attente', percent: 15, color: '#f59e0b' }
-    ]
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
   };
 
+  const handleProfileClick = () => {
+    // Optionnel : gérer la modification du profil
+    navigate('/transporteur?tab=profile');
+  };
+
+  const handlePasswordClick = () => {
+    navigate('/transporteur?tab=password');
+  };
+
+  const chartData = [
+    { name: 'Lun', value: 30 }, { name: 'Mar', value: 45 },
+    { name: 'Mer', value: 35 }, { name: 'Jeu', value: 60 },
+    { name: 'Ven', value: 85 }
+  ];
+
   const renderDashboard = () => (
-    <div className="dashboard-grid-premium">
-      {/* CARD VEHICULE */}
-      <div className="premium-card td-vehicle-card-ultra">
-        <div className="vehicle-info-block">
-          <span className="status-indicator" style={{background: '#eff6ff', color: '#3b82f6'}}>VÉHICULE ASSIGNÉ</span>
-          <h2>Volkswagen Transporter</h2>
-          <div className="specs-row">
-            <div className="spec-pill"><FaWeightHanging /> 2,885 lbs</div>
-            <div className="spec-pill"><FaCube /> 353,937 in³</div>
-            <div className="spec-pill"><FaRuler /> 117 in</div>
+    <div className="modern-saas-container">
+      {/* TOP KPI CARDS */}
+      <div className="stats-grid-top">
+        <div className="stat-box">
+          <span className="label">LIVRAISONS ACTIVES</span>
+          <div className="value-row">
+            <span className="number">{livraisons.length}</span>
+            <div className="icon-badge blue"><FaTruck /></div>
           </div>
         </div>
-        <img src={vanImage} alt="Van" style={{ width: '220px', zIndex: 2 }} />
-      </div>
-
-      {/* MISSION EN COURS */}
-      <div className="premium-card route-section-ultra">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Mission Actuelle</h3>
-          <span className="status-indicator" style={{background: '#dcfce7', color: '#166534'}}>EN COURS</span>
-        </div>
-
-        <div className="address-flow">
-          <div className="flow-point">
-            <div className="point-dot start"></div>
-            <div>
-              <p style={{ fontSize: '0.7rem', color: 'var(--lp-text-slate)', fontWeight: 700 }}>DÉPART</p>
-              <p style={{ fontWeight: 600 }}>{currentDelivery?.adresseDepart || 'Entrepôt L-Mobile'}</p>
-            </div>
-          </div>
-          <div className="flow-line"></div>
-          <div className="flow-point">
-            <div className="point-dot end"></div>
-            <div>
-              <p style={{ fontSize: '0.7rem', color: 'var(--lp-text-slate)', fontWeight: 700 }}>LIVRAISON</p>
-              <p style={{ fontWeight: 600 }}>{currentDelivery?.adresseLivraison || 'Destination client'}</p>
-            </div>
+        <div className="stat-box">
+          <span className="label">FLOTTE OPÉRATIONNELLE</span>
+          <div className="value-row">
+            <span className="number">98%</span>
+            <div className="progress-circle">98%</div>
           </div>
         </div>
-
-        <div style={{ height: '220px', borderRadius: '20px', overflow: 'hidden' }}>
-          <MapContainer center={[36.8065, 10.1815]} zoom={12} zoomControl={false} style={{ height: '100%', width: '100%' }}>
-            <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
-          </MapContainer>
+        <div className="stat-box">
+          <span className="label">LIVRAISONS AUJOURD'HUI</span>
+          <div className="value-row">
+            <span className="number">{historique.length}</span>
+            <div className="icon-badge green"><FaCheckCircle /></div>
+          </div>
+        </div>
+        <div className="stat-box quick-actions-box">
+          <span className="label">ACTIONS RAPIDES</span>
+          <div className="action-btns">
+            <button className="btn-main"><FaPlus /> Nouvelle</button>
+            <button className="btn-sub"><FaSearch /> Suivre</button>
+          </div>
         </div>
       </div>
 
-      {/* STATS SIDEBAR */}
-      <div className="stats-sidebar-ultra">
-        <div className="premium-card" style={{ textAlign: 'center' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Efficacité</h3>
-          <div className="circle-chart-container">
-            <svg viewBox="0 0 36 36" style={{ width: '100%' }}>
-              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" strokeWidth="3" />
-              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--lp-primary)" strokeWidth="3" strokeDasharray="85, 100" strokeLinecap="round" />
-            </svg>
-            <div className="circle-value">85%</div>
+      {/* CARTE + LISTE DES ENVOIS */}
+      <div className="dashboard-middle-grid">
+        <aside className="shipments-panel">
+          <h3>LIVRAISONS EN COURS</h3>
+          <div className="shipment-scroll-area">
+            {livraisons.map((l, idx) => (
+              <div key={l.id || idx} className="shipment-item-card" onClick={() => handleOpenDetail(l)} style={{ cursor: 'pointer' }}>
+                <div className="item-header">
+                  <FaTruck className="truck-icon" />
+                  <span>BL n° {l.numeroBL?.slice(-8) || "N/A"}</span>
+                </div>
+                <div className="status-pill moving">En cours</div>
+                <div className="item-details">
+                  <p><strong>Client :</strong> {l.clientNom}</p>
+                  <p><strong>Adresse :</strong> {l.adresseLivraison?.substring(0, 30)}...</p>
+                </div>
+              </div>
+            ))}
+            {livraisons.length === 0 && <div className="empty-msg">Aucune livraison en cours</div>}
           </div>
-          <p style={{ fontSize: '0.8rem', color: 'var(--lp-text-slate)' }}>Excellent travail, {userName} !</p>
-        </div>
+        </aside>
 
-        <div className="premium-card">
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '20px' }}>Activité du jour</h3>
-          {driverStats.categories.map(cat => (
-            <div key={cat.name} className="progress-group">
-              <div className="progress-label">
-                <span>{cat.name}</span>
-                <span>{cat.percent}%</span>
-              </div>
-              <div className="progress-bar-bg">
-                <div style={{ background: cat.color, width: `${cat.percent}%`, height: '100%' }}></div>
-              </div>
+        <section className="map-container-panel">
+          <div className="map-header"><h3>SUIVI EN DIRECT</h3></div>
+          <div className="map-frame">
+            <MapContainer 
+              center={livraisons[0]?.clientLatitude && livraisons[0]?.clientLongitude 
+                ? [livraisons[0].clientLatitude, livraisons[0].clientLongitude] 
+                : [36.8065, 10.1815]} 
+              zoom={12} 
+              zoomControl={false} 
+              style={{ height: '100%', width: '100%' }}
+            >
+              <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+            </MapContainer>
+            <div className="map-legend-overlay">
+              <span><FaCircle className="dot blue" /> En mouvement</span>
+              <span><FaCircle className="dot orange" /> Retardé</span>
             </div>
-          ))}
+          </div>
+        </section>
+      </div>
+
+      {/* GRAPHIQUES STATISTIQUES */}
+      <div className="charts-bottom-grid">
+        <div className="chart-card">
+          <h3>EFFICACITÉ HEBDOMADAIRE</h3>
+          <ResponsiveContainer width="100%" height={160}>
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="colorCurve" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ff6b00" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#ff6b00" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <Tooltip contentStyle={{background: '#161b22', border: 'none', borderRadius: '8px'}} />
+              <Area type="monotone" dataKey="value" stroke="#ff6b00" strokeWidth={3} fillOpacity={1} fill="url(#colorCurve)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="chart-card">
+          <h3>CONSOMMATION CARBURANT</h3>
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={chartData}>
+              <Bar dataKey="value" fill="#ff6b00" radius={[4, 4, 0, 0]} barSize={40} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="td-transporteur-dashboard">
-      <TopNavbar /> 
+    <div className="td-transporteur-dashboard dark-theme-active">
+      <NavbarTransporteur 
+        userPrenom={userPrenom}
+        userName={userName}
+        userRole={userRole}
+        profileImage={profileImage}
+        onLogout={handleLogout}
+        onProfileClick={handleProfileClick}
+        onPasswordClick={handlePasswordClick}
+      />
       <div className="td-dashboard-layout">
         <aside className="td-dashboard-sidebar">
-          <button className={`td-nav-item ${activeMenu === 'dashboard' ? 'td-active' : ''}`} onClick={() => setActiveMenu('dashboard')}>
+          <div className="sidebar-brand">WARE<span>HOUSE</span></div>
+          <button className={`nav-link ${activeMenu === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveMenu('dashboard')}>
             <FaTachometerAlt /> Tableau de bord
           </button>
-          <button className={`td-nav-item ${activeMenu === 'livraisons' ? 'td-active' : ''}`} onClick={() => setActiveMenu('livraisons')}>
+          <button className={`nav-link ${activeMenu === 'livraisons' ? 'active' : ''}`} onClick={() => setActiveMenu('livraisons')}>
             <FaTruck /> Mes livraisons
           </button>
-          <button className={`td-nav-item ${activeMenu === 'historique' ? 'td-active' : ''}`} onClick={() => setActiveMenu('historique')}>
+          <button className={`nav-link ${activeMenu === 'historique' ? 'active' : ''}`} onClick={() => setActiveMenu('historique')}>
             <FaHistory /> Historique
           </button>
         </aside>
 
-        <main className="td-dashboard-main">
+        <main className="td-main-content">
           {loading ? (
-            <div className="td-loader">Chargement des données...</div>
+            <div className="loader-container">Synchronisation en cours...</div>
           ) : (
             <>
               {activeMenu === 'dashboard' && renderDashboard()}
-              {activeMenu === 'livraisons' && (
-                <div className="premium-card">
-                  <h3 style={{marginBottom: '20px'}}>📦 Livraisons à effectuer</h3>
-                  <LivraisonList livraisons={livraisons} onValider={handleValider} readonly={false} />
-                </div>
-              )}
-              {activeMenu === 'historique' && (
-                <div className="premium-card">
-                  <h3 style={{marginBottom: '20px'}}>✅ Livraisons terminées</h3>
-                  <LivraisonList livraisons={historique} onValider={() => {}} readonly={true} />
+              {(activeMenu === 'livraisons' || activeMenu === 'historique') && (
+                <div className="full-width-card">
+                  <LivraisonList 
+                    livraisons={activeMenu === 'livraisons' ? livraisons : historique}
+                    onValider={handleOpenValidation}
+                    onRowClick={handleOpenDetail}
+                    readonly={activeMenu === 'historique'}
+                  />
                 </div>
               )}
             </>
@@ -182,11 +247,19 @@ const TransporteurDashboard = () => {
         </main>
       </div>
 
-      {showModal && (
-        <ValidationModal 
-          livraison={selectedLivraison} 
-          onClose={() => setShowModal(false)} 
-          onSuccess={handleValidationSuccess} 
+      {/* MODALES */}
+      {showValidationModal && selectedLivraison && (
+        <ValidationModal
+          livraison={selectedLivraison}
+          onClose={handleCloseModals}
+          onSuccess={handleValidationSuccess}
+        />
+      )}
+
+      {showDetailModal && selectedLivraison && (
+        <LivraisonDetailModal
+          livraison={selectedLivraison}
+          onClose={handleCloseModals}
         />
       )}
     </div>
