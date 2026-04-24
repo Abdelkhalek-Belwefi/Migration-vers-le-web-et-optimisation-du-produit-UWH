@@ -18,6 +18,7 @@ import StockList from '../components/stock/StockList';
 import AdminStats from '../components/admin/stats/AdminStats';
 import CategoryManagement from '../components/admin/CategoryManagement'; // Nouveau composant
 import '../styles/admin-dashboard.css';
+import EntrepotManagement from '../components/admin/EntrepotManagement'; // ← nouvelle ligne
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -47,6 +48,7 @@ const AdminDashboard = () => {
         { id: 'categories', label: 'Catégories', icon: <FaList /> }, // Nouvel élément
         { id: 'articles', label: 'Catalogue articles', icon: <FaBoxOpen /> },
         { id: 'stocks', label: 'Gestion des Stocks', icon: <FaBoxes /> },
+        { id: 'entrepots', label: 'Entrepôts', icon: <FaBoxes /> }, // ajouter nouvelle 
         { id: 'logout', label: 'Déconnexion', icon: <FaSignOutAlt />, action: handleLogout }
     ];
 
@@ -64,8 +66,10 @@ const AdminDashboard = () => {
                 {activeTab === 'dashboard' && <AdminStats />}
                 {activeTab === 'users' && <UserManagement />}
                 {activeTab === 'categories' && <CategoryManagement />}
+                {activeTab === 'entrepots' && <EntrepotManagement />} {/* 🆕 AJOUT */} // version original 
                 {activeTab === 'articles' && <ArticleList />}
                 {activeTab === 'stocks' && <StockList />}
+                
             </div>
         </div>
     );

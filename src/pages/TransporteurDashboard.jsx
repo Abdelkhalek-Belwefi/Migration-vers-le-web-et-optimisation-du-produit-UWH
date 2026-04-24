@@ -96,64 +96,64 @@ const TransporteurDashboard = () => {
   ];
 
   const renderDashboard = () => (
-    <div className="modern-saas-container">
+    <div className="transporteur-dashboard-container">
       {/* TOP KPI CARDS */}
-      <div className="stats-grid-top">
-        <div className="stat-box">
-          <span className="label">LIVRAISONS ACTIVES</span>
-          <div className="value-row">
-            <span className="number">{livraisons.length}</span>
-            <div className="icon-badge blue"><FaTruck /></div>
+      <div className="transporteur-dashboard-stats-grid-top">
+        <div className="transporteur-dashboard-stat-box">
+          <span className="transporteur-dashboard-label">LIVRAISONS ACTIVES</span>
+          <div className="transporteur-dashboard-value-row">
+            <span className="transporteur-dashboard-number">{livraisons.length}</span>
+            <div className="transporteur-dashboard-icon-badge transporteur-dashboard-icon-badge--blue"><FaTruck /></div>
           </div>
         </div>
-        <div className="stat-box">
-          <span className="label">FLOTTE OPÉRATIONNELLE</span>
-          <div className="value-row">
-            <span className="number">98%</span>
-            <div className="progress-circle">98%</div>
+        <div className="transporteur-dashboard-stat-box">
+          <span className="transporteur-dashboard-label">FLOTTE OPÉRATIONNELLE</span>
+          <div className="transporteur-dashboard-value-row">
+            <span className="transporteur-dashboard-number">98%</span>
+            <div className="transporteur-dashboard-progress-circle">98%</div>
           </div>
         </div>
-        <div className="stat-box">
-          <span className="label">LIVRAISONS AUJOURD'HUI</span>
-          <div className="value-row">
-            <span className="number">{historique.length}</span>
-            <div className="icon-badge green"><FaCheckCircle /></div>
+        <div className="transporteur-dashboard-stat-box">
+          <span className="transporteur-dashboard-label">LIVRAISONS AUJOURD'HUI</span>
+          <div className="transporteur-dashboard-value-row">
+            <span className="transporteur-dashboard-number">{historique.length}</span>
+            <div className="transporteur-dashboard-icon-badge transporteur-dashboard-icon-badge--green"><FaCheckCircle /></div>
           </div>
         </div>
-        <div className="stat-box quick-actions-box">
-          <span className="label">ACTIONS RAPIDES</span>
-          <div className="action-btns">
-            <button className="btn-main"><FaPlus /> Nouvelle</button>
-            <button className="btn-sub"><FaSearch /> Suivre</button>
+        <div className="transporteur-dashboard-stat-box transporteur-dashboard-quick-actions-box">
+          <span className="transporteur-dashboard-label">ACTIONS RAPIDES</span>
+          <div className="transporteur-dashboard-action-btns">
+            <button className="transporteur-dashboard-btn-main"><FaPlus /> Nouvelle</button>
+            <button className="transporteur-dashboard-btn-sub"><FaSearch /> Suivre</button>
           </div>
         </div>
       </div>
 
       {/* CARTE + LISTE DES ENVOIS */}
-      <div className="dashboard-middle-grid">
-        <aside className="shipments-panel">
+      <div className="transporteur-dashboard-middle-grid">
+        <aside className="transporteur-dashboard-shipments-panel">
           <h3>LIVRAISONS EN COURS</h3>
-          <div className="shipment-scroll-area">
+          <div className="transporteur-dashboard-shipment-scroll-area">
             {livraisons.map((l, idx) => (
-              <div key={l.id || idx} className="shipment-item-card" onClick={() => handleOpenDetail(l)} style={{ cursor: 'pointer' }}>
-                <div className="item-header">
-                  <FaTruck className="truck-icon" />
+              <div key={l.id || idx} className="transporteur-dashboard-shipment-item-card" onClick={() => handleOpenDetail(l)} style={{ cursor: 'pointer' }}>
+                <div className="transporteur-dashboard-item-header">
+                  <FaTruck className="transporteur-dashboard-truck-icon" />
                   <span>BL n° {l.numeroBL?.slice(-8) || "N/A"}</span>
                 </div>
-                <div className="status-pill moving">En cours</div>
-                <div className="item-details">
+                <div className="transporteur-dashboard-status-pill transporteur-dashboard-status-pill--moving">En cours</div>
+                <div className="transporteur-dashboard-item-details">
                   <p><strong>Client :</strong> {l.clientNom}</p>
                   <p><strong>Adresse :</strong> {l.adresseLivraison?.substring(0, 30)}...</p>
                 </div>
               </div>
             ))}
-            {livraisons.length === 0 && <div className="empty-msg">Aucune livraison en cours</div>}
+            {livraisons.length === 0 && <div className="transporteur-dashboard-empty-msg">Aucune livraison en cours</div>}
           </div>
         </aside>
 
-        <section className="map-container-panel">
-          <div className="map-header"><h3>SUIVI EN DIRECT</h3></div>
-          <div className="map-frame">
+        <section className="transporteur-dashboard-map-container-panel">
+          <div className="transporteur-dashboard-map-header"><h3>SUIVI EN DIRECT</h3></div>
+          <div className="transporteur-dashboard-map-frame">
             <MapContainer 
               center={livraisons[0]?.clientLatitude && livraisons[0]?.clientLongitude 
                 ? [livraisons[0].clientLatitude, livraisons[0].clientLongitude] 
@@ -164,17 +164,17 @@ const TransporteurDashboard = () => {
             >
               <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
             </MapContainer>
-            <div className="map-legend-overlay">
-              <span><FaCircle className="dot blue" /> En mouvement</span>
-              <span><FaCircle className="dot orange" /> Retardé</span>
+            <div className="transporteur-dashboard-map-legend-overlay">
+              <span><FaCircle className="transporteur-dashboard-dot transporteur-dashboard-dot--blue" /> En mouvement</span>
+              <span><FaCircle className="transporteur-dashboard-dot transporteur-dashboard-dot--orange" /> Retardé</span>
             </div>
           </div>
         </section>
       </div>
 
       {/* GRAPHIQUES STATISTIQUES */}
-      <div className="charts-bottom-grid">
-        <div className="chart-card">
+      <div className="transporteur-dashboard-charts-bottom-grid">
+        <div className="transporteur-dashboard-chart-card">
           <h3>EFFICACITÉ HEBDOMADAIRE</h3>
           <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={chartData}>
@@ -189,7 +189,7 @@ const TransporteurDashboard = () => {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div className="chart-card">
+        <div className="transporteur-dashboard-chart-card">
           <h3>CONSOMMATION CARBURANT</h3>
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={chartData}>
@@ -202,7 +202,7 @@ const TransporteurDashboard = () => {
   );
 
   return (
-    <div className="td-transporteur-dashboard dark-theme-active">
+    <div className="transporteur-dashboard-root transporteur-dashboard-dark-theme-active">
       <NavbarTransporteur 
         userPrenom={userPrenom}
         userName={userName}
@@ -212,28 +212,28 @@ const TransporteurDashboard = () => {
         onProfileClick={handleProfileClick}
         onPasswordClick={handlePasswordClick}
       />
-      <div className="td-dashboard-layout">
-        <aside className="td-dashboard-sidebar">
-          <div className="sidebar-brand">WARE<span>HOUSE</span></div>
-          <button className={`nav-link ${activeMenu === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveMenu('dashboard')}>
+      <div className="transporteur-dashboard-layout">
+        <aside className="transporteur-dashboard-sidebar">
+          <div className="transporteur-dashboard-sidebar-brand">WARE<span>HOUSE</span></div>
+          <button className={`transporteur-dashboard-nav-link ${activeMenu === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveMenu('dashboard')}>
             <FaTachometerAlt /> Tableau de bord
           </button>
-          <button className={`nav-link ${activeMenu === 'livraisons' ? 'active' : ''}`} onClick={() => setActiveMenu('livraisons')}>
+          <button className={`transporteur-dashboard-nav-link ${activeMenu === 'livraisons' ? 'active' : ''}`} onClick={() => setActiveMenu('livraisons')}>
             <FaTruck /> Mes livraisons
           </button>
-          <button className={`nav-link ${activeMenu === 'historique' ? 'active' : ''}`} onClick={() => setActiveMenu('historique')}>
+          <button className={`transporteur-dashboard-nav-link ${activeMenu === 'historique' ? 'active' : ''}`} onClick={() => setActiveMenu('historique')}>
             <FaHistory /> Historique
           </button>
         </aside>
 
-        <main className="td-main-content">
+        <main className="transporteur-dashboard-main-content">
           {loading ? (
-            <div className="loader-container">Synchronisation en cours...</div>
+            <div className="transporteur-dashboard-loader-container">Synchronisation en cours...</div>
           ) : (
             <>
               {activeMenu === 'dashboard' && renderDashboard()}
               {(activeMenu === 'livraisons' || activeMenu === 'historique') && (
-                <div className="full-width-card">
+                <div className="transporteur-dashboard-full-width-card">
                   <LivraisonList 
                     livraisons={activeMenu === 'livraisons' ? livraisons : historique}
                     onValider={handleOpenValidation}

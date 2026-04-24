@@ -1,0 +1,245 @@
+/* === Entrepôt Management - Styles modernes (inspirés de CategoryManagement) === */
+
+.entrepot_management-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #f8fafc;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.entrepot_management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.entrepot_management-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.entrepot_management-btn-add {
+    background: linear-gradient(135deg, #8598b6, #2c3038);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.entrepot_management-btn-add:hover {
+    background: linear-gradient(135deg, #353b47, #8591b4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.entrepot_management-alert {
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.entrepot_management-alert.error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-left: 4px solid #dc2626;
+}
+
+.entrepot_management-alert.success {
+    background: #d1fae5;
+    color: #065f46;
+    border-left: 4px solid #10b981;
+}
+
+.entrepot_management-form-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    padding: 28px;
+    margin-bottom: 32px;
+    border: 1px solid #e2e8f0;
+}
+
+.entrepot_management-form-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 0;
+    margin-bottom: 24px;
+}
+
+.entrepot_management-form-group {
+    margin-bottom: 20px;
+}
+
+.entrepot_management-form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #334155;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.entrepot_management-form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    transition: 0.2s;
+    background: #ffffff;
+}
+
+.entrepot_management-form-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.entrepot_management-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.entrepot_management-btn-cancel,
+.entrepot_management-btn-submit {
+    padding: 10px 24px;
+    border-radius: 40px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.entrepot_management-btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.entrepot_management-btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.entrepot_management-btn-submit {
+    background: #1e293b;
+    color: white;
+}
+
+.entrepot_management-btn-submit:hover {
+    background: #0f172a;
+    transform: translateY(-1px);
+}
+
+.entrepot_management-table-wrapper {
+    background: white;
+    border-radius: 20px;
+    overflow-x: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.entrepot_management-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.entrepot_management-table th {
+    background: #f8fafc;
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #334155;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.entrepot_management-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+}
+
+.entrepot_management-table tr:hover {
+    background: #f9fafb;
+}
+
+.entrepot_management-btn-edit,
+.entrepot_management-btn-delete {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin: 0 4px;
+    padding: 6px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.entrepot_management-btn-edit {
+    color: #3b82f6;
+}
+
+.entrepot_management-btn-edit:hover {
+    background: #e0f2fe;
+    transform: scale(1.05);
+}
+
+.entrepot_management-btn-delete {
+    color: #ef4444;
+}
+
+.entrepot_management-btn-delete:hover {
+    background: #fee2e2;
+    transform: scale(1.05);
+}
+
+.entrepot_management-loading {
+    text-align: center;
+    padding: 60px;
+    font-size: 1.1rem;
+    color: #64748b;
+}
+
+@media (max-width: 768px) {
+    .entrepot_management-container {
+        padding: 16px;
+    }
+    .entrepot_management-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .entrepot_management-btn-add {
+        justify-content: center;
+    }
+    .entrepot_management-form-card {
+        padding: 20px;
+    }
+    .entrepot_management-table th,
+    .entrepot_management-table td {
+        padding: 12px 10px;
+    }
+}
