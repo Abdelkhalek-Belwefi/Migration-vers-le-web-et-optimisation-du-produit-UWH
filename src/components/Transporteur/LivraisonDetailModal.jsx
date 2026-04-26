@@ -12,29 +12,78 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Service de géocodage intégré
+const geocodeAddress = async (address) => {
+  if (!address || address.trim() === '') return null;
+  const encodedAddress = encodeURIComponent(address);
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1`;
+  try {
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'WarehouseApp/1.0' }
+    });
+    const data = await response.json();
+    if (data && data.length > 0) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    }
+    return null;
+  } catch (error) {
+    console.error('Erreur de géocodage:', error);
+    return null;
+  }
+};
+
 const LivraisonDetailModal = ({ livraison, onClose }) => {
   const mapRef = useRef(null);
   const routingControlRef = useRef(null);
   const [position, setPosition] = useState(null);
   const [loadingRoute, setLoadingRoute] = useState(false);
+  const [clientCoords, setClientCoords] = useState(null);
+  const [loadingCoords, setLoadingCoords] = useState(false);
 
-  // Récupérer la position actuelle du livreur
+  // 1. Récupérer les coordonnées du client (base de données ou géocodage)
   useEffect(() => {
-    if (!livraison?.clientLatitude || !livraison?.clientLongitude) return;
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        (err) => console.warn('Erreur géolocalisation :', err),
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
+    if (!livraison) return;
+
+    // Si les coordonnées existent déjà en base, on les utilise
+    if (livraison.clientLatitude && livraison.clientLongitude) {
+      setClientCoords({
+        lat: livraison.clientLatitude,
+        lng: livraison.clientLongitude
+      });
+      return;
+    }
+
+    // Sinon, on géocode l'adresse
+    if (livraison.adresseLivraison) {
+      setLoadingCoords(true);
+      geocodeAddress(livraison.adresseLivraison).then(coords => {
+        if (coords) {
+          setClientCoords(coords);
+          console.log('📍 Adresse géocodée:', coords);
+        } else {
+          console.warn('Impossible de géocoder l\'adresse:', livraison.adresseLivraison);
+        }
+        setLoadingCoords(false);
+      });
     }
   }, [livraison]);
 
-  // Initialiser la carte (une seule fois)
+  // 2. Récupérer la position actuelle du livreur
   useEffect(() => {
-    if (!livraison?.clientLatitude || !livraison?.clientLongitude) return;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (err) => console.warn('Erreur géolocalisation:', err),
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+  }, []);
+
+  // 3. Initialiser la carte (une seule fois)
+  useEffect(() => {
+    if (!clientCoords) return;
     if (!mapRef.current) {
-      const map = L.map('detail-map').setView([livraison.clientLatitude, livraison.clientLongitude], 13);
+      const map = L.map('detail-map').setView([clientCoords.lat, clientCoords.lng], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributeurs'
       }).addTo(map);
@@ -47,11 +96,11 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
         routingControlRef.current = null;
       }
     };
-  }, [livraison]);
+  }, [clientCoords]);
 
-  // Tracer l'itinéraire dès que la position est connue
+  // 4. Tracer l'itinéraire dès que la position du livreur et les coordonnées client sont disponibles
   useEffect(() => {
-    if (!mapRef.current || !position || !livraison?.clientLatitude) return;
+    if (!mapRef.current || !position || !clientCoords) return;
 
     if (routingControlRef.current) {
       mapRef.current.removeControl(routingControlRef.current);
@@ -60,7 +109,7 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
     setLoadingRoute(true);
 
     const start = L.latLng(position.lat, position.lng);
-    const end = L.latLng(livraison.clientLatitude, livraison.clientLongitude);
+    const end = L.latLng(clientCoords.lat, clientCoords.lng);
 
     const control = L.Routing.control({
       waypoints: [start, end],
@@ -74,19 +123,12 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
       show: false
     }).addTo(mapRef.current);
 
-    control.on('routesfound', (e) => {
-      const route = e.routes[0];
-      const distance = (route.summary.totalDistance / 1000).toFixed(1);
-      const duration = Math.round(route.summary.totalTime / 60);
-      console.log(`Itinéraire trouvé : ${distance} km, ${duration} min`);
-      setLoadingRoute(false);
-    });
-
+    control.on('routesfound', () => setLoadingRoute(false));
     control.on('routingerror', () => setLoadingRoute(false));
 
     routingControlRef.current = control;
     mapRef.current.fitBounds([start, end]);
-  }, [position, livraison]);
+  }, [position, clientCoords]);
 
   // Utilitaires d'affichage
   const formatDate = (dateString) => {
@@ -111,9 +153,9 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
   };
 
   const getMapUrl = () => {
-    if (livraison.clientLatitude && livraison.clientLongitude) {
-      return `https://www.google.com/maps?q=${livraison.clientLatitude},${livraison.clientLongitude}`;
-    } else if (livraison.adresseLivraison) {
+    if (clientCoords) {
+      return `https://www.google.com/maps?q=${clientCoords.lat},${clientCoords.lng}`;
+    } else if (livraison?.adresseLivraison) {
       return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(livraison.adresseLivraison)}`;
     }
     return '#';
@@ -152,12 +194,13 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
           {/* Carte + itinéraire */}
           <div className="detail-section">
             <h4>🗺️ Itinéraire vers le client</h4>
+            {loadingCoords && <div className="loading-text">Géocodage de l'adresse...</div>}
             {loadingRoute && <div className="loading-text">Calcul de l'itinéraire...</div>}
             <div id="detail-map" style={{ height: '350px', borderRadius: '12px', marginBottom: '10px' }}></div>
             <div className="map-links">
-              {position && (
+              {position && clientCoords && (
                 <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${livraison.clientLatitude},${livraison.clientLongitude}&travelmode=driving`}
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${clientCoords.lat},${clientCoords.lng}&travelmode=driving`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -168,9 +211,14 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
                 📍 Voir le point client dans Google Maps
               </a>
             </div>
-            {!position && (
+            {!position && !loadingRoute && (
               <div className="warning-message">
-                ⚠️ Position actuelle non disponible. L'itinéraire ne peut pas être tracé.
+                ⚠️ Position actuelle non disponible. Activez la géolocalisation.
+              </div>
+            )}
+            {!clientCoords && !loadingCoords && (
+              <div className="warning-message">
+                ⚠️ Impossible de localiser l'adresse du client.
               </div>
             )}
           </div>

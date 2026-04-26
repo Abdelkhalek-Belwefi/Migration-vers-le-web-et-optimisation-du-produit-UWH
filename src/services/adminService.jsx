@@ -24,12 +24,12 @@ export const adminService = {
         }
     },
 
-    // Mettre à jour le rôle
-    updateUserRole: async (userId, role) => {
+    // Mettre à jour le rôle (avec entrepotId optionnel)
+    updateUserRole: async (userId, role, entrepotId = null) => {
         try {
             const response = await axios.put(
                 `${API_URL}/users/${userId}/role`,
-                { role },
+                { role, entrepotId },
                 getAuthHeader()
             );
             return response.data;
@@ -83,7 +83,7 @@ export const adminService = {
         }
     },
 
-    // Créer un utilisateur
+    // Créer un utilisateur (avec entrepotId optionnel)
     createUser: async (userData) => {
         try {
             const response = await axios.post(`${API_URL}/users`, userData, getAuthHeader());

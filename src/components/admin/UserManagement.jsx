@@ -7,31 +7,37 @@ import {
     FaEdit, 
     FaTrash,
     FaUserCheck,
-    FaCrown
+    FaCrown,
+    FaWarehouse
 } from 'react-icons/fa';
 import { adminService } from '../../services/adminService';
+import { getAllEntrepots } from '../../services/entrepotService ';
 import './UserManagement.css';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [roles, setRoles] = useState([]);
+    const [entrepots, setEntrepots] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [editingUserId, setEditingUserId] = useState(null);
     const [selectedRole, setSelectedRole] = useState('');
+    const [selectedRoleEntrepotId, setSelectedRoleEntrepotId] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
     const [newUser, setNewUser] = useState({
         nom: '',
         prenom: '',
         email: '',
         password: '',
-        role: 'OPERATEUR_ENTREPOT'
+        role: 'OPERATEUR_ENTREPOT',
+        entrepotId: ''
     });
 
     useEffect(() => {
         fetchUsers();
         fetchRoles();
+        fetchEntrepots();
     }, []);
 
     const fetchUsers = async () => {
@@ -51,7 +57,6 @@ const UserManagement = () => {
     const fetchRoles = async () => {
         try {
             const data = await adminService.getAllRoles();
-            // Ajout manuel de SERVICE_COMMERCIAL si absent
             let rolesList = data.filter(role => role !== 'ADMINISTRATEUR');
             if (!rolesList.includes('SERVICE_COMMERCIAL')) {
                 rolesList.push('SERVICE_COMMERCIAL');
@@ -59,10 +64,20 @@ const UserManagement = () => {
             setRoles(rolesList);
         } catch (err) {
             console.error('Erreur lors du chargement des rôles:', err);
-            // Fallback : fournir une liste par défaut
             setRoles(['RESPONSABLE_ENTREPOT', 'OPERATEUR_ENTREPOT', 'OPERATOR', 'SERVICE_COMMERCIAL']);
         }
     };
+
+    const fetchEntrepots = async () => {
+        try {
+            const data = await getAllEntrepots();
+            setEntrepots(data);
+        } catch (err) {
+            console.error('Erreur chargement entrepôts:', err);
+            setEntrepots([]);
+        }
+    };
+
     const handleActiverCompte = async (userId) => {
         try {
             await adminService.activerCompte(userId);
@@ -91,14 +106,15 @@ const UserManagement = () => {
         }
     };
 
-    const handleRoleChange = async (userId, newRole) => {
+    const handleRoleChange = async (userId, newRole, entrepotId) => {
         try {
-            await adminService.updateUserRole(userId, newRole);
+            await adminService.updateUserRole(userId, newRole, entrepotId);
             setUsers(users.map(user =>
-                user.id === userId ? { ...user, role: newRole } : user
+                user.id === userId ? { ...user, role: newRole, entrepotId: entrepotId } : user
             ));
             setEditingUserId(null);
             setSelectedRole('');
+            setSelectedRoleEntrepotId('');
             setSuccess('Rôle mis à jour avec succès');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
@@ -125,7 +141,11 @@ const UserManagement = () => {
     const handleAddUser = async (e) => {
         e.preventDefault();
         try {
-            const newUserData = await adminService.createUser(newUser);
+            const userToCreate = {
+                ...newUser,
+                entrepotId: newUser.entrepotId || null
+            };
+            const newUserData = await adminService.createUser(userToCreate);
             setUsers([...users, newUserData]);
             setShowAddModal(false);
             setNewUser({
@@ -133,7 +153,8 @@ const UserManagement = () => {
                 prenom: '',
                 email: '',
                 password: '',
-                role: 'OPERATEUR_ENTREPOT'
+                role: 'OPERATEUR_ENTREPOT',
+                entrepotId: ''
             });
             setSuccess('Utilisateur ajouté avec succès');
             setTimeout(() => setSuccess(''), 3000);
@@ -188,6 +209,7 @@ const UserManagement = () => {
                             <th>Prénom</th>
                             <th>Email</th>
                             <th>Rôle</th>
+                            <th>Entrepôt</th>
                             <th>Statut</th>
                             <th>Actions</th>
                         </tr>
@@ -201,34 +223,55 @@ const UserManagement = () => {
                                 <td>{user.email}</td>
                                 <td>
                                     {editingUserId === user.id ? (
-                                        <select
-                                            value={selectedRole || user.role}
-                                            onChange={(e) => setSelectedRole(e.target.value)}
-                                            className="role-select"
-                                        >
-                                            {roles.map(role => (
-                                                <option key={role} value={role}>
-                                                    {getRoleLabel(role)}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <>
+                                            <select
+                                                value={selectedRole || user.role}
+                                                onChange={(e) => setSelectedRole(e.target.value)}
+                                                className="role-select"
+                                                style={{ marginBottom: '8px', width: '100%' }}
+                                            >
+                                                {roles.map(role => (
+                                                    <option key={role} value={role}>
+                                                        {getRoleLabel(role)}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <select
+                                                value={selectedRoleEntrepotId || (user.entrepotId || '')}
+                                                onChange={(e) => setSelectedRoleEntrepotId(e.target.value)}
+                                                className="role-select"
+                                                style={{ width: '100%' }}
+                                            >
+                                                <option value="">-- Aucun (global) --</option>
+                                                {entrepots.map(ent => (
+                                                    <option key={ent.id} value={ent.id}>{ent.nom}</option>
+                                                ))}
+                                            </select>
+                                        </>
                                     ) : (
-                                        <span className={getRoleBadgeClass(user.role)}>
-                                            {getRoleLabel(user.role)}
-                                        </span>
+                                        <>
+                                            <span className={getRoleBadgeClass(user.role)}>
+                                                {getRoleLabel(user.role)}
+                                            </span>
+                                            {user.entrepotNom && (
+                                                <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                                                    <FaWarehouse size={10} /> {user.entrepotNom}
+                                                </div>
+                                            )}
+                                        </>
                                     )}
-                                </td>
-                                <td>
+                                 </td>
+                                 <td>
                                     <span className={`status-badge ${user.estActif ? 'active' : 'inactive'}`}>
                                         {user.estActif ? 'Actif' : 'Inactif'}
                                     </span>
-                                </td>
+                                 </td>
                                 <td className="actions">
                                     {editingUserId === user.id ? (
                                         <>
                                             <button
                                                 className="btn-save"
-                                                onClick={() => handleRoleChange(user.id, selectedRole)}
+                                                onClick={() => handleRoleChange(user.id, selectedRole, selectedRoleEntrepotId || null)}
                                                 title="Sauvegarder"
                                             >
                                                 <FaSave />
@@ -238,6 +281,7 @@ const UserManagement = () => {
                                                 onClick={() => {
                                                     setEditingUserId(null);
                                                     setSelectedRole('');
+                                                    setSelectedRoleEntrepotId('');
                                                 }}
                                                 title="Annuler"
                                             >
@@ -274,6 +318,7 @@ const UserManagement = () => {
                                                         onClick={() => {
                                                             setEditingUserId(user.id);
                                                             setSelectedRole(user.role);
+                                                            setSelectedRoleEntrepotId(user.entrepotId || '');
                                                         }}
                                                         title="Modifier le rôle"
                                                     >
@@ -351,6 +396,19 @@ const UserManagement = () => {
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Entrepôt (optionnel)</label>
+                                <select
+                                    value={newUser.entrepotId}
+                                    onChange={(e) => setNewUser({...newUser, entrepotId: e.target.value})}
+                                >
+                                    <option value="">-- Aucun (rôle global) --</option>
+                                    {entrepots.map(ent => (
+                                        <option key={ent.id} value={ent.id}>{ent.nom}</option>
+                                    ))}
+                                </select>
+                                <small>Laissez vide pour un rôle valable sur tous les entrepôts</small>
                             </div>
                             <div className="modal-actions">
                                 <button type="submit" className="btn-submit">

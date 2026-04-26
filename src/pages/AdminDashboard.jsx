@@ -66,7 +66,7 @@ const AdminDashboard = () => {
                 {activeTab === 'dashboard' && <AdminStats />}
                 {activeTab === 'users' && <UserManagement />}
                 {activeTab === 'categories' && <CategoryManagement />}
-                {activeTab === 'entrepots' && <EntrepotManagement />} {/* 🆕 AJOUT */} // version original 
+                {activeTab === 'entrepots' && <EntrepotManagement />} {/* 🆕 AJOUT */} 
                 {activeTab === 'articles' && <ArticleList />}
                 {activeTab === 'stocks' && <StockList />}
                 
