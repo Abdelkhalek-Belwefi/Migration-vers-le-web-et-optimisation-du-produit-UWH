@@ -12,7 +12,9 @@ import {
     FaPrint,
     FaSync,
     FaHistory,
-    FaShoppingCart
+    FaShoppingCart,
+    FaExclamationTriangle,
+    FaInbox
 } from 'react-icons/fa';
 import Sidebar from "../components/dashboard/layout/Sidebar";
 import TopNavbar from "../components/dashboard/layout/TopNavbar";
@@ -28,6 +30,8 @@ import CommandeList from "../components/commercial/CommandeList";
 import PreparationCommandes from "../components/entrepot/PreparationCommandes";
 import ExpedierCommandes from "../components/expedition/ExpedierCommandes";
 import ImpressionDocuments from "../components/expedition/ImpressionDocuments";
+import StockFaibleList from "../components/transfert/StockFaibleList";
+import DemandesRecuesList from "../components/transfert/DemandesRecuesList";
 
 import "../styles/dashboard.css";
 
@@ -127,7 +131,10 @@ const Dashboard_warehouse = () => {
           { id: "rangement", label: "Suivi Rangement", icon: <FaClipboardList /> },
           { id: "expedier", label: "Expéditions", icon: <FaTruck /> },
           { id: "documents", label: "Impression Documents", icon: <FaPrint /> },
-          { id: "synchronisation", label: "Synchronisation ERP", icon: <FaSync /> }
+          { id: "synchronisation", label: "Synchronisation ERP", icon: <FaSync /> },
+          // ========== NOUVEAUX MENU ITEMS POUR TRANSFERT ==========
+          { id: "stockFaible", label: "Stock faible", icon: <FaExclamationTriangle /> },
+          { id: "demandesRecues", label: "Demandes reçues", icon: <FaInbox /> }
         ];
 
       case "SERVICE_COMMERCIAL":
@@ -167,7 +174,9 @@ const Dashboard_warehouse = () => {
       documents: "Impression de documents",
       synchronisation: "Synchronisation ERP",
       commandes: "Gestion des commandes",
-      clients: "Gestion des clients"
+      clients: "Gestion des clients",
+      stockFaible: "Stocks faibles - Déclarer un besoin",
+      demandesRecues: "Demandes de transfert reçues"
     };
     return titles[tabId] || tabId;
   };
@@ -313,6 +322,13 @@ const Dashboard_warehouse = () => {
 
       case "documents":
         return <ImpressionDocuments />;
+
+      // ========== NOUVEAUX CAS POUR LES TRANSFERTS ==========
+      case "stockFaible":
+        return <StockFaibleList />;
+
+      case "demandesRecues":
+        return <DemandesRecuesList />;
 
       default:
         return (

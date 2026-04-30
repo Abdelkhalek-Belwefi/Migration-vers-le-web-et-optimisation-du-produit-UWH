@@ -100,5 +100,28 @@ export const stockService = {
             console.error('Erreur API changerStatut:', error.response?.data || error.message);
             throw error;
         }
+    },
+      // ========== NOUVELLE MÉTHODE : Récupérer les stocks faibles ==========
+    getStocksFaibles: async (seuil = 20) => {
+        try {
+            const response = await axios.get(`${API_URL}/faibles?seuil=${seuil}`, getAuthHeader());
+            return response.data;
+        } catch (error) {
+            console.error('Erreur API getStocksFaibles:', error.response?.data || error.message);
+            throw error;
+        }
+    },
+
+    // Récupérer le stock d'un article dans un entrepôt spécifique
+getStockByArticleAndEntrepot: async (articleId, entrepotId) => {
+    try {
+        const response = await axios.get(`${API_URL}/article/${articleId}/entrepot/${entrepotId}`, getAuthHeader());
+        return response.data;
+    } catch (error) {
+        console.error('Erreur API getStockByArticleAndEntrepot:', error.response?.data || error.message);
+        return null;
     }
+}
+
+    
 };

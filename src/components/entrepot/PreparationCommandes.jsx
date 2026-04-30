@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCommandesByStatut, updateStatut } from '../../services/commandeService';
+import { getCommandesByStatut, updateStatut, getCommandesTransfertAPreparer } from '../../services/commandeService';
 import '../../styles/warehouse-modules.css';
 
 const PreparationCommandes = () => {
@@ -12,8 +12,14 @@ const PreparationCommandes = () => {
   const loadCommandes = async () => {
     try {
       setLoading(true);
-      const data = await getCommandesByStatut('EN_ATTENTE');
-      setCommandes(data);
+      // Récupérer les commandes client en attente
+      const commandesClient = await getCommandesByStatut('EN_ATTENTE');
+      // Récupérer les commandes de transfert acceptées (à préparer)
+      const commandesTransfert = await getCommandesTransfertAPreparer();
+      
+      // Fusionner les deux listes
+      const allCommandes = [...commandesClient, ...commandesTransfert];
+      setCommandes(allCommandes);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -59,19 +65,29 @@ const PreparationCommandes = () => {
           <thead>
             <tr>
               <th>N° commande</th>
-              <th>Client</th>
+              <th>Client / Entrepôt</th>
               <th>Date</th>
               <th>Articles</th>
+              <th>Type</th>
               <th>Actions</th>
-              </tr>
-            </thead>
+            </tr>
+          </thead>
           <tbody>
             {commandes.map(cmd => (
               <tr key={cmd.id}>
                 <td>{cmd.numeroCommande}</td>
-                <td>{cmd.clientNom}</td>
+                <td>
+                  {cmd.typeCommande === 'TRANSFERT' 
+                    ? `📦 Transfert - ${cmd.entrepotDestination?.nom || `Entrepôt #${cmd.entrepotDestinationId}`}`
+                    : cmd.clientNom}
+                </td>
                 <td>{new Date(cmd.dateCommande).toLocaleDateString()}</td>
                 <td>{cmd.lignes?.length || 0}</td>
+                <td>
+                  {cmd.typeCommande === 'TRANSFERT' 
+                    ? <span className="badge-transfert">Transfert</span>
+                    : <span className="badge-client">Client</span>}
+                </td>
                 <td>
                   <button className="btn-details" onClick={() => handleShowDetails(cmd)}>
                     📋 Détails
@@ -95,7 +111,15 @@ const PreparationCommandes = () => {
               <button className="modal-close" onClick={closeModal}>×</button>
             </div>
             <div className="modal-body">
-              <p><strong>Client :</strong> {selectedCommande.clientNom}</p>
+              {selectedCommande.typeCommande === 'TRANSFERT' ? (
+                <>
+                  <p><strong>Type :</strong> Transfert entre entrepôts</p>
+                  <p><strong>Entrepôt demandeur :</strong> {selectedCommande.entrepotDestination?.nom || `Entrepôt #${selectedCommande.entrepotDestinationId}`}</p>
+                  <p><strong>Entrepôt fournisseur :</strong> {selectedCommande.entrepotSource?.nom || `Entrepôt #${selectedCommande.entrepotSourceId}`}</p>
+                </>
+              ) : (
+                <p><strong>Client :</strong> {selectedCommande.clientNom}</p>
+              )}
               <p><strong>Date de commande :</strong> {new Date(selectedCommande.dateCommande).toLocaleString()}</p>
               <p><strong>Date de livraison souhaitée :</strong> {selectedCommande.dateLivraisonSouhaitee ? new Date(selectedCommande.dateLivraisonSouhaitee).toLocaleDateString() : 'Non spécifiée'}</p>
               <p><strong>Notes :</strong> {selectedCommande.notes || 'Aucune'}</p>
@@ -107,8 +131,8 @@ const PreparationCommandes = () => {
                     <th>Désignation</th>
                     <th>Quantité</th>
                     <th>Prix unitaire</th>
-                    </tr>
-                  </thead>
+                  </tr>
+                </thead>
                 <tbody>
                   {selectedCommande.lignes?.map((ligne, idx) => (
                     <tr key={idx}>

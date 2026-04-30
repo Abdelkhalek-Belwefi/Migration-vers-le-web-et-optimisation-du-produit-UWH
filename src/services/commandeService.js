@@ -52,3 +52,46 @@ export const updateCommande = async (id, commandeData) => {
 export const deleteCommande = async (id) => {
   await axios.delete(`${API_URL}/${id}`, getAuthHeader());
 };
+
+// ========== NOUVELLE MÉTHODE : Créer une commande de transfert ==========
+export const createCommandeTransfert = async (transfertData) => {
+  const response = await axios.post(`${API_URL}/transfert`, transfertData, getAuthHeader());
+  return response.data;
+};
+
+// ========== NOUVELLE MÉTHODE : Récupérer les demandes de transfert reçues ==========
+export const getCommandesTransfertRecues = async () => {
+  const response = await axios.get(`${API_URL}/transfert/recues`, getAuthHeader());
+  return response.data;
+};
+
+// ========== NOUVELLE MÉTHODE : Accepter une demande de transfert ==========
+export const accepterDemandeTransfert = async (id) => {
+  const response = await axios.patch(
+    `${API_URL}/transfert/${id}/accepter`,
+    {},
+    getAuthHeader()
+  );
+  return response.data;
+};
+
+// ========== NOUVELLE MÉTHODE : Refuser une demande de transfert ==========
+export const refuserDemandeTransfert = async (id) => {
+  const response = await axios.patch(
+    `${API_URL}/transfert/${id}/refuser`,
+    {},
+    getAuthHeader()
+  );
+  return response.data;
+};
+
+// Récupérer les demandes où l'entrepôt SOURCE est celui de l'utilisateur
+export const getCommandesTransfertSource = async () => {
+    const response = await axios.get(`${API_URL}/transfert/source`, getAuthHeader());
+    return response.data;
+};
+
+export const getCommandesTransfertAPreparer = async () => {
+    const response = await axios.get(`${API_URL}/transfert/preparer`, getAuthHeader());
+    return response.data;
+};
