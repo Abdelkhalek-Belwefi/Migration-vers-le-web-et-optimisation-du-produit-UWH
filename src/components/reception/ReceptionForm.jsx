@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { receptionService } from '../../services/receptionService';
 import { articleService } from '../../services/articleService';
+import { stockService } from '../../services/stockService';
 import { gs1Service } from '../../services/gs1Service';
 import { ocrService } from '../../services/ocrService';
-import useBarcodeReceiver from '../../hooks/useBarcodeReceiver'; // ajout hooks
+import useBarcodeReceiver from '../../hooks/useBarcodeReceiver';
 import './styles/ReceptionForm.css';
 import { MdAdd } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
@@ -11,7 +12,7 @@ import { FaDownload } from "react-icons/fa";
 import { FaBarcode, FaQrcode } from "react-icons/fa";
 
 const ReceptionForm = ({ onSuccess, onCancel }) => {
-    useBarcodeReceiver(); // ajout hooks
+    useBarcodeReceiver();
     const [formData, setFormData] = useState({
         numeroPO: '',
         fournisseur: '',
@@ -37,7 +38,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
     const [ocrLoading, setOcrLoading] = useState(false);
     const [showScanFields, setShowScanFields] = useState(false);
 
-    // États pour le scan document via curseur
     const [ocrFocusMode, setOcrFocusMode] = useState(false);
     const ocrFocusInputRef = useRef(null);
 
@@ -58,7 +58,22 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // ===== GESTION DU SCAN PRINCIPAL =====
+    // ========== NOUVELLE FONCTION : Récupérer l'emplacement avec le stock le plus faible ==========
+    const getLowestStockLocation = async (articleId) => {
+        try {
+            const stocks = await stockService.getStocksByArticle(articleId);
+            if (stocks && stocks.length > 0) {
+                // Trier par quantité croissante et prendre le premier (stock le plus faible)
+                const lowestStock = stocks.sort((a, b) => a.quantite - b.quantite)[0];
+                return lowestStock.emplacement;
+            }
+            return '';
+        } catch (err) {
+            console.error('Erreur récupération emplacement:', err);
+            return '';
+        }
+    };
+
     const handleScan = async (e) => {
         const scannedCode = e.target.value;
         if (!scannedCode || scannedCode.length < 3) return;
@@ -89,6 +104,20 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                             updates.articleId = article.id.toString();
                             updates.quantiteAttendue = gs1Data.quantite ? gs1Data.quantite.toString() : '1';
                             updates.quantiteRecue = gs1Data.quantite ? gs1Data.quantite.toString() : '1';
+                            
+                            // 🔹 LOT AUTOMATIQUE : utiliser le lot par défaut de l'article si disponible
+                            if (article.lotDefaut && !updates.lot) {
+                                updates.lot = article.lotDefaut;
+                            }
+                            
+                            // 🔹 EMPLACEMENT AUTOMATIQUE : chercher l'emplacement avec le stock le plus faible
+                            const lowestLocation = await getLowestStockLocation(article.id);
+                            if (lowestLocation && !updates.emplacementDestination) {
+                                updates.emplacementDestination = lowestLocation;
+                                setSuccess(`📦 Emplacement suggéré (stock faible) : ${lowestLocation}`);
+                                setTimeout(() => setSuccess(''), 3000);
+                            }
+                            
                             alert(`✅ Article trouvé : ${article.designation}`);
                         } else {
                             setError('Article non trouvé pour ce code GS1');
@@ -116,7 +145,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // ===== GESTION DU SCAN D'EMPLACEMENT =====
     const handleEmplacementScan = async (e) => {
         const scannedCode = e.target.value;
         if (!scannedCode || scannedCode.length < 2) return;
@@ -134,7 +162,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // ===== GESTION DU SCAN DU BON DE LIVRAISON =====
     const handleDocumentScan = async (e) => {
         const scannedCode = e.target.value;
         if (!scannedCode || scannedCode.length < 3) return;
@@ -168,7 +195,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // ===== GESTION DU TÉLÉCHARGEMENT DE FICHIER POUR OCR =====
     const handleFileSelect = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -182,7 +208,8 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                 ...prev,
                 numeroPO: extractedData.numeroPO || prev.numeroPO,
                 fournisseur: extractedData.fournisseur || prev.fournisseur,
-                bonLivraison: extractedData.bonLivraison || prev.bonLivraison
+                bonLivraison: extractedData.bonLivraison || prev.bonLivraison,
+                dateReception: extractedData.dateReception || prev.dateReception
             }));
             setSuccess('✅ Document analysé avec succès');
             setTimeout(() => setSuccess(''), 3000);
@@ -196,7 +223,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // ===== TRAITEMENT DE L'IMAGE REÇUE VIA WEBSOCKET =====
     const processOcrImage = async (base64Image) => {
         setOcrLoading(true);
         setError('');
@@ -215,7 +241,8 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                 ...prev,
                 numeroPO: extractedData.numeroPO || prev.numeroPO,
                 fournisseur: extractedData.fournisseur || prev.fournisseur,
-                bonLivraison: extractedData.bonLivraison || prev.bonLivraison
+                bonLivraison: extractedData.bonLivraison || prev.bonLivraison,
+                dateReception: extractedData.dateReception || prev.dateReception
             }));
             setSuccess('✅ Document analysé avec succès');
             setTimeout(() => setSuccess(''), 3000);
@@ -228,7 +255,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // 🔥 Écoute des messages WebSocket via événement personnalisé
     useEffect(() => {
         const handleWebSocketMessage = (event) => {
             const message = event.detail;
@@ -241,7 +267,8 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                             ...prev,
                             numeroPO: parsed.data.numeroPO || prev.numeroPO,
                             fournisseur: parsed.data.fournisseur || prev.fournisseur,
-                            bonLivraison: parsed.data.bonLivraison || prev.bonLivraison
+                            bonLivraison: parsed.data.bonLivraison || prev.bonLivraison,
+                            dateReception: parsed.data.dateReception || prev.dateReception
                         }));
                         setSuccess('✅ Document analysé avec succès');
                         setTimeout(() => setSuccess(''), 3000);
@@ -386,7 +413,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
 
             {showScanFields && (
                 <div className="scan-fields-row">
-                    {/* ZONE DE SCAN PRINCIPALE (articles) */}
                     <div className="scan-field-item">
                         <h3><FaBarcode /> Scanner un article</h3>
                         <div className="scan-input-wrapper">
@@ -403,11 +429,10 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                         <p className="scan-help">
                             Formats supportés :<br />
                             • PO-XXXX : charge une réception existante<br />
-                            • Code GS1 : pré-remplit l'article, le lot et la date
+                            • Code GS1 : pré-remplit l'article, le lot, la date et l'emplacement suggéré
                         </p>
                     </div>
 
-                    {/* ZONE DE SCAN DÉDIÉE AU BON DE LIVRAISON */}
                     <div className="scan-field-item">
                         <h3><FaDownload /> Scanner le bon de livraison</h3>
                         <div className="scan-input-wrapper">
@@ -426,7 +451,6 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                         </p>
                     </div>
 
-                    {/* ZONE D'ANALYSE DE DOCUMENT (OCR) avec les deux options */}
                     <div className="scan-field-item ocr-scan-item">
                         <h3>📄 Analyser un document</h3>
                         <div className="ocr-options">
@@ -626,8 +650,9 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                                         <th>Lot</th>
                                         <th>Expiration</th>
                                         <th>Emplacement</th>
-                                        </tr>
-                                     </thead>
+                                        <th></th>
+                                    </tr>
+                                </thead>
                                 <tbody>
                                     {formData.lignes.map((line, index) => (
                                         <tr key={index}>
