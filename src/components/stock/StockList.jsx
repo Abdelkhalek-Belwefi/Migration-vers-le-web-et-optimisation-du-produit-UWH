@@ -73,8 +73,10 @@ const StockList = () => {
         try {
             setLoading(true);
             const data = await stockService.getAllStocks();
-            setStocks(data);
-            setFilteredStocks(data);
+            // 🔹 FILTRER LES STOCKS À 0
+            const filteredData = data.filter(stock => stock.quantite > 0);
+            setStocks(filteredData);
+            setFilteredStocks(filteredData);
             setError('');
         } catch (err) {
             setError('Erreur lors du chargement des stocks');
@@ -120,7 +122,9 @@ const StockList = () => {
             if (searchParams.statut) params.statut = searchParams.statut;
 
             const data = await stockService.searchStocks(params);
-            setStocks(data);
+            // 🔹 FILTRER LES STOCKS À 0
+            const filteredData = data.filter(stock => stock.quantite > 0);
+            setStocks(filteredData);
             setError('');
         } catch (err) {
             setError('Erreur lors de la recherche');
@@ -175,9 +179,11 @@ const StockList = () => {
 
                 // 2. Récupérer tous les stocks de cet article
                 const stocksByArticle = await stockService.getStocksByArticle(article.id);
+                // 🔹 FILTRER LES STOCKS À 0
+                const filteredStocksByArticle = stocksByArticle.filter(s => s.quantite > 0);
                 
                 // 3. Calculer la quantité totale
-                const quantiteTotale = stocksByArticle.reduce((sum, s) => sum + s.quantite, 0);
+                const quantiteTotale = filteredStocksByArticle.reduce((sum, s) => sum + s.quantite, 0);
                 
                 // 4. Mettre à jour les états : afficher la carte récap
                 setScannedArticle({
@@ -186,7 +192,7 @@ const StockList = () => {
                     designation: article.designation,
                     quantiteTotale: quantiteTotale
                 });
-                setScannedArticleStocks(stocksByArticle);
+                setScannedArticleStocks(filteredStocksByArticle);
                 setShowStockTableForScanned(false);  // tableau caché au départ
                 setError('');
                 
@@ -201,7 +207,9 @@ const StockList = () => {
             if (field === 'emplacementScan') params.emplacement = value;
 
             const data = await stockService.searchStocks(params);
-            setStocks(data);
+            // 🔹 FILTRER LES STOCKS À 0
+            const filteredData = data.filter(stock => stock.quantite > 0);
+            setStocks(filteredData);
             setError('');
             
             // Réinitialiser l'affichage du scan article amélioré

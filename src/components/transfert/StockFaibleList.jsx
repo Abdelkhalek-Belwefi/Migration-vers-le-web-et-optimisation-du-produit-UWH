@@ -26,7 +26,9 @@ const StockFaibleList = () => {
             setLoading(true);
             setError('');
             const data = await stockService.getStocksFaibles(seuil);
-            setStocksFaibles(data);
+            // 🔹 FILTRER LES STOCKS À 0 (double sécurité)
+            const filteredData = data.filter(stock => stock.quantite > 0);
+            setStocksFaibles(filteredData);
         } catch (err) {
             console.error('Erreur chargement stocks faibles:', err);
             setError('Erreur lors du chargement des stocks faibles');
