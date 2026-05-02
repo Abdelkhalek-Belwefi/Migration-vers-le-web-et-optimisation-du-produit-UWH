@@ -11,6 +11,13 @@ const MapPickerModal = ({ onClose, onSelect, initialAddress = '' }) => {
     const markerRef = useRef(null);
     const mapInstanceRef = useRef(null);
 
+    // Fonction utilitaire pour extraire la ville
+    const extractCity = (addr) => {
+        if (!addr) return 'Nabeul';
+        const parts = addr.split(',');
+        return parts.length > 1 ? parts[1].trim() : parts[0].trim();
+    };
+
     // Initialisation de Leaflet
     useEffect(() => {
         const loadLeaflet = async () => {
@@ -18,7 +25,6 @@ const MapPickerModal = ({ onClose, onSelect, initialAddress = '' }) => {
                 await import('leaflet');
                 await import('leaflet/dist/leaflet.css');
                 
-                // Correction des icônes Leaflet
                 delete window.L.Icon.Default.prototype._getIconUrl;
                 window.L.Icon.Default.mergeOptions({
                     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -35,7 +41,6 @@ const MapPickerModal = ({ onClose, onSelect, initialAddress = '' }) => {
     const initMap = () => {
         if (!mapRef.current || mapInstanceRef.current) return;
         
-        // Position par défaut (Tunisie)
         const defaultCenter = [36.8065, 10.1815];
         
         const map = window.L.map(mapRef.current).setView(defaultCenter, 13);
@@ -47,17 +52,14 @@ const MapPickerModal = ({ onClose, onSelect, initialAddress = '' }) => {
             maxZoom: 19
         }).addTo(map);
         
-        // Ajouter un marqueur
         const marker = window.L.marker(defaultCenter, { draggable: true }).addTo(map);
         markerRef.current = marker;
         
-        // Mettre à jour les coordonnées quand on déplace le marqueur
         marker.on('dragend', async () => {
             const latLng = marker.getLatLng();
             await reverseGeocode(latLng.lat, latLng.lng);
         });
         
-        // Mettre à jour les coordonnées quand on clique sur la carte
         map.on('click', async (e) => {
             marker.setLatLng(e.latlng);
             await reverseGeocode(e.latlng.lat, e.latlng.lng);
@@ -65,42 +67,61 @@ const MapPickerModal = ({ onClose, onSelect, initialAddress = '' }) => {
     };
 
     const geocodeAddress = async (address) => {
-        if (!address.trim()) return;
-        
+        if (!address || !address.trim()) return;
+
         setLoading(true);
         setError('');
-        
+
+        // 1. Nettoyage initial (supprime les codes bizarres comme QX6C+7J)
+        let cleanAddress = address
+            .replace(/[A-Z0-9]{2,6}\+[A-Z0-9]{1,3}/gi, '')
+            .replace(/[^\w\s,.-]/g, '')
+            .trim();
+
+        // 2. Définition des tentatives (du plus précis au plus général)
+        const attempts = [
+            cleanAddress,
+            extractCity(cleanAddress) + ", Tunisie",
+            "Nabeul, Tunisie"
+        ];
+
         try {
-            const encodedAddress = encodeURIComponent(address + ', Tunisie');
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1`
-            );
-            const data = await response.json();
-            
-            if (data && data.length > 0) {
-                const lat = parseFloat(data[0].lat);
-                const lon = parseFloat(data[0].lon);
-                const displayName = data[0].display_name;
+            for (const query of attempts) {
+                console.log(`🔍 Tentative de recherche pour : ${query}`);
                 
-                if (mapInstanceRef.current) {
-                    mapInstanceRef.current.setView([lat, lon], 15);
-                    if (markerRef.current) {
-                        markerRef.current.setLatLng([lat, lon]);
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`
+                );
+                const data = await response.json();
+
+                if (data && data.length > 0) {
+                    const result = data[0];
+                    const lat = parseFloat(result.lat);
+                    const lon = parseFloat(result.lon);
+
+                    if (mapInstanceRef.current) {
+                        mapInstanceRef.current.setView([lat, lon], query === attempts[0] ? 16 : 13);
+                        if (markerRef.current) {
+                            markerRef.current.setLatLng([lat, lon]);
+                        }
                     }
+
+                    setSelectedLocation({
+                        lat: lat,
+                        lng: lon,
+                        address: result.display_name
+                    });
+
+                    setError('');
+                    return;
                 }
-                
-                setSelectedLocation({
-                    lat: lat,
-                    lng: lon,
-                    address: displayName
-                });
-                setError('');
-            } else {
-                setError('Adresse non trouvée. Veuillez cliquer directement sur la carte.');
             }
+
+            setError('Lieu introuvable. Veuillez pointer manuellement sur la carte.');
+            
         } catch (err) {
-            console.error('Erreur géocodage:', err);
-            setError('Erreur lors de la recherche. Veuillez cliquer directement sur la carte.');
+            console.error('Erreur API:', err);
+            setError('Erreur de connexion. Cliquez sur la carte.');
         } finally {
             setLoading(false);
         }
@@ -179,6 +200,7 @@ const MapPickerModal = ({ onClose, onSelect, initialAddress = '' }) => {
                 <div className="map-picker-instructions">
                     <p>💡 Cliquez sur la carte ou déplacez le marqueur pour sélectionner l'emplacement exact</p>
                     <p>📍 Si la recherche échoue, cliquez directement sur la carte pour placer le marqueur</p>
+                    <p>📌 Astuce : Si l'adresse n'est pas trouvée, déplacez manuellement le marqueur rouge sur la destination exacte.</p>
                 </div>
 
                 <div ref={mapRef} className="map-picker-container"></div>

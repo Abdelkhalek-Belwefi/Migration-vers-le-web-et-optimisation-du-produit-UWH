@@ -35,10 +35,13 @@ const geocodeAddress = async (address) => {
 const LivraisonDetailModal = ({ livraison, onClose }) => {
   const mapRef = useRef(null);
   const routingControlRef = useRef(null);
+  const watchIdRef = useRef(null);
   const [position, setPosition] = useState(null);
+  const [positionAccuracy, setPositionAccuracy] = useState(null);
   const [loadingRoute, setLoadingRoute] = useState(false);
   const [clientCoords, setClientCoords] = useState(null);
   const [loadingCoords, setLoadingCoords] = useState(false);
+  const [locationError, setLocationError] = useState(false);
 
   // 1. Récupérer les coordonnées du client (base de données ou géocodage)
   useEffect(() => {
@@ -68,15 +71,51 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
     }
   }, [livraison]);
 
-  // 2. Récupérer la position actuelle du livreur
+  // 2. Récupérer la position actuelle du livreur avec watchPosition (solution pro)
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        (err) => console.warn('Erreur géolocalisation:', err),
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
+    if (!navigator.geolocation) {
+      console.error("La géolocalisation n'est pas supportée par ce navigateur.");
+      setLocationError(true);
+      return;
     }
+
+    // Configuration Haute Précision
+    const geoOptions = {
+      enableHighAccuracy: true, // Force l'utilisation du GPS
+      maximumAge: 0,            // Ne pas utiliser de position en cache
+      timeout: 20000            // Laisser 20s pour obtenir un signal stable
+    };
+
+    // Démarrage du suivi en temps réel (Watch)
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        console.log(`📍 Position captée (Précision: ${accuracy}m)`);
+        
+        // Mise à jour de l'état avec la position réelle
+        setPosition({ lat: latitude, lng: longitude });
+        setPositionAccuracy(accuracy);
+        setLocationError(false);
+      },
+      (err) => {
+        console.error("❌ Erreur GPS:", err.message);
+        setLocationError(true);
+        
+        // Fallback : position par défaut (Tunis)
+        if (!position) {
+          setPosition({ lat: 36.8065, lng: 10.1815 });
+        }
+      },
+      geoOptions
+    );
+
+    // NETTOYAGE : Très important pour la batterie et la performance
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        console.log("🛰️ GPS arrêté.");
+      }
+    };
   }, []);
 
   // 3. Initialiser la carte (une seule fois)
@@ -130,6 +169,25 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
     mapRef.current.fitBounds([start, end]);
   }, [position, clientCoords]);
 
+  // Fonction pour rafraîchir manuellement la position
+  const refreshPosition = () => {
+    if (!navigator.geolocation) return;
+    
+    setLoadingRoute(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setPositionAccuracy(pos.coords.accuracy);
+        setLoadingRoute(false);
+      },
+      (err) => {
+        console.error("Erreur:", err);
+        setLoadingRoute(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+  
   // Utilitaires d'affichage
   const formatDate = (dateString) => {
     if (!dateString) return '—';
@@ -191,6 +249,24 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
             </div>
           </div>
 
+          {/* Position du livreur + précision */}
+          {position && positionAccuracy && (
+            <div className="detail-section">
+              <h4>📍 Ma position</h4>
+              <div className="gps-info">
+                <span>Latitude: {position.lat.toFixed(6)}</span>
+                <span>Longitude: {position.lng.toFixed(6)}</span>
+                <span className={`gps-accuracy ${positionAccuracy > 100 ? 'warning' : 'good'}`}>
+                  📡 Précision: {Math.round(positionAccuracy)} mètres
+                  {positionAccuracy > 100 && " ⚠️ Position approximative"}
+                </span>
+              </div>
+              <button onClick={refreshPosition} className="btn-refresh-position">
+                🔄 Rafraîchir ma position
+              </button>
+            </div>
+          )}
+
           {/* Carte + itinéraire */}
           <div className="detail-section">
             <h4>🗺️ Itinéraire vers le client</h4>
@@ -200,7 +276,7 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
             <div className="map-links">
               {position && clientCoords && (
                 <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${clientCoords.lat},${clientCoords.lng}&travelmode=driving`}
+                  href={`https://www.google.com/maps/dir/?api=1&origin=${position.lat},${position.lng}&destination=${clientCoords.lat},${clientCoords.lng}&travelmode=driving`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -211,7 +287,7 @@ const LivraisonDetailModal = ({ livraison, onClose }) => {
                 📍 Voir le point client dans Google Maps
               </a>
             </div>
-            {!position && !loadingRoute && (
+            {locationError && !position && (
               <div className="warning-message">
                 ⚠️ Position actuelle non disponible. Activez la géolocalisation.
               </div>

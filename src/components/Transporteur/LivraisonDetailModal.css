@@ -126,3 +126,41 @@
   text-align: center;
   margin-top: 0.5rem;
 }
+/* Styles pour la GPS section */
+.gps-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  background: #f8fafc;
+  padding: 10px 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+.gps-accuracy {
+  font-weight: 500;
+}
+
+.gps-accuracy.good {
+  color: #10b981;
+}
+
+.gps-accuracy.warning {
+  color: #f59e0b;
+}
+
+.btn-refresh-position {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 30px;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 5px;
+}
+
+.btn-refresh-position:hover {
+  background: #e2e8f0;
+}
