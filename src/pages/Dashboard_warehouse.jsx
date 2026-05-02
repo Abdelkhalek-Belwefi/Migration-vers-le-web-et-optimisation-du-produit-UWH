@@ -14,7 +14,8 @@ import {
     FaHistory,
     FaShoppingCart,
     FaExclamationTriangle,
-    FaInbox
+    FaInbox,
+    FaClock
 } from 'react-icons/fa';
 import Sidebar from "../components/dashboard/layout/Sidebar";
 import TopNavbar from "../components/dashboard/layout/TopNavbar";
@@ -32,6 +33,7 @@ import ExpedierCommandes from "../components/expedition/ExpedierCommandes";
 import ImpressionDocuments from "../components/expedition/ImpressionDocuments";
 import StockFaibleList from "../components/transfert/StockFaibleList";
 import DemandesRecuesList from "../components/transfert/DemandesRecuesList";
+import LivraisonsAttenteList from "../components/transfert/LivraisonsAttenteList";
 
 import "../styles/dashboard.css";
 
@@ -119,7 +121,9 @@ const Dashboard_warehouse = () => {
           ...baseItems,
           { id: "reception", label: "Réception", icon: <FaBoxes /> },
           { id: "rangement", label: "Rangement", icon: <FaClipboardList /> },
-          { id: "preparation", label: "Préparation de commandes", icon: <FaClipboardList /> }
+          { id: "preparation", label: "Préparation de commandes", icon: <FaClipboardList /> },
+          // ========== NOUVEAU MENU ITEM POUR LIVRAISONS EN ATTENTE ==========
+          { id: "livraisonsAttente", label: "Livraisons en attente", icon: <FaClock /> }
         ];
 
       case "RESPONSABLE_ENTREPOT":
@@ -134,7 +138,9 @@ const Dashboard_warehouse = () => {
           { id: "synchronisation", label: "Synchronisation ERP", icon: <FaSync /> },
           // ========== NOUVEAUX MENU ITEMS POUR TRANSFERT ==========
           { id: "stockFaible", label: "Stock faible", icon: <FaExclamationTriangle /> },
-          { id: "demandesRecues", label: "Demandes reçues", icon: <FaInbox /> }
+          { id: "demandesRecues", label: "Demandes reçues", icon: <FaInbox /> },
+          // ========== NOUVEAU MENU ITEM POUR LIVRAISONS EN ATTENTE ==========
+          { id: "livraisonsAttente", label: "Livraisons en attente", icon: <FaClock /> }
         ];
 
       case "SERVICE_COMMERCIAL":
@@ -176,7 +182,8 @@ const Dashboard_warehouse = () => {
       commandes: "Gestion des commandes",
       clients: "Gestion des clients",
       stockFaible: "Stocks faibles - Déclarer un besoin",
-      demandesRecues: "Demandes de transfert reçues"
+      demandesRecues: "Demandes de transfert reçues",
+      livraisonsAttente: "Livraisons en attente - Codes OTP"
     };
     return titles[tabId] || tabId;
   };
@@ -329,6 +336,10 @@ const Dashboard_warehouse = () => {
 
       case "demandesRecues":
         return <DemandesRecuesList />;
+
+      // ========== NOUVEAU CAS POUR LES LIVRAISONS EN ATTENTE ==========
+      case "livraisonsAttente":
+        return <LivraisonsAttenteList />;
 
       default:
         return (

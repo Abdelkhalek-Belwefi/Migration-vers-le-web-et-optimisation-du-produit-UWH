@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaMapMarkerAlt } from 'react-icons/fa';
 import entrepotService from '../../services/entrepotService ';
+import MapPickerModal from './MapPickerModal';
 import './EntrepotManagement.css';
 
 const EntrepotManagement = () => {
@@ -10,6 +11,7 @@ const EntrepotManagement = () => {
     const [success, setSuccess] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [editingEntrepot, setEditingEntrepot] = useState(null);
+    const [showMapPicker, setShowMapPicker] = useState(false);
     const [formData, setFormData] = useState({
         nom: '',
         adresse: '',
@@ -19,7 +21,9 @@ const EntrepotManagement = () => {
         responsableNom: '',
         telephone: '',
         email: '',
-        actif: true
+        actif: true,
+        latitude: null,
+        longitude: null
     });
 
     useEffect(() => {
@@ -44,6 +48,18 @@ const EntrepotManagement = () => {
             ...formData,
             [name]: type === 'checkbox' ? checked : value
         });
+    };
+
+    const handleLocationSelect = (location) => {
+        setFormData({
+            ...formData,
+            adresse: location.address,
+            latitude: location.lat,
+            longitude: location.lng
+        });
+        setShowMapPicker(false);
+        setSuccess(`📍 Position sélectionnée: ${location.address}`);
+        setTimeout(() => setSuccess(''), 3000);
     };
 
     const handleSubmit = async (e) => {
@@ -82,7 +98,9 @@ const EntrepotManagement = () => {
             responsableNom: entrepot.responsableNom || '',
             telephone: entrepot.telephone || '',
             email: entrepot.email || '',
-            actif: entrepot.actif !== undefined ? entrepot.actif : true
+            actif: entrepot.actif !== undefined ? entrepot.actif : true,
+            latitude: entrepot.latitude || null,
+            longitude: entrepot.longitude || null
         });
         setShowForm(true);
     };
@@ -108,7 +126,9 @@ const EntrepotManagement = () => {
             responsableNom: '',
             telephone: '',
             email: '',
-            actif: true
+            actif: true,
+            latitude: null,
+            longitude: null
         });
         setShowForm(false);
         setEditingEntrepot(null);
@@ -141,7 +161,37 @@ const EntrepotManagement = () => {
                         </div>
                         <div className="entrepot_management-form-group">
                             <label>Adresse</label>
-                            <input type="text" name="adresse" value={formData.adresse} onChange={handleInputChange} />
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                <input 
+                                    type="text" 
+                                    name="adresse" 
+                                    value={formData.adresse} 
+                                    onChange={handleInputChange} 
+                                    style={{ flex: 1 }}
+                                    placeholder="Adresse de l'entrepôt"
+                                />
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowMapPicker(true)}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #4361ee, #3a56d4)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        padding: '8px 16px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    <FaMapMarkerAlt /> Choisir sur la carte
+                                </button>
+                            </div>
+                            <small className="field-hint">
+                                Cliquez sur le bouton pour sélectionner l'emplacement sur la carte
+                            </small>
                         </div>
                         <div className="entrepot_management-form-group">
                             <label>Ville</label>
@@ -173,6 +223,14 @@ const EntrepotManagement = () => {
                                 {' '}Actif
                             </label>
                         </div>
+                        {formData.latitude && formData.longitude && (
+                            <div className="entrepot_management-form-group">
+                                <label>Coordonnées GPS</label>
+                                <div style={{ background: '#f0f9ff', padding: '8px 12px', borderRadius: '8px', fontSize: '12px' }}>
+                                    📍 Latitude: {formData.latitude} | Longitude: {formData.longitude}
+                                </div>
+                            </div>
+                        )}
                         <div className="entrepot_management-form-actions">
                             <button type="button" className="entrepot_management-btn-cancel" onClick={resetForm}>
                                 <FaTimes /> Annuler
@@ -218,6 +276,14 @@ const EntrepotManagement = () => {
                     </tbody>
                 </table>
             </div>
+
+            {showMapPicker && (
+                <MapPickerModal
+                    onClose={() => setShowMapPicker(false)}
+                    onSelect={handleLocationSelect}
+                    initialAddress={formData.adresse}
+                />
+            )}
         </div>
     );
 };

@@ -1,0 +1,327 @@
+.livraisons-attente-container {
+    padding: 24px;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.header h2 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.5rem;
+}
+
+.btn-refresh {
+    background: #f1f5f9;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+    background: #e2e8f0;
+}
+
+.livraisons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+}
+
+.livraison-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #eef2f6;
+}
+
+.livraison-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: white;
+}
+
+.bl-number {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.header-icon {
+    font-size: 1.1rem;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-assignee {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.status-en-cours {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status-livree {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.card-body {
+    padding: 16px 20px;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+}
+
+.info-label {
+    width: 120px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.info-value {
+    flex: 1;
+    color: #1e293b;
+    word-break: break-word;
+}
+
+.card-footer {
+    padding: 12px 20px 20px 20px;
+    border-top: 1px solid #eef2f6;
+}
+
+.btn-show-otp {
+    width: 100%;
+    background: linear-gradient(135deg, #4361ee, #3a56d4);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-show-otp:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 16px;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: #64748b;
+}
+
+.loading {
+    text-align: center;
+    padding: 60px;
+    font-size: 1.1rem;
+    color: #64748b;
+}
+
+.alert {
+    padding: 12px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.alert.error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.alert.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+/* Modal OTP */
+.otp-modal {
+    background: white;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px;
+    animation: slideUp 0.2s ease;
+    box-shadow: 0 20px 35px -10px rgba(0,0,0,0.3);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid #eef2f6;
+    background: #fafcff;
+    border-radius: 20px 20px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #1e293b;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: color 0.2s;
+}
+
+.modal-close:hover {
+    color: #ef4444;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.otp-info {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.otp-info p {
+    margin: 0.3rem 0;
+    font-size: 0.85rem;
+}
+
+.otp-code-container {
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.otp-code-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.otp-code-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    font-family: monospace;
+    letter-spacing: 8px;
+    color: #1e293b;
+    background: #f1f5f9;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    display: inline-block;
+    margin: 0.5rem 0;
+}
+
+.btn-copy-otp {
+    background: #e2e8f0;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: 0.2s;
+    margin-top: 0.5rem;
+}
+
+.btn-copy-otp:hover {
+    background: #cbd5e1;
+}
+
+.otp-instruction {
+    background: #fef9e3;
+    padding: 0.8rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+}
+
+.otp-instruction p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #b45309;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #eef2f6;
+    text-align: right;
+}
+
+.btn-close {
+    background: #f1f5f9;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.btn-close:hover {
+    background: #e2e8f0;
+}

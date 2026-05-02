@@ -1,0 +1,239 @@
+.map-picker-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.map-picker-modal {
+    background: white;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.map-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eef2f6;
+    background: #fafcff;
+}
+
+.map-picker-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #1e293b;
+}
+
+.map-picker-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: color 0.2s;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.map-picker-close:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.map-picker-search {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eef2f6;
+}
+
+.map-picker-search form {
+    display: flex;
+    gap: 10px;
+}
+
+.map-picker-search input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.map-picker-search input:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.map-picker-search button {
+    background: linear-gradient(135deg, #4361ee, #3a56d4);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0 20px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.map-picker-search button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+}
+
+.map-picker-search button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.map-picker-instructions {
+    padding: 0.5rem 1.5rem;
+    background: #fef9e3;
+    border-bottom: 1px solid #fde68a;
+}
+
+.map-picker-instructions p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #b45309;
+}
+
+.map-picker-container {
+    height: 400px;
+    width: 100%;
+    background: #e2e8f0;
+    z-index: 1;
+}
+
+.map-picker-error {
+    margin: 10px 1.5rem;
+    padding: 10px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.map-picker-selected {
+    padding: 1rem 1.5rem;
+    background: #f0f9ff;
+    border-top: 1px solid #bae6fd;
+}
+
+.selected-info {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.selected-info svg {
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+.selected-info div {
+    flex: 1;
+}
+
+.selected-info strong {
+    display: block;
+    font-size: 0.85rem;
+    color: #0369a1;
+    margin-bottom: 4px;
+}
+
+.selected-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #1e293b;
+    word-break: break-word;
+}
+
+.selected-info small {
+    font-size: 0.7rem;
+    color: #64748b;
+}
+
+.map-picker-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #eef2f6;
+    background: #f8fafc;
+}
+
+.map-picker-actions .btn-cancel {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 10px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.map-picker-actions .btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.map-picker-actions .btn-confirm {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.map-picker-actions .btn-confirm:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.map-picker-actions .btn-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

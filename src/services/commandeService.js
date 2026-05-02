@@ -95,3 +95,9 @@ export const getCommandesTransfertAPreparer = async () => {
     const response = await axios.get(`${API_URL}/transfert/preparer`, getAuthHeader());
     return response.data;
 };
+
+// ========== NOUVELLE MÉTHODE : Récupérer les livraisons en attente pour l'entrepôt demandeur ==========
+export const getLivraisonsEntrepotAttente = async () => {
+    const response = await axios.get(`http://localhost:8080/api/transporteur/livraisons/entrepot/attente`, getAuthHeader());
+    return response.data;
+};
