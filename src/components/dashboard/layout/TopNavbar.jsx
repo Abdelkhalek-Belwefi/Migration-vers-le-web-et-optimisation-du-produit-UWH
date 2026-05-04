@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaSignOutAlt, FaWarehouse, FaBell, FaSearch, FaLock, FaUserCircle } from 'react-icons/fa';
+import NotificationBell from '../../notification/NotificationBell';
 import './TopNavbar.css';
 
 const TopNavbar = ({ userPrenom, userName, userRole, profileImage, onLogout, onProfileClick, onPasswordClick }) => {
@@ -45,20 +46,15 @@ const TopNavbar = ({ userPrenom, userName, userRole, profileImage, onLogout, onP
         <nav className="top-navbar">
             <div className="navbar-left">
                 <div className="logo">
-                   
                     <span className="logo-text">WAREHOUSE SOLUTION</span>
                 </div>
-                
-                
             </div>
 
             <div className="navbar-right">
-                <button className="notification-btn">
-                    <FaBell />
-                    <span className="notification-badge">1</span>
-                </button>
+                {/* Cloche de notification unique */}
+                <NotificationBell />
 
-                {/* ✅ Menu utilisateur avec dropdown à droite */}
+                {/* Menu utilisateur avec dropdown à droite */}
                 <div className="user-menu-container" ref={menuRef}>
                     <button 
                         className="user-avatar-btn" 
@@ -73,7 +69,7 @@ const TopNavbar = ({ userPrenom, userName, userRole, profileImage, onLogout, onP
                         )}
                     </button>
 
-                    {/* ✅ Menu déroulant positionné à droite */}
+                    {/* Menu déroulant positionné à droite */}
                     {showUserMenu && (
                         <div className="user-dropdown-menu right-aligned">
                             <div className="dropdown-header">

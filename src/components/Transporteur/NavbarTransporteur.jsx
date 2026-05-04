@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaSignOutAlt, FaBell, FaLock, FaChevronDown, FaQuestionCircle, FaSearch } from 'react-icons/fa';
+import NotificationBell from '../notification/NotificationBell';
 import './NavbarTransporteur.css';
 
 const NavbarTransporteur = ({ userPrenom, userName, userRole, profileImage, onLogout, onProfileClick, onPasswordClick }) => {
@@ -37,9 +38,10 @@ const NavbarTransporteur = ({ userPrenom, userName, userRole, profileImage, onLo
                 <div className="NavbarTransporteur-nav-right-section">
                     <div className="NavbarTransporteur-nav-actions">
                         <button className="NavbarTransporteur-nav-icon-btn"><FaSearch /></button>
-                        
-                        
                     </div>
+
+                    {/* Cloche de notification */}
+                    <NotificationBell />
 
                     <div className="NavbarTransporteur-nav-divider"></div>
 
