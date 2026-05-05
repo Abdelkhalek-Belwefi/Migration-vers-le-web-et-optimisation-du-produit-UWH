@@ -67,10 +67,14 @@ const LoginForm = () => {
               <input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={loading} />
             </div>
 
+
             <button type="submit" className="w-trigger-action" disabled={loading}>
               {loading ? "Chargement..." : "Login to Dashboard"}
             </button>
           </form>
+           <div className="w-forgot-password">
+              <Link to="/forgot-password">Mot de passe oublié ?</Link>
+            </div>
 
           <p className="w-anchor-route">
             Pas encore de compte ? <Link to="/signup">S'inscrire</Link>

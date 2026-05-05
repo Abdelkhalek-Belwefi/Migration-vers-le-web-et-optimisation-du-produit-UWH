@@ -196,3 +196,17 @@
 @media (max-width: 900px) {
   .w-visual-sector { display: none; }
 }
+.w-forgot-password {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.w-forgot-password a {
+    color: #ff6b00;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.w-forgot-password a:hover {
+    text-decoration: underline;
+}

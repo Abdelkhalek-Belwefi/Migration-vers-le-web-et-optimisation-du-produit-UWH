@@ -7,6 +7,8 @@ import Signup from "./pages/Signup";
 import Dashboard_warehouse from "./pages/Dashboard_warehouse";
 import AdminDashboard from "./pages/AdminDashboard";
 import EnAttente from "./pages/EnAttente";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import ArticleList from "./components/articles/ArticleList";
 import StockList from "./components/stock/StockList";
 import PrivateRoute from "./components/route/PrivateRoute";
@@ -29,6 +31,10 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/en-attente" element={<EnAttente />} />
+        
+        {/* ===== MOT DE PASSE OUBLIÉ ===== */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* ===== ROUTES PROTÉGÉES ===== */}
         <Route

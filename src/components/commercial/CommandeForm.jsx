@@ -15,8 +15,7 @@ const CommandeForm = ({ commande, onSuccess, onCancel }) => {
         notes: commande?.notes || '',
         lignes: commande?.lignes?.map(l => ({
             articleId: l.articleId,
-            quantite: l.quantite,
-            prixUnitaire: l.prixUnitaire
+            quantite: l.quantite
         })) || []
     });
     const [loading, setLoading] = useState(false);
@@ -47,7 +46,7 @@ const CommandeForm = ({ commande, onSuccess, onCancel }) => {
     const handleAddLigne = () => {
         setFormData({
             ...formData,
-            lignes: [...formData.lignes, { articleId: '', quantite: 1, prixUnitaire: '' }]
+            lignes: [...formData.lignes, { articleId: '', quantite: 1 }]
         });
     };
 
@@ -79,8 +78,7 @@ const CommandeForm = ({ commande, onSuccess, onCancel }) => {
             notes: formData.notes || '',
             lignes: formData.lignes.map(l => ({
                 articleId: parseInt(l.articleId),
-                quantite: parseInt(l.quantite) || 1,
-                prixUnitaire: l.prixUnitaire ? parseFloat(l.prixUnitaire) : null
+                quantite: parseInt(l.quantite) || 1
             }))
         };
 
