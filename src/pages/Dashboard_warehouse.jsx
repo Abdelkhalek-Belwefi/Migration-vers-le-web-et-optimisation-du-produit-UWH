@@ -34,6 +34,7 @@ import ImpressionDocuments from "../components/expedition/ImpressionDocuments";
 import StockFaibleList from "../components/transfert/StockFaibleList";
 import DemandesRecuesList from "../components/transfert/DemandesRecuesList";
 import LivraisonsAttenteList from "../components/transfert/LivraisonsAttenteList";
+import ChatBot from "../components/chatbot/ChatBot";
 
 import "../styles/dashboard.css";
 
@@ -382,6 +383,9 @@ const Dashboard_warehouse = () => {
           {renderContent()}
         </div>
       </div>
+
+      {/* ChatBot */}
+      <ChatBot userRole={userRole} userId={localStorage.getItem('userId')} />
     </div>
   );
 };

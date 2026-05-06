@@ -7,6 +7,10 @@
     <title>pfe_warehouse</title>
     <!-- ✅ Ajoutez cette ligne pour Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- ✅ Ajout du polyfill pour global (sockjs-client) -->
+    <script>
+      window.global = window;
+    </script>
   </head>
   <body>
     <div id="root"></div>
