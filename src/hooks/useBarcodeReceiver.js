@@ -15,7 +15,7 @@ const connectWebSocket = () => {
       return;
     }
 
-    const WS_URL = "ws://172.20.197.167:3001";
+    const WS_URL = "ws://10.206.9.167:3001";
     const ws = new WebSocket(WS_URL);
     globalWs = ws;
 
@@ -33,10 +33,23 @@ const connectWebSocket = () => {
 
     ws.onmessage = (event) => {
       const data = event.data;
-      console.log("📥 Message reçu:", data);
+      console.log("📦 Reçu:", data.substring(0, 100) + (data.length > 100 ? "..." : ""));
 
+      // ========== DÉTECTION OCR - MESSAGE JSON AVEC numeroPO OU bonLivraison ==========
+      if (typeof data === 'string' && (data.includes('"numeroPO"') || data.includes('"bonLivraison"'))) {
+        try {
+          const parsed = JSON.parse(data);
+          console.log("📊 OCR détecté, déclenchement événement:", parsed);
+          // Déclencher l'événement pour que le formulaire l'écoute
+          window.dispatchEvent(new CustomEvent("ocr-data", { detail: parsed }));
+          return; // Sortie immédiate, ne pas traiter comme code-barres
+        } catch(e) {
+          console.log("Erreur parsing JSON:", e);
+        }
+      }
+
+      // ========== DIFFUSION DES MESSAGES POUR AUTRES USAGES ==========
       if (typeof window !== "undefined") {
-        console.log("📢 Déclenchement événement websocket-message");
         window.dispatchEvent(
           new CustomEvent("websocket-message", { detail: data })
         );
@@ -47,6 +60,7 @@ const connectWebSocket = () => {
         return;
       }
 
+      // ========== TRAITEMENT DES CODE-BARRES (INJECTION DIRECTE) ==========
       let cleaned = data.replace(/[\x00-\x1F\x7F]/g, "").trim();
       if (cleaned === "✅ Connecté au serveur de scan" || cleaned === "ping")
         return;
@@ -104,7 +118,6 @@ const connectWebSocket = () => {
     };
   } catch (error) {
     console.error("Erreur lors de la connexion WebSocket:", error);
-    // Ne pas propager l'erreur pour éviter de casser le rendu
   }
 };
 

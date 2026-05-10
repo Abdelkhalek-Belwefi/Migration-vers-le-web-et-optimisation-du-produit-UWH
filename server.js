@@ -25,15 +25,17 @@ wss.on('connection', (ws) => {
     const msgStr = message.toString();
     console.log(`📦 Reçu: ${msgStr.substring(0, 100)}...`);
 
+    // ========== TRAITEMENT OCR ==========
     if (msgStr.startsWith('OCR:')) {
       console.log('🔍 Message OCR détecté');
       const base64Image = msgStr.substring(4);
-      await processOCR(ws, base64Image);
+      await processOCR(base64Image);
       return;
     }
 
     if (msgStr === 'ping') return;
 
+    // ========== DIFFUSION DES CODE-BARRES À TOUS LES CLIENTS ==========
     let count = 0;
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
@@ -41,7 +43,7 @@ wss.on('connection', (ws) => {
         count++;
       }
     });
-    console.log(`📤 Code diffusé à ${count} client(s)`);
+    console.log(`📤 Code-barres diffusé à ${count} client(s)`);
   });
 
   ws.on('close', () => {
@@ -54,7 +56,8 @@ wss.on('connection', (ws) => {
   });
 });
 
-async function processOCR(ws, base64Image) {
+// ========== FONCTION OCR - DIFFUSE LE RÉSULTAT À TOUS LES CLIENTS ==========
+async function processOCR(base64Image) {
   console.log('📤 Envoi de l\'image au backend OCR...');
   try {
     const imageBuffer = Buffer.from(base64Image, 'base64');
@@ -70,21 +73,32 @@ async function processOCR(ws, base64Image) {
     });
 
     console.log('✅ Résultat OCR:', response.data);
-    const message = JSON.stringify({
-      type: 'OCR_RESULT',
-      data: response.data
+    
+    // Envoyer le JSON directement à TOUS les clients
+    const message = JSON.stringify(response.data);
+    
+    let count = 0;
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+        count++;
+      }
     });
-    ws.send(message);
-    console.log('📤 Résultat envoyé au client');
+    console.log(`📤 Résultat OCR diffusé à ${count} client(s)`);
+    
   } catch (error) {
     console.error('❌ Erreur OCR:', error.message);
     if (error.response) {
       console.error('Status:', error.response.status);
       console.error('Data:', error.response.data);
     }
-    ws.send(JSON.stringify({
-      type: 'OCR_ERROR',
-      error: error.message
-    }));
+    
+    // Envoyer l'erreur à tous les clients
+    const errorMessage = JSON.stringify({ error: error.message });
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(errorMessage);
+      }
+    });
   }
 }

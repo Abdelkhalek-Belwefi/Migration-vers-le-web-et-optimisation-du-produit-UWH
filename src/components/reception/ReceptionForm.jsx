@@ -49,6 +49,36 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         loadArticles();
     }, []);
 
+    // ========== ÉCOUTEUR UNIQUE POUR OCR (PROPRE ET SIMPLE) ==========
+    useEffect(() => {
+        const handleOCRData = (event) => {
+            const { numeroPO, bonLivraison, dateReception, fournisseur } = event.detail;
+            
+            console.log("📄 Données OCR reçues dans le formulaire:", { numeroPO, bonLivraison, dateReception, fournisseur });
+            
+            // Mise à jour directe du state React
+            setFormData(prev => ({
+                ...prev,
+                numeroPO: numeroPO || prev.numeroPO,
+                bonLivraison: bonLivraison || prev.bonLivraison,
+                fournisseur: fournisseur || prev.fournisseur,
+                dateReception: dateReception || prev.dateReception
+            }));
+            
+            // Message de succès
+            if (numeroPO || bonLivraison) {
+                setSuccess(`✅ Document analysé : ${numeroPO ? `PO: ${numeroPO}` : ''} ${bonLivraison ? `BL: ${bonLivraison}` : ''}`);
+                setTimeout(() => setSuccess(''), 5000);
+            }
+        };
+        
+        window.addEventListener('ocr-data', handleOCRData);
+        
+        return () => {
+            window.removeEventListener('ocr-data', handleOCRData);
+        };
+    }, []);
+
     const loadArticles = async () => {
         try {
             const data = await articleService.getAllArticles();
@@ -58,12 +88,10 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // ========== NOUVELLE FONCTION : Récupérer l'emplacement avec le stock le plus faible ==========
     const getLowestStockLocation = async (articleId) => {
         try {
             const stocks = await stockService.getStocksByArticle(articleId);
             if (stocks && stocks.length > 0) {
-                // Trier par quantité croissante et prendre le premier (stock le plus faible)
                 const lowestStock = stocks.sort((a, b) => a.quantite - b.quantite)[0];
                 return lowestStock.emplacement;
             }
@@ -105,12 +133,10 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
                             updates.quantiteAttendue = gs1Data.quantite ? gs1Data.quantite.toString() : '1';
                             updates.quantiteRecue = gs1Data.quantite ? gs1Data.quantite.toString() : '1';
                             
-                            // 🔹 LOT AUTOMATIQUE : utiliser le lot par défaut de l'article si disponible
                             if (article.lotDefaut && !updates.lot) {
                                 updates.lot = article.lotDefaut;
                             }
                             
-                            // 🔹 EMPLACEMENT AUTOMATIQUE : chercher l'emplacement avec le stock le plus faible
                             const lowestLocation = await getLowestStockLocation(article.id);
                             if (lowestLocation && !updates.emplacementDestination) {
                                 updates.emplacementDestination = lowestLocation;
@@ -255,30 +281,11 @@ const ReceptionForm = ({ onSuccess, onCancel }) => {
         }
     };
 
+    // ========== GESTION DU MODE FOCUS POUR OCR (GARDÉ POUR COMPATIBILITÉ) ==========
     useEffect(() => {
         const handleWebSocketMessage = (event) => {
             const message = event.detail;
-            console.log('📨 Message WebSocket reçu dans ReceptionForm:', message);
-            if (typeof message === 'string' && message.startsWith('{')) {
-                try {
-                    const parsed = JSON.parse(message);
-                    if (parsed.type === 'OCR_RESULT' && parsed.data) {
-                        setFormData(prev => ({
-                            ...prev,
-                            numeroPO: parsed.data.numeroPO || prev.numeroPO,
-                            fournisseur: parsed.data.fournisseur || prev.fournisseur,
-                            bonLivraison: parsed.data.bonLivraison || prev.bonLivraison,
-                            dateReception: parsed.data.dateReception || prev.dateReception
-                        }));
-                        setSuccess('✅ Document analysé avec succès');
-                        setTimeout(() => setSuccess(''), 3000);
-                    } else if (parsed.type === 'OCR_ERROR') {
-                        setError(parsed.error);
-                    }
-                } catch (e) {
-                    console.error('Erreur parsing JSON:', e);
-                }
-            } else if (ocrFocusMode && typeof message === 'string' && message.startsWith('OCR:')) {
+            if (ocrFocusMode && typeof message === 'string' && message.startsWith('OCR:')) {
                 const base64Image = message.substring(4);
                 processOcrImage(base64Image);
             }
