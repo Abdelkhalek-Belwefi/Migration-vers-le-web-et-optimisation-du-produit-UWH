@@ -9,16 +9,18 @@ import {
     FaTachometerAlt,
     FaBoxes,
     FaHome,
-    FaList  // Ajout pour l'icône des catégories
+    FaList,
+    FaChartLine
 } from 'react-icons/fa';
 import Sidebar from '../components/dashboard/layout/Sidebar';
 import UserManagement from '../components/admin/UserManagement';
 import ArticleList from '../components/articles/ArticleList';
 import StockList from '../components/stock/StockList';
 import AdminStats from '../components/admin/stats/AdminStats';
-import CategoryManagement from '../components/admin/CategoryManagement'; // Nouveau composant
+import CategoryManagement from '../components/admin/CategoryManagement';
 import '../styles/admin-dashboard.css';
-import EntrepotManagement from '../components/admin/EntrepotManagement'; // ← nouvelle ligne
+import EntrepotManagement from '../components/admin/EntrepotManagement';
+import PrevisionChart from '../components/prevision/PrevisionChart';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -45,10 +47,11 @@ const AdminDashboard = () => {
     const menuItems = [
         { id: 'dashboard', label: 'Tableau de bord', icon: <FaHome /> },
         { id: 'users', label: 'Utilisateurs', icon: <FaUsers /> },
-        { id: 'categories', label: 'Catégories', icon: <FaList /> }, // Nouvel élément
+        { id: 'categories', label: 'Catégories', icon: <FaList /> },
+        { id: 'previsions', label: 'Prévisions 7j', icon: <FaChartLine /> },
         { id: 'articles', label: 'Catalogue articles', icon: <FaBoxOpen /> },
         { id: 'stocks', label: 'Gestion des Stocks', icon: <FaBoxes /> },
-        { id: 'entrepots', label: 'Entrepôts', icon: <FaBoxes /> }, // ajouter nouvelle 
+        { id: 'entrepots', label: 'Entrepôts', icon: <FaBoxes /> },
         { id: 'logout', label: 'Déconnexion', icon: <FaSignOutAlt />, action: handleLogout }
     ];
 
@@ -66,10 +69,10 @@ const AdminDashboard = () => {
                 {activeTab === 'dashboard' && <AdminStats />}
                 {activeTab === 'users' && <UserManagement />}
                 {activeTab === 'categories' && <CategoryManagement />}
-                {activeTab === 'entrepots' && <EntrepotManagement />} {/* 🆕 AJOUT */} 
+                {activeTab === 'previsions' && <PrevisionChart />}
+                {activeTab === 'entrepots' && <EntrepotManagement />}
                 {activeTab === 'articles' && <ArticleList />}
                 {activeTab === 'stocks' && <StockList />}
-                
             </div>
         </div>
     );

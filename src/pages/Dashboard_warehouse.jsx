@@ -15,7 +15,8 @@ import {
     FaShoppingCart,
     FaExclamationTriangle,
     FaInbox,
-    FaClock
+    FaClock,
+    FaChartLine  // ← AJOUTÉ POUR L'ICÔNE DES PRÉVISIONS
 } from 'react-icons/fa';
 import Sidebar from "../components/dashboard/layout/Sidebar";
 import TopNavbar from "../components/dashboard/layout/TopNavbar";
@@ -35,6 +36,7 @@ import StockFaibleList from "../components/transfert/StockFaibleList";
 import DemandesRecuesList from "../components/transfert/DemandesRecuesList";
 import LivraisonsAttenteList from "../components/transfert/LivraisonsAttenteList";
 import ChatBot from "../components/chatbot/ChatBot";
+import PrevisionChart from "../components/prevision/PrevisionChart";  // ← AJOUTÉ
 
 import "../styles/dashboard.css";
 
@@ -120,6 +122,7 @@ const Dashboard_warehouse = () => {
       case "OPERATEUR_ENTREPOT":
         return [
           ...baseItems,
+          { id: "previsions", label: "Prévisions 7j", icon: <FaChartLine /> },  // ← AJOUTÉ
           { id: "reception", label: "Réception", icon: <FaBoxes /> },
           { id: "rangement", label: "Rangement", icon: <FaClipboardList /> },
           { id: "preparation", label: "Préparation de commandes", icon: <FaClipboardList /> },
@@ -130,13 +133,14 @@ const Dashboard_warehouse = () => {
       case "RESPONSABLE_ENTREPOT":
         return [
           ...baseItems,
+          { id: "previsions", label: "Prévisions 7j", icon: <FaChartLine /> },  // ← AJOUTÉ
           { id: "stock", label: "Consultation Stock", icon: <FaBoxes /> },
           { id: "mouvements", label: "Historique mouvements", icon: <FaHistory /> },
           { id: "reception", label: "Validation Réception", icon: <FaCheckCircle /> },
           { id: "rangement", label: "Suivi Rangement", icon: <FaClipboardList /> },
           { id: "expedier", label: "Expéditions", icon: <FaTruck /> },
           { id: "documents", label: "Impression Documents", icon: <FaPrint /> },
-          { id: "synchronisation", label: "Synchronisation ERP", icon: <FaSync /> },
+          
           // ========== NOUVEAUX MENU ITEMS POUR TRANSFERT ==========
           { id: "stockFaible", label: "Stock faible", icon: <FaExclamationTriangle /> },
           { id: "demandesRecues", label: "Demandes reçues", icon: <FaInbox /> },
@@ -147,6 +151,7 @@ const Dashboard_warehouse = () => {
       case "SERVICE_COMMERCIAL":
         return [
           ...baseItems,
+          { id: "previsions", label: "Prévisions 7j", icon: <FaChartLine /> },  // ← AJOUTÉ (optionnel)
           { id: "commandes", label: "Commandes", icon: <FaShoppingCart /> },
           { id: "clients", label: "Clients", icon: <FaBoxOpen /> }
         ];
@@ -184,7 +189,8 @@ const Dashboard_warehouse = () => {
       clients: "Gestion des clients",
       stockFaible: "Stocks faibles - Déclarer un besoin",
       demandesRecues: "Demandes de transfert reçues",
-      livraisonsAttente: "Livraisons en attente - Codes OTP"
+      livraisonsAttente: "Livraisons en attente - Codes OTP",
+      previsions: "Prévisions de charge - 7 jours"  // ← AJOUTÉ
     };
     return titles[tabId] || tabId;
   };
@@ -341,6 +347,10 @@ const Dashboard_warehouse = () => {
       // ========== NOUVEAU CAS POUR LES LIVRAISONS EN ATTENTE ==========
       case "livraisonsAttente":
         return <LivraisonsAttenteList />;
+
+      // ========== NOUVEAU CAS POUR LES PRÉVISIONS 7 JOURS ==========
+      case "previsions":
+        return <PrevisionChart />;
 
       default:
         return (

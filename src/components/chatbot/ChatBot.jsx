@@ -716,7 +716,7 @@ Tapez "Aide" pour la liste.`;
         <div className="chatbot-container">
             <div className="chatbot-window">
                 <div className="chatbot-header">
-                    <h3><FaRobot /> L-Mobile Smart-Assist</h3>
+                    <h3><FaRobot /> Warehouse_Solution</h3>
                     <button className="chatbot-close" onClick={() => setIsOpen(false)}>
                         <FaTimes />
                     </button>
