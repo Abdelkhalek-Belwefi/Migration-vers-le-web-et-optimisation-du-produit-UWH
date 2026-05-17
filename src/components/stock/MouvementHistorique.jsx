@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { mouvementService } from '../../services/mouvementService';
-import { FaDownload, FaSearch, FaUndo } from 'react-icons/fa';
+import { 
+    FaDownload, 
+    FaSearch, 
+    FaUndo, 
+    FaPlus, 
+    FaMinus, 
+    FaExchangeAlt,
+    FaBox,
+    FaTag,
+    FaMapMarkerAlt,
+    FaArrowRight,
+    FaEdit,
+    FaTrashAlt,
+    FaUndoAlt,
+    FaClipboardList,
+    FaExclamationTriangle
+} from 'react-icons/fa';
 import './styles/MouvementHistorique.css';
 
 const MouvementHistorique = () => {
@@ -23,7 +39,7 @@ const MouvementHistorique = () => {
         try {
             setLoading(true);
             const data = await mouvementService.getAllMouvements();
-            console.log('📦 Mouvements reçus:', data); // Pour déboguer
+            console.log('📦 Mouvements reçus:', data);
             setMouvements(data);
             setFilteredMouvements(data);
             setError('');
@@ -46,17 +62,6 @@ const MouvementHistorique = () => {
 
         if (searchParams.motif) {
             filtered = filtered.filter(m => m.motif === searchParams.motif);
-        }
-
-        if (searchParams.dateDebut) {
-            const debut = new Date(searchParams.dateDebut);
-            filtered = filtered.filter(m => new Date(m.dateMouvement) >= debut);
-        }
-
-        if (searchParams.dateFin) {
-            const fin = new Date(searchParams.dateFin);
-            fin.setHours(23, 59, 59);
-            filtered = filtered.filter(m => new Date(m.dateMouvement) <= fin);
         }
 
         setFilteredMouvements(filtered);
@@ -82,7 +87,6 @@ const MouvementHistorique = () => {
     const handleExportCSV = () => {
         const headers = ['Date', 'Article', 'Lot(s)', 'Emplacement(s)', 'Type', 'Qté', 'Ancien', 'Nouveau', 'Motif', 'Utilisateur', 'Commentaire'];
         const csvData = filteredMouvements.map(m => {
-            // Formater les lots et emplacements selon le type
             let lots = m.lotSource || '-';
             let emplacements = m.emplacementSource || '-';
             if (m.type === 'TRANSFERT' && m.lotDestination) {
@@ -117,64 +121,74 @@ const MouvementHistorique = () => {
 
     const getTypeIcon = (type) => {
         switch(type) {
-            case 'ENTREE': return '➕';
-            case 'SORTIE': return '➖';
-            case 'TRANSFERT': return '🔄';
-            default: return '';
+            case 'ENTREE': return <FaPlus className="mvt-icon-entree" />;
+            case 'SORTIE': return <FaMinus className="mvt-icon-sortie" />;
+            case 'TRANSFERT': return <FaExchangeAlt className="mvt-icon-transfert" />;
+            default: return <FaBox />;
+        }
+    };
+
+    const getMotifIcon = (motif) => {
+        switch(motif) {
+            case 'RECEPTION': return <FaClipboardList />;
+            case 'VENTE': return <FaTag />;
+            case 'TRANSFERT': return <FaExchangeAlt />;
+            case 'CORRECTION': return <FaEdit />;
+            case 'RETOUR': return <FaUndoAlt />;
+            case 'QUALITE': return <FaExclamationTriangle />;
+            default: return <FaBox />;
         }
     };
 
     const getMotifLabel = (motif) => {
         const labels = {
-            'RECEPTION': '📦 Réception',
-            'VENTE': '🛒 Vente',
-            'TRANSFERT': '🔄 Transfert',
-            'CORRECTION': '✏️ Correction',
-            'RETOUR': '↩️ Retour',
-            'QUALITE': '🔬 Contrôle qualité'
+            'RECEPTION': 'Réception',
+            'VENTE': 'Vente',
+            'TRANSFERT': 'Transfert',
+            'CORRECTION': 'Correction',
+            'RETOUR': 'Retour',
+            'QUALITE': 'Contrôle qualité'
         };
         return labels[motif] || motif;
     };
 
-    // Affichage des lots avec flèche pour les transferts
     const renderLots = (m) => {
         if (m.type === 'TRANSFERT' && m.lotDestination) {
             return (
-                <span title={`Source: ${m.lotSource}, Destination: ${m.lotDestination}`}>
-                    {m.lotSource} → {m.lotDestination}
+                <span className="mvt-lots-transfer" title={`Source: ${m.lotSource}, Destination: ${m.lotDestination}`}>
+                    {m.lotSource} <FaArrowRight className="mvt-arrow-icon" /> {m.lotDestination}
                 </span>
             );
         }
         return m.lotSource || '-';
     };
 
-    // Affichage des emplacements avec flèche pour les transferts
     const renderEmplacements = (m) => {
         if (m.type === 'TRANSFERT' && m.emplacementDestination) {
             return (
-                <span title={`Source: ${m.emplacementSource}, Destination: ${m.emplacementDestination}`}>
-                    {m.emplacementSource} → {m.emplacementDestination}
+                <span className="mvt-emplacement-transfer" title={`Source: ${m.emplacementSource}, Destination: ${m.emplacementDestination}`}>
+                    {m.emplacementSource} <FaArrowRight className="mvt-arrow-icon" /> {m.emplacementDestination}
                 </span>
             );
         }
         return m.emplacementSource || '-';
     };
 
-    if (loading) return <div className="loading">Chargement de l'historique...</div>;
+    if (loading) return <div className="mvt-loading">Chargement de l'historique...</div>;
 
     return (
-        <div className="historique-container">
-            <div className="header">
-                <h2>📋 Historique des mouvements</h2>
-                <button className="btn-export" onClick={handleExportCSV}>
+        <div className="mvt-historique-container">
+            <div className="mvt-header">
+                <h2><FaClipboardList /> Historique des mouvements</h2>
+                <button className="mvt-btn-export" onClick={handleExportCSV}>
                     <FaDownload /> Exporter CSV
                 </button>
             </div>
 
-            {error && <div className="alert error">{error}</div>}
+            {error && <div className="mvt-alert mvt-alert-error">{error}</div>}
 
-            <div className="search-section">
-                <form onSubmit={handleSearch} className="search-form">
+            <div className="mvt-search-section">
+                <form onSubmit={handleSearch} className="mvt-search-form">
                     <select name="type" value={searchParams.type} onChange={handleInputChange}>
                         <option value="">Tous les types</option>
                         <option value="ENTREE">Entrées</option>
@@ -192,33 +206,17 @@ const MouvementHistorique = () => {
                         <option value="QUALITE">Contrôle qualité</option>
                     </select>
 
-                    <input
-                        type="date"
-                        name="dateDebut"
-                        value={searchParams.dateDebut}
-                        onChange={handleInputChange}
-                        placeholder="Date début"
-                    />
-
-                    <input
-                        type="date"
-                        name="dateFin"
-                        value={searchParams.dateFin}
-                        onChange={handleInputChange}
-                        placeholder="Date fin"
-                    />
-
-                    <button type="submit" className="btn-search">
+                    <button type="submit" className="mvt-btn-search">
                         <FaSearch /> Filtrer
                     </button>
-                    <button type="button" className="btn-reset" onClick={handleReset}>
+                    <button type="button" className="mvt-btn-reset" onClick={handleReset}>
                         <FaUndo /> Réinitialiser
                     </button>
                 </form>
             </div>
 
-            <div className="table-container">
-                <table className="mouvements-table">
+            <div className="mvt-table-container">
+                <table className="mvt-mouvements-table">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -236,18 +234,20 @@ const MouvementHistorique = () => {
                     </thead>
                     <tbody>
                         {filteredMouvements.map(m => (
-                            <tr key={m.id} className={m.type?.toLowerCase()}>
+                            <tr key={m.id} className={`mvt-row-${m.type?.toLowerCase()}`}>
                                 <td>{new Date(m.dateMouvement).toLocaleString()}</td>
                                 <td>{m.articleDesignation} ({m.articleCode})</td>
                                 <td>{renderLots(m)}</td>
                                 <td>{renderEmplacements(m)}</td>
-                                <td className="type-cell">
+                                <td className="mvt-type-cell">
                                     {getTypeIcon(m.type)} {m.type}
                                 </td>
-                                <td className="quantite-cell">{m.quantite}</td>
+                                <td className="mvt-quantite-cell">{m.quantite}</td>
                                 <td>{m.ancienneQuantiteSource}</td>
-                                <td className="nouvelle-quantite">{m.nouvelleQuantiteSource}</td>
-                                <td>{getMotifLabel(m.motif)}</td>
+                                <td className="mvt-nouvelle-quantite">{m.nouvelleQuantiteSource}</td>
+                                <td className="mvt-motif-cell">
+                                    {getMotifIcon(m.motif)} {getMotifLabel(m.motif)}
+                                </td>
                                 <td>{m.utilisateurNom || 'Système'}</td>
                                 <td>{m.commentaire || '-'}</td>
                             </tr>
@@ -257,7 +257,7 @@ const MouvementHistorique = () => {
             </div>
 
             {filteredMouvements.length === 0 && (
-                <div className="no-data">Aucun mouvement trouvé</div>
+                <div className="mvt-no-data">Aucun mouvement trouvé</div>
             )}
         </div>
     );

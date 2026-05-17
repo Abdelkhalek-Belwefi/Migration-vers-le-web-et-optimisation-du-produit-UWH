@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { getAllCommandes, updateStatut, deleteCommande } from '../../services/commandeService';
 import CommandeForm from './CommandeForm';
+import CommandeDetailModal from './CommandeDetailModal';
 import './styles/commande.css';
+import { FaTrash, FaSearch, FaTimes } from "react-icons/fa";
+import { FiEdit2 } from "react-icons/fi";
 
 const CommandeList = () => {
   const [commandes, setCommandes] = useState([]);
+  const [filteredCommandes, setFilteredCommandes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingCommande, setEditingCommande] = useState(null);
+  const [numeroFilter, setNumeroFilter] = useState('');
+  const [selectedCommande, setSelectedCommande] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // Fonction de tri : date la plus récente en premier
   const sortByDateDesc = (data) => {
@@ -21,6 +28,7 @@ const CommandeList = () => {
       const data = await getAllCommandes();
       const sortedData = sortByDateDesc(data);
       setCommandes(sortedData);
+      setFilteredCommandes(sortedData);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -31,6 +39,18 @@ const CommandeList = () => {
   useEffect(() => {
     fetchCommandes();
   }, []);
+
+  // Filtre par numéro de commande
+  useEffect(() => {
+    if (numeroFilter.trim() === '') {
+      setFilteredCommandes(commandes);
+    } else {
+      const filtered = commandes.filter(cmd =>
+        cmd.numeroCommande?.toLowerCase().includes(numeroFilter.toLowerCase())
+      );
+      setFilteredCommandes(filtered);
+    }
+  }, [numeroFilter, commandes]);
 
   const handleAddClick = () => {
     setEditingCommande(null);
@@ -50,7 +70,7 @@ const CommandeList = () => {
     if (!window.confirm('Supprimer cette commande ?')) return;
     try {
       await deleteCommande(id);
-      fetchCommandes(); // recharge et retrie
+      fetchCommandes();
     } catch (err) {
       alert('Erreur lors de la suppression');
     }
@@ -59,7 +79,7 @@ const CommandeList = () => {
   const handleStatutChange = async (id, newStatut) => {
     try {
       await updateStatut(id, newStatut);
-      fetchCommandes(); // recharge et retrie
+      fetchCommandes();
     } catch (err) {
       alert('Erreur lors du changement de statut');
     }
@@ -68,6 +88,15 @@ const CommandeList = () => {
   const handleFormSuccess = () => {
     setShowForm(false);
     fetchCommandes();
+  };
+
+  const handleRowClick = (commande) => {
+    setSelectedCommande(commande);
+    setShowDetailModal(true);
+  };
+
+  const handleClearFilter = () => {
+    setNumeroFilter('');
   };
 
   const getStatutBadge = (statut) => {
@@ -92,6 +121,30 @@ const CommandeList = () => {
 
       {error && <div className="error-message">{error}</div>}
 
+      {/* Barre de filtre par numéro de commande */}
+      <div className="search-section" style={{ marginBottom: '20px' }}>
+        <div className="search-form" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ flex: 1, position: 'relative' }}>
+            <FaSearch style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
+            <input
+              type="text"
+              placeholder="Filtrer par numéro de commande..."
+              value={numeroFilter}
+              onChange={(e) => setNumeroFilter(e.target.value)}
+              style={{ paddingLeft: '35px', width: '100%' }}
+            />
+            {numeroFilter && (
+              <button
+                onClick={handleClearFilter}
+                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#999' }}
+              >
+                <FaTimes />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="commande-table-container">
         <table className="commande-table">
           <thead>
@@ -102,36 +155,38 @@ const CommandeList = () => {
               <th>Livraison souhaitée</th>
               <th>Statut</th>
               <th>Actions</th>
-              </tr>
-            </thead>
+            </tr>
+          </thead>
           <tbody>
-            {commandes.map(cmd => (
-              <tr key={cmd.id}>
-                <td>{cmd.numeroCommande}</td>
+            {filteredCommandes.map(cmd => (
+              <tr 
+                key={cmd.id} 
+                onClick={() => handleRowClick(cmd)}
+                style={{ cursor: 'pointer' }}
+                className="clickable-row"
+              >
+                <td style={{ fontWeight: '500' }}>{cmd.numeroCommande}</td>
                 <td>{cmd.clientNom}</td>
                 <td>{new Date(cmd.dateCommande).toLocaleDateString()}</td>
                 <td>{cmd.dateLivraisonSouhaitee ? new Date(cmd.dateLivraisonSouhaitee).toLocaleDateString() : '-'}</td>
                 <td>{getStatutBadge(cmd.statut)}</td>
-                <td className="action-buttons">
+                <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
                   {cmd.statut === 'EN_ATTENTE' && (
-                    <button className="btn-edit" onClick={() => handleEditClick(cmd)}>✏️</button>
+                    <button className="btn-edit" onClick={() => handleEditClick(cmd)}><FiEdit2 /></button>
                   )}
-                  <button className="btn-delete" onClick={() => handleDelete(cmd.id)}>🗑️</button>
-                  <select
-                    className="statut-select"
-                    value={cmd.statut}
-                    onChange={(e) => handleStatutChange(cmd.id, e.target.value)}
-                  >
-                    <option value="EN_ATTENTE">En attente</option>
-                    <option value="VALIDEE">Validée</option>
-                    <option value="EXPEDIEE">Expédiée</option>
-                  </select>
+                  <button className="btn-delete" onClick={() => handleDelete(cmd.id)}><FaTrash size={20} /></button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {filteredCommandes.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+          Aucune commande trouvée avec ce numéro
+        </div>
+      )}
 
       {showForm && (
         <div className="modal-overlay">
@@ -143,6 +198,13 @@ const CommandeList = () => {
             />
           </div>
         </div>
+      )}
+
+      {showDetailModal && selectedCommande && (
+        <CommandeDetailModal
+          commande={selectedCommande}
+          onClose={() => setShowDetailModal(false)}
+        />
       )}
     </div>
   );

@@ -3,6 +3,10 @@ import { stockService } from '../../services/stockService';
 import { getAllEntrepots } from '../../services/entrepotService ';
 import DeclarerTransfertModal from './DeclarerTransfertModal';
 import './StockFaibleList.css';
+import { MdLocalShipping } from "react-icons/md";
+import { FaBox } from "react-icons/fa";
+import { FaSyncAlt } from "react-icons/fa";
+import { FaCheckCircle } from "react-icons/fa";
 
 const StockFaibleList = () => {
     const [stocksFaibles, setStocksFaibles] = useState([]);
@@ -74,7 +78,7 @@ const StockFaibleList = () => {
     return (
         <div className="stock-faible-container">
             <div className="header">
-                <h2>📦 Stocks faibles</h2>
+                <h2><FaBox />Stocks faibles</h2>
                 <div className="seuil-control">
                     <label>Seuil :</label>
                     <input
@@ -85,7 +89,7 @@ const StockFaibleList = () => {
                         className="seuil-input"
                     />
                     <button className="btn-refresh" onClick={loadStocksFaibles}>
-                        🔄 Actualiser
+                        <FaSyncAlt /> Actualiser
                     </button>
                 </div>
             </div>
@@ -94,7 +98,7 @@ const StockFaibleList = () => {
 
             {stocksFaibles.length === 0 ? (
                 <div className="empty-state">
-                    <div className="empty-icon">✅</div>
+                    <div className="empty-icon"><FaCheckCircle /></div>
                     <h3>Aucun stock faible</h3>
                     <p>Tous les stocks sont supérieurs au seuil de {seuil} unités.</p>
                 </div>

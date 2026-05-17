@@ -99,11 +99,11 @@ const CommandeForm = ({ commande, onSuccess, onCancel }) => {
     };
 
     return (
-        <div className="commande-form">
+        <div className="CommFr">
             <h3>{commande ? 'Modifier la commande' : 'Nouvelle commande'}</h3>
-            {error && <div className="error-message">{error}</div>}
+            {error && <div className="CommFr-error">{error}</div>}
             <form onSubmit={handleSubmit}>
-                <div className="form-group">
+                <div className="CommFr-group">
                     <label>Client *</label>
                     <select
                         name="clientId"
@@ -118,7 +118,7 @@ const CommandeForm = ({ commande, onSuccess, onCancel }) => {
                     </select>
                 </div>
 
-                <div className="form-group">
+                <div className="CommFr-group">
                     <label>Date de livraison souhaitée</label>
                     <input
                         type="date"
@@ -128,7 +128,7 @@ const CommandeForm = ({ commande, onSuccess, onCancel }) => {
                     />
                 </div>
 
-                <div className="form-group">
+                <div className="CommFr-group">
                     <label>Notes</label>
                     <textarea
                         name="notes"
@@ -150,15 +150,15 @@ const CommandeForm = ({ commande, onSuccess, onCancel }) => {
                     />
                 ))}
 
-                <button type="button" className="btn-add-ligne" onClick={handleAddLigne}>
+                <button type="button" className="CommFr-add-ligne" onClick={handleAddLigne}>
                     + Ajouter un article
                 </button>
 
-                <div className="form-actions">
-                    <button type="submit" className="btn-submit" disabled={loading}>
+                <div className="CommFr-actions">
+                    <button type="submit" className="CommFr-submit" disabled={loading}>
                         {loading ? 'Enregistrement...' : 'Enregistrer'}
                     </button>
-                    <button type="button" className="btn-cancel" onClick={onCancel}>
+                    <button type="button" className="CommFr-cancel" onClick={onCancel}>
                         Annuler
                     </button>
                 </div>

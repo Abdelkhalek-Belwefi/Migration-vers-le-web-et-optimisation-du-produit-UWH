@@ -8,7 +8,14 @@ import {
     FaTrash,
     FaUserCheck,
     FaCrown,
-    FaWarehouse
+    FaWarehouse,
+    FaSearch,
+    FaEye,
+    FaEnvelope,
+    FaPhone,
+    FaCalendarAlt,
+    FaBuilding,
+    FaUserTag
 } from 'react-icons/fa';
 import { adminService } from '../../services/adminService';
 import { getAllEntrepots } from '../../services/entrepotService ';
@@ -16,6 +23,7 @@ import './UserManagement.css';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
     const [roles, setRoles] = useState([]);
     const [entrepots, setEntrepots] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -25,13 +33,17 @@ const UserManagement = () => {
     const [selectedRole, setSelectedRole] = useState('');
     const [selectedRoleEntrepotId, setSelectedRoleEntrepotId] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [searchEmail, setSearchEmail] = useState('');
     const [newUser, setNewUser] = useState({
         nom: '',
         prenom: '',
         email: '',
         password: '',
         role: 'OPERATEUR_ENTREPOT',
-        entrepotId: ''
+        entrepotId: '',
+        numTelephone: ''
     });
 
     useEffect(() => {
@@ -45,6 +57,7 @@ const UserManagement = () => {
             setLoading(true);
             const data = await adminService.getAllUsers();
             setUsers(data);
+            setFilteredUsers(data);
             setError('');
         } catch (err) {
             setError('Erreur lors du chargement des utilisateurs');
@@ -52,6 +65,41 @@ const UserManagement = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSearchByEmail = async () => {
+        if (!searchEmail.trim()) {
+            setFilteredUsers(users);
+            return;
+        }
+        
+        try {
+            setLoading(true);
+            const data = await adminService.searchUsersByEmail(searchEmail.trim());
+            setFilteredUsers(data);
+            setError('');
+        } catch (err) {
+            setError('Erreur lors de la recherche');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResetSearch = () => {
+        setSearchEmail('');
+        setFilteredUsers(users);
+    };
+
+    // ========== OUVRE LE MODAL DE DÉTAILS (uniquement par le bouton) ==========
+    const handleShowDetails = (user) => {
+        setSelectedUser(user);
+        setShowDetailModal(true);
+    };
+
+    const handleCloseDetailModal = () => {
+        setShowDetailModal(false);
+        setSelectedUser(null);
     };
 
     const fetchRoles = async () => {
@@ -81,9 +129,11 @@ const UserManagement = () => {
     const handleActiverCompte = async (userId) => {
         try {
             await adminService.activerCompte(userId);
-            setUsers(users.map(user =>
+            const updatedUsers = users.map(user =>
                 user.id === userId ? { ...user, estActif: true } : user
-            ));
+            );
+            setUsers(updatedUsers);
+            setFilteredUsers(updatedUsers);
             setSuccess('Compte activé avec succès');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
@@ -95,9 +145,11 @@ const UserManagement = () => {
     const handleDesactiverCompte = async (userId) => {
         try {
             await adminService.desactiverCompte(userId);
-            setUsers(users.map(user =>
+            const updatedUsers = users.map(user =>
                 user.id === userId ? { ...user, estActif: false } : user
-            ));
+            );
+            setUsers(updatedUsers);
+            setFilteredUsers(updatedUsers);
             setSuccess('Compte désactivé avec succès');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
@@ -109,9 +161,11 @@ const UserManagement = () => {
     const handleRoleChange = async (userId, newRole, entrepotId) => {
         try {
             await adminService.updateUserRole(userId, newRole, entrepotId);
-            setUsers(users.map(user =>
+            const updatedUsers = users.map(user =>
                 user.id === userId ? { ...user, role: newRole, entrepotId: entrepotId } : user
-            ));
+            );
+            setUsers(updatedUsers);
+            setFilteredUsers(updatedUsers);
             setEditingUserId(null);
             setSelectedRole('');
             setSelectedRoleEntrepotId('');
@@ -129,7 +183,9 @@ const UserManagement = () => {
         }
         try {
             await adminService.deleteUser(userId);
-            setUsers(users.filter(user => user.id !== userId));
+            const updatedUsers = users.filter(user => user.id !== userId);
+            setUsers(updatedUsers);
+            setFilteredUsers(updatedUsers);
             setSuccess('Utilisateur supprimé avec succès');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
@@ -146,7 +202,9 @@ const UserManagement = () => {
                 entrepotId: newUser.entrepotId || null
             };
             const newUserData = await adminService.createUser(userToCreate);
-            setUsers([...users, newUserData]);
+            const updatedUsers = [...users, newUserData];
+            setUsers(updatedUsers);
+            setFilteredUsers(updatedUsers);
             setShowAddModal(false);
             setNewUser({
                 nom: '',
@@ -154,7 +212,8 @@ const UserManagement = () => {
                 email: '',
                 password: '',
                 role: 'OPERATEUR_ENTREPOT',
-                entrepotId: ''
+                entrepotId: '',
+                numTelephone: ''
             });
             setSuccess('Utilisateur ajouté avec succès');
             setTimeout(() => setSuccess(''), 3000);
@@ -170,7 +229,8 @@ const UserManagement = () => {
             'RESPONSABLE_ENTREPOT': 'role-badge manager',
             'OPERATEUR_ENTREPOT': 'role-badge operator',
             'OPERATOR': 'role-badge pending',
-            'SERVICE_COMMERCIAL': 'role-badge commercial'
+            'SERVICE_COMMERCIAL': 'role-badge commercial',
+            'TRANSPORTEUR': 'role-badge transporter'
         };
         return roleClasses[role] || 'role-badge';
     };
@@ -181,9 +241,21 @@ const UserManagement = () => {
             'RESPONSABLE_ENTREPOT': 'Responsable Entrepôt',
             'OPERATEUR_ENTREPOT': 'Opérateur Entrepôt',
             'OPERATOR': 'En attente',
-            'SERVICE_COMMERCIAL': 'Service Commercial'
+            'SERVICE_COMMERCIAL': 'Service Commercial',
+            'TRANSPORTEUR': 'Transporteur'
         };
         return labels[role] || role;
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        return new Date(dateString).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
     if (loading) return <div className="loading">Chargement...</div>;
@@ -200,6 +272,25 @@ const UserManagement = () => {
             {error && <div className="alert error">{error}</div>}
             {success && <div className="alert success">{success}</div>}
 
+            {/* SECTION DE RECHERCHE PAR EMAIL */}
+            <div className="search-section">
+                <div className="search-form">
+                    <input
+                        type="text"
+                        placeholder="Rechercher par email..."
+                        value={searchEmail}
+                        onChange={(e) => setSearchEmail(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSearchByEmail()}
+                    />
+                    <button className="btn-search" onClick={handleSearchByEmail}>
+                        <FaSearch /> Rechercher
+                    </button>
+                    <button className="btn-reset" onClick={handleResetSearch}>
+                        <FaTimes /> Réinitialiser
+                    </button>
+                </div>
+            </div>
+
             <div className="table-container">
                 <table className="users-table">
                     <thead>
@@ -209,13 +300,12 @@ const UserManagement = () => {
                             <th>Prénom</th>
                             <th>Email</th>
                             <th>Rôle</th>
-                            <th>Entrepôt</th>
                             <th>Statut</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map(user => (
+                        {filteredUsers.map(user => (
                             <tr key={user.id}>
                                 <td>{user.id}</td>
                                 <td>{user.nom}</td>
@@ -260,12 +350,12 @@ const UserManagement = () => {
                                             )}
                                         </>
                                     )}
-                                 </td>
-                                 <td>
+                                   </td>
+                                   <td>
                                     <span className={`status-badge ${user.estActif ? 'active' : 'inactive'}`}>
                                         {user.estActif ? 'Actif' : 'Inactif'}
                                     </span>
-                                 </td>
+                                   </td>
                                 <td className="actions">
                                     {editingUserId === user.id ? (
                                         <>
@@ -296,6 +386,14 @@ const UserManagement = () => {
                                                 </span>
                                             ) : (
                                                 <>
+                                                    {/* Bouton Voir Détails - SEUL moyen d'ouvrir le modal */}
+                                                    <button
+                                                        className="btn-view"
+                                                        onClick={() => handleShowDetails(user)}
+                                                        title="Voir détails"
+                                                    >
+                                                        <FaEye />
+                                                    </button>
                                                     {!user.estActif ? (
                                                         <button
                                                             className="btn-activate"
@@ -335,11 +433,14 @@ const UserManagement = () => {
                                             )}
                                         </>
                                     )}
-                                </td>
-                            </tr>
+                                 </td>
+                             </tr>
                         ))}
                     </tbody>
                 </table>
+                {filteredUsers.length === 0 && (
+                    <div className="no-data">Aucun utilisateur trouvé</div>
+                )}
             </div>
 
             {/* Modal d'ajout */}
@@ -373,6 +474,15 @@ const UserManagement = () => {
                                     value={newUser.email}
                                     onChange={(e) => setNewUser({...newUser, email: e.target.value})}
                                     required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label><FaPhone /> Téléphone</label>
+                                <input
+                                    type="tel"
+                                    value={newUser.numTelephone}
+                                    onChange={(e) => setNewUser({...newUser, numTelephone: e.target.value})}
+                                    placeholder="Numéro de téléphone"
                                 />
                             </div>
                             <div className="form-group">
@@ -423,6 +533,84 @@ const UserManagement = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL DE DÉTAILS */}
+            {showDetailModal && selectedUser && (
+                <div className="modal-overlay" onClick={handleCloseDetailModal}>
+                    <div className="modal-content user-detail-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3><FaUserTag /> Détails de l'utilisateur</h3>
+                            <button className="modal-close" onClick={handleCloseDetailModal}>
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="detail-section">
+                                <h4>📋 Informations personnelles</h4>
+                                
+                                <div className="detail-row">
+                                    <span className="detail-label">ID :</span>
+                                    <span className="detail-value">{selectedUser.id}</span>
+                                </div>
+                                
+                                <div className="detail-row">
+                                    <span className="detail-label">Nom :</span>
+                                    <span className="detail-value">{selectedUser.nom}</span>
+                                </div>
+                                
+                                <div className="detail-row">
+                                    <span className="detail-label">Prénom :</span>
+                                    <span className="detail-value">{selectedUser.prenom}</span>
+                                </div>
+                                
+                                <div className="detail-row">
+                                    <span className="detail-label">Nom complet :</span>
+                                    <span className="detail-value">{selectedUser.prenom} {selectedUser.nom}</span>
+                                </div>
+                                
+                                <div className="detail-row">
+                                    <span className="detail-label"><FaPhone /> Téléphone :</span>
+                                    <span className="detail-value">{selectedUser.numTelephone || 'Non renseigné'}</span>
+                                </div>
+                                
+                                <div className="detail-row">
+                                    <span className="detail-label"><FaEnvelope /> Email :</span>
+                                    <span className="detail-value">{selectedUser.email}</span>
+                                </div>
+                                
+                                <div className="detail-row">
+                                    <span className="detail-label"><FaUserTag /> Rôle :</span>
+                                    <span className={`role-badge ${getRoleBadgeClass(selectedUser.role)}`}>
+                                        {getRoleLabel(selectedUser.role)}
+                                    </span>
+                                </div>
+                                
+                                <div className="detail-row">
+                                    <span className="detail-label"><FaBuilding /> Entrepôt :</span>
+                                    <span className="detail-value">{selectedUser.entrepotNom || 'Aucun (global)'}</span>
+                                </div>
+                                
+                                <div className="detail-row">
+                                    <span className="detail-label">Statut :</span>
+                                    <span className={`status-badge ${selectedUser.estActif ? 'active' : 'inactive'}`}>
+                                        {selectedUser.estActif ? '✅ Actif' : '❌ Inactif'}
+                                    </span>
+                                </div>
+                                
+                                <div className="detail-row">
+                                    <span className="detail-label"><FaCalendarAlt /> Date de création :</span>
+                                    <span className="detail-value">{formatDate(selectedUser.createdAt)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn-close" onClick={handleCloseDetailModal}>
+                                Fermer
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

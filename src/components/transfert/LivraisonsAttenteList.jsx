@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { getLivraisonsEntrepotAttente } from '../../services/commandeService';
 import { FaTruck, FaClock, FaCheckCircle, FaMapMarkerAlt, FaHashtag, FaCalendarAlt } from 'react-icons/fa';
 import './LivraisonsAttenteList.css';
+import { FaBox } from "react-icons/fa";
+import { FaSyncAlt } from "react-icons/fa";
+import { MdLocalShipping } from "react-icons/md";
 
 const LivraisonsAttenteList = () => {
     const [livraisons, setLivraisons] = useState([]);
@@ -104,9 +107,9 @@ const LivraisonsAttenteList = () => {
     return (
         <div className="livraisons-attente-container">
             <div className="header">
-                <h2>📦 Livraisons en attente</h2>
+                <h2><FaBox /> Livraisons en attente</h2>
                 <button className="btn-refresh" onClick={loadLivraisons}>
-                    🔄 Actualiser
+                    <FaSyncAlt /> Actualiser
                 </button>
             </div>
 
@@ -115,7 +118,7 @@ const LivraisonsAttenteList = () => {
 
             {livraisons.length === 0 ? (
                 <div className="empty-state">
-                    <div className="empty-icon">🚚</div>
+                    <div className="empty-icon"><MdLocalShipping /></div>
                     <h3>Aucune livraison en attente</h3>
                     <p>Les livraisons apparaîtront ici lorsqu'un transporteur sera assigné.</p>
                 </div>

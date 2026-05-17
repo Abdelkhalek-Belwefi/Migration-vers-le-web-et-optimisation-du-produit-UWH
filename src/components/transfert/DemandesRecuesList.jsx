@@ -4,7 +4,11 @@ import {
     accepterDemandeTransfert, 
     refuserDemandeTransfert 
 } from '../../services/commandeService';
+import { FaClipboard } from "react-icons/fa";
+import { FaInbox } from "react-icons/fa";
+import { FaSyncAlt } from "react-icons/fa";
 import './DemandesRecuesList.css';
+
 
 const DemandesRecuesList = () => {
     const [demandes, setDemandes] = useState([]);
@@ -123,9 +127,9 @@ const DemandesRecuesList = () => {
     return (
         <div className="demandes-recues-container">
             <div className="header">
-                <h2>📋 Demandes de transfert reçues</h2>
+                <h2><FaClipboard /> Demandes de transfert reçues</h2>
                 <button className="btn-refresh" onClick={loadDemandes}>
-                    🔄 Actualiser
+                    <FaSyncAlt /> Actualiser
                 </button>
             </div>
 
@@ -134,7 +138,7 @@ const DemandesRecuesList = () => {
 
             {demandes.length === 0 ? (
                 <div className="empty-state">
-                    <div className="empty-icon">📭</div>
+                    <div className="empty-icon"><FaInbox /></div>
                     <h3>Aucune demande reçue</h3>
                     <p>Les demandes de transfert d'autres entrepôts apparaîtront ici.</p>
                 </div>

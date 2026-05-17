@@ -122,7 +122,7 @@ const Dashboard_warehouse = () => {
       case "OPERATEUR_ENTREPOT":
         return [
           ...baseItems,
-          { id: "previsions", label: "Prévisions 7j", icon: <FaChartLine /> },  // ← AJOUTÉ
+          
           { id: "reception", label: "Réception", icon: <FaBoxes /> },
           { id: "rangement", label: "Rangement", icon: <FaClipboardList /> },
           { id: "preparation", label: "Préparation de commandes", icon: <FaClipboardList /> },
@@ -151,7 +151,7 @@ const Dashboard_warehouse = () => {
       case "SERVICE_COMMERCIAL":
         return [
           ...baseItems,
-          { id: "previsions", label: "Prévisions 7j", icon: <FaChartLine /> },  // ← AJOUTÉ (optionnel)
+          
           { id: "commandes", label: "Commandes", icon: <FaShoppingCart /> },
           { id: "clients", label: "Clients", icon: <FaBoxOpen /> }
         ];

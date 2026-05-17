@@ -1,0 +1,53 @@
+.client-detail-modal {
+    max-width: 500px;
+}
+
+.client-detail-content {
+    padding: 20px;
+}
+
+.detail-row {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    width: 120px;
+    font-weight: 600;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-value {
+    flex: 1;
+    color: #212529;
+    word-break: break-word;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-cancel {
+    padding: 8px 20px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-cancel:hover {
+    background: #5a6268;
+}

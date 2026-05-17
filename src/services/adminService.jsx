@@ -24,6 +24,20 @@ export const adminService = {
         }
     },
 
+    // ========== NOUVEAU : Rechercher les utilisateurs par email ==========
+    searchUsersByEmail: async (email) => {
+        try {
+            const response = await axios.get(`${API_URL}/users/search`, {
+                ...getAuthHeader(),
+                params: { email }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Erreur API searchUsersByEmail:', error.response?.data || error.message);
+            throw error;
+        }
+    },
+
     // Mettre à jour le rôle (avec entrepotId optionnel)
     updateUserRole: async (userId, role, entrepotId = null) => {
         try {

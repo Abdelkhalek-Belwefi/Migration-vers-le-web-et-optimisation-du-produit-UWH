@@ -116,6 +116,10 @@
 .role-badge.operator {
     background: #6c757d;
 }
+.role-badge.transporter {
+    background: #ff6f00; /* orange */
+    color: white;
+}
 
 .role-select {
     padding: 8px;
