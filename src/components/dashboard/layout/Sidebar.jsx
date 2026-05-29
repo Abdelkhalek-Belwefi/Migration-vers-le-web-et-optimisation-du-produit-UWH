@@ -15,7 +15,7 @@ const Sidebar = ({ userName, userPrenom, userRole, menuItems, activeTab, onTabCh
             userName={userName}
           />
         ) : (
-          <h2>Dashboard</h2>   // ← comportement original pour AdminDashboard
+          <h2></h2>   // ← comportement original pour AdminDashboard
         )}
         <div className="user-info">
           <p className="user-name">{userPrenom} {userName}</p>

@@ -88,6 +88,17 @@ export const articleService = {
         }
     },
 
+    // ========== NOUVELLE MÉTHODE : Récupérer le prochain code ERP ==========
+    getNextCodeERP: async () => {
+        try {
+            const response = await axios.get(`${API_URL}/next-code`, getAuthHeader());
+            return response.data;
+        } catch (error) {
+            console.error('❌ Erreur API getNextCodeERP:', error.response?.data || error.message);
+            return "ART-0001"; // Fallback
+        }
+    },
+
     // Création d'article – envoie à la fois 'code' et 'codeArticleERP'
     createArticle: async (articleData) => {
         try {

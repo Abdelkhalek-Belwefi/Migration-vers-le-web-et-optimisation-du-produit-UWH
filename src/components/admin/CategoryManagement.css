@@ -1,255 +1,330 @@
-/* === Catégorie Management - Styles modernes === */
-
-.cat-mgt-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px;
-    background: #f8fafc;
-    min-height: 100vh;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+/* === Variables globales (Thème moderne & Pro) === */
+:root {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+    --border-hover: #cbd5e1;
+    
+    /* Couleurs de texte */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    /* Brand & Actions */
+    --primary: #0f172a;
+    --primary-hover: #1e293b;
+    --primary-light: #f1f5f9;
+    --accent: #3b82f6;
+    --accent-light: rgba(59, 130, 246, 0.08);
+    
+    /* Statuts */
+    --success: #10b981;
+    --success-bg: #f0fdf4;
+    --success-border: #bbf7d0;
+    --error: #ef4444;
+    --error-bg: #fef2f2;
+    --error-border: #fecaca;
+    
+    /* Design tokens */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.03), 0 4px 6px -4px rgba(0,0,0,0.03);
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* En-tête */
-.cat-mgt-header {
+/* === Conteneur Principal === */
+.categ_container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    background-color: var(--bg-main);
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* === En-tête === */
+.categ_header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 32px;
-    flex-wrap: wrap;
-    gap: 16px;
+    gap: 20px;
 }
 
-.cat-mgt-header h2 {
+.categ_header h2 {
     font-size: 1.75rem;
-    font-weight: 600;
-    color: #0f172a;
+    font-weight: 700;
+    color: var(--text-primary);
     margin: 0;
+    letter-spacing: -0.02em;
+}
+
+/* === Boutons Génériques === */
+.categ_btn_add,
+.categ_btn_cancel,
+.categ_btn_submit {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+/* Bouton Principal (Ajouter / Enregistrer) */
+.categ_btn_add,
+.categ_btn_submit {
+    background-color: var(--primary);
+    color: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+}
+
+.categ_btn_add:hover,
+.categ_btn_submit:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Bouton Annuler */
+.categ_btn_cancel {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.categ_btn_cancel:hover {
+    background-color: var(--primary-light);
+    color: var(--text-primary);
+}
+
+/* === Alertes de Statut === */
+.categ_alert {
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.categ_alert.error {
+    background-color: var(--error-bg);
+    color: var(--error);
+    border-color: var(--error-border);
+}
+
+.categ_alert.success {
+    background-color: var(--success-bg);
+    color: var(--success);
+    border-color: var(--success-border);
+}
+
+/* === Carte Formulaire === */
+.categ_form_card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    padding: 32px;
+    margin-bottom: 32px;
+}
+
+.categ_form_card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 0;
+    margin-bottom: 24px;
     letter-spacing: -0.01em;
 }
 
-/* Bouton Ajouter */
-.cat-mgt-btn-add {
-    background: linear-gradient(135deg, #8598b6, #2c3038);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 40px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.cat-mgt-btn-add:hover {
-    background: linear-gradient(135deg, #353b47, #8591b4);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-/* Alertes */
-.cat-mgt-alert {
-    padding: 14px 18px;
-    border-radius: 12px;
-    margin-bottom: 24px;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.cat-mgt-alert.error {
-    background: #fee2e2;
-    color: #b91c1c;
-    border-left: 4px solid #dc2626;
-}
-
-.cat-mgt-alert.success {
-    background: #d1fae5;
-    color: #065f46;
-    border-left: 4px solid #10b981;
-}
-
-/* Carte formulaire */
-.cat-mgt-form-card {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-    padding: 28px;
-    margin-bottom: 32px;
-    border: 1px solid #e2e8f0;
-}
-
-.cat-mgt-form-card h3 {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin-top: 0;
-    margin-bottom: 24px;
-}
-
-.cat-mgt-form-group {
+.categ_form_group {
     margin-bottom: 20px;
 }
 
-.cat-mgt-form-group label {
+.categ_form_group label {
     display: block;
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: #334155;
-    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
 }
 
-.cat-mgt-form-group input,
-.cat-mgt-form-group textarea {
+.categ_form_group input,
+.categ_form_group textarea {
     width: 100%;
-    padding: 12px 16px;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    transition: 0.2s;
-    background: #ffffff;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.925rem;
+    color: var(--text-primary);
+    background-color: var(--bg-card);
+    transition: var(--transition);
 }
 
-.cat-mgt-form-group input:focus,
-.cat-mgt-form-group textarea:focus {
+.categ_form_group input::placeholder,
+.categ_form_group textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.categ_form_group input:focus,
+.categ_form_group textarea:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-light);
 }
 
-.cat-mgt-form-actions {
+.categ_form_actions {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 24px;
+    margin-top: 28px;
 }
 
-.cat-mgt-btn-cancel,
-.cat-mgt-btn-submit {
-    padding: 10px 24px;
-    border-radius: 40px;
-    font-weight: 500;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: 0.2s;
+/* === Tableau & Conteneur === */
+.categ_table_wrapper {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
 }
 
-.cat-mgt-btn-cancel {
-    background: #f1f5f9;
-    color: #475569;
-}
-
-.cat-mgt-btn-cancel:hover {
-    background: #e2e8f0;
-}
-
-.cat-mgt-btn-submit {
-    background: #1e293b;
-    color: white;
-}
-
-.cat-mgt-btn-submit:hover {
-    background: #0f172a;
-    transform: translateY(-1px);
-}
-
-/* Tableau */
-.cat-mgt-table-wrapper {
-    background: white;
-    border-radius: 20px;
-    overflow-x: auto;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    border: 1px solid #e2e8f0;
-}
-
-.cat-mgt-table {
+.categ_table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
-}
-
-.cat-mgt-table th {
-    background: #f8fafc;
-    padding: 16px;
     text-align: left;
+}
+
+.categ_table th {
+    background-color: var(--primary-light);
+    padding: 16px;
     font-weight: 600;
-    color: #334155;
-    border-bottom: 1px solid #e2e8f0;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.cat-mgt-table td {
-    padding: 14px 16px;
-    border-bottom: 1px solid #f1f5f9;
-    color: #1e293b;
+.categ_table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transition: var(--transition);
 }
 
-.cat-mgt-table tr:hover {
-    background: #f9fafb;
+/* Suppression de la bordure basse pour la dernière ligne */
+.categ_table tr:last-child td {
+    border-bottom: none;
 }
 
-/* Boutons action */
-.cat-mgt-btn-edit,
-.cat-mgt-btn-delete {
-    background: none;
+.categ_table tr:hover td {
+    background-color: rgba(248, 250, 252, 0.75);
+}
+
+/* Action d'alignement pour la colonne des boutons */
+.categ_table td:last-child, 
+.categ_table th:last-child {
+    text-align: right;
+}
+
+/* Boutons d'action icones */
+.categ_btn_edit,
+.categ_btn_delete {
+    appearance: none;
+    background: transparent;
     border: none;
-    font-size: 1.1rem;
+    padding: 8px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    margin: 0 4px;
-    padding: 6px;
-    border-radius: 8px;
-    transition: 0.2s;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.cat-mgt-btn-edit {
-    color: #3b82f6;
+.categ_btn_edit {
+    color: var(--text-secondary);
 }
 
-.cat-mgt-btn-edit:hover {
-    background: #e0f2fe;
-    transform: scale(1.05);
+.categ_btn_edit:hover {
+    color: var(--accent);
+    background-color: var(--accent-light);
 }
 
-.cat-mgt-btn-delete {
-    color: #ef4444;
+.categ_btn_delete {
+    color: var(--text-muted);
 }
 
-.cat-mgt-btn-delete:hover {
-    background: #fee2e2;
-    transform: scale(1.05);
+.categ_btn_delete:hover {
+    color: var(--error);
+    background-color: var(--error-bg);
 }
 
-/* Loading */
-.cat-mgt-loading {
-    text-align: center;
-    padding: 60px;
-    font-size: 1.1rem;
-    color: #64748b;
+/* === Loader === */
+.categ_loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 64px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
 }
 
-/* Responsive */
+/* === Responsive (Mobile First-ish) === */
 @media (max-width: 768px) {
-    .cat-mgt-container {
+    .categ_container {
         padding: 16px;
     }
-    .cat-mgt-header {
+    
+    .categ_header {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
+        gap: 16px;
     }
-    .cat-mgt-btn-add {
-        justify-content: center;
+    
+    .categ_btn_add {
+        width: 100%;
     }
-    .cat-mgt-form-card {
+    
+    .categ_form_card {
         padding: 20px;
     }
-    .cat-mgt-table th,
-    .cat-mgt-table td {
-        padding: 12px 10px;
+    
+    .categ_form_actions {
+        flex-direction: column-reverse;
+    }
+    
+    .categ_form_actions button {
+        width: 100%;
+    }
+    
+    .categ_table th,
+    .categ_table td {
+        padding: 12px;
     }
 }

@@ -1,103 +1,185 @@
-.admin-dashboard.admin-dashboard {
-    display: flex;
-    min-height: 100vh;
-    background: #f5f7fa;
+/* ==========================================================================
+   VARIABLES GLOBALES & POLICES
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --sidebar-width: 280px;
+    --navbar-height: 70px;
+    --dark-bg: #2c3e50;       /* ✅ Couleur modifiée : Bleu Ardoise */
+    --light-bg: #ffffff;      /* Blanc pur pour la navbar et les cartes */
+    --body-bg: #f5f7fa;       /* Gris clair pour le fond du site */
+    --border-color: #e2e8f0;  /* Séparations fines */
+    --text-muted: #94a3b8;    /* Gris pour les icônes et sous-titres sidebar */
 }
 
-/* ✅ SIDEBAR AJOUTÉ */
+/* ==========================================================================
+   STRUCTURE DE MISE EN PAGE (Layout)
+   ========================================================================== */
+.admin_dash_container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--body-bg);
+    font-family: 'Inter', sans-serif;
+}
+
+.admin_dash_layout {
+    display: flex;
+    flex: 1;
+}
+
+/* ✅ LA SIDEBAR FIXE ET PARFAITE */
 .dashboard-sidebar {
-    width: 280px;
-    background: #2c3e50;
+    width: var(--sidebar-width);
+    background: var(--dark-bg);
     color: white;
     height: 100vh;
     position: fixed;
     left: 0;
     top: 0;
-    padding-top: 20px;
+    z-index: 1000; /* Priorité maximale pour bloquer le coin haut-gauche */
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.05);
 }
 
-.sidebar-header {
+/* ✅ LE CONTENU CENTRAL AJUSTÉ SANS CHEVAUCHEMENT */
+.admin_dash_main {
+    flex: 1;
+    margin-left: var(--sidebar-width); /* Laisse la place exacte à la sidebar fixe */
+    margin-top: var(--navbar-height);  /* Laisse la place exacte à la navbar fixe */
+    padding: 30px;
+    overflow-y: auto;
+    min-height: calc(100vh - var(--navbar-height));
+}
+
+/* ==========================================================================
+   COMPOSANTS DE LA SIDEBAR (Profil Utilisateur Intégré)
+   ========================================================================== */
+.sidebar-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
     padding: 20px;
-    margin-top: 40px;
+    margin: 15px;
+    background: rgba(255, 255, 255, 0.05); /* Transparence subtile sur le fond #2c3e50 */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
 }
 
-.sidebar-header h2 {
-    margin-bottom: 10px;
-    text-align: center;
+.sidebar-avatar-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, 0.15);
 }
 
-.user-name {
-    font-weight: bold;
+.sidebar-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sidebar-avatar-initials {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #ff6b00, #ff8c2e);
     color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
-.user-role {
-    font-size: 12px;
-    opacity: 0.7;
-    color: white;
+.sidebar-user-meta {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* NAVIGATION */
+.sidebar-user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.sidebar-user-role {
+    font-size: 11px;
+    color: #ff8c2e; /* Teinte orange pour faire ressortir le rôle */
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+/* ==========================================================================
+   NAVIGATION SIDEBAR
+   ========================================================================== */
 .sidebar-nav {
-    margin-top: 20px;
+    margin-top: 10px;
     display: flex;
     flex-direction: column;
 }
 
-/* ✅ STYLE DES LIENS (comme image) */
+/* Liens de Navigation */
 .nav-item {
     display: flex;
     align-items: center;
     gap: 20px;
-    padding: 10px 15px;
-    margin: 8px 15px;
-    border-radius: 20px;
+    padding: 12px 20px;
+    margin: 4px 15px;
+    border-radius: 12px;
     border: none;
     background: transparent;
-    color: white;
+    color: rgba(255, 255, 255, 0.7); /* Texte clair et lisible sur le bleu ardoise */
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     text-align: left;
     font-size: 14px;
-}
-
-/* Hover */
-.nav-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* Active (Dashboard sélectionné) */
-.nav-item.active {
-    background: #dbe7f3;
-    color: #2c3e50;
     font-weight: 500;
 }
 
-/* Logout */
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+/* Élément Actif Sélectionné */
+.nav-item.active {
+    background: #dbe7f3; /* Fond clair doux */
+    color: #2c3e50;      /* Contraste parfait avec la couleur principale */
+    font-weight: 600;
+}
+
+/* Bouton Déconnexion */
 .nav-item.logout {
     margin-top: auto;
+    margin-bottom: 20px;
     color: #ff6b6b;
 }
 
 .nav-item.logout:hover {
-    background: rgba(255, 107, 107, 0.2);
+    background: rgba(255, 107, 107, 0.15);
+    color: #ff6b6b;
 }
 
-/* ======================== */
-/* TON CODE ORIGINAL (inchangé) */
-/* ======================== */
-
-.admin-main {
-    flex: 1;
-    margin-left: 280px;
-    padding: 30px;
-}
-
+/* ==========================================================================
+   GESTION DES RÔLES
+   ========================================================================== */
 .roles-management {
-    background: white;
+    background: var(--light-bg);
     border-radius: 10px;
     padding: 25px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .roles-management h2 {
@@ -123,67 +205,122 @@
     box-shadow: 0 5px 20px rgba(0,0,0,0.2);
 }
 
-.role-card.admin {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
+.role-card.admin { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.role-card.manager { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+.role-card.receiver { background: linear-gradient(135deg, #17a2b8 0%, #009688 100%); }
+.role-card.effector { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
 
-.role-card.manager {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-}
+.role-card h3 { margin-bottom: 10px; font-size: 18px; }
+.role-card p { margin-bottom: 15px; font-size: 14px; opacity: 0.9; }
+.role-card ul { list-style: none; padding: 0; }
+.role-card li { margin-bottom: 8px; font-size: 13px; padding-left: 20px; position: relative; }
+.role-card li:before { content: "✓"; position: absolute; left: 0; color: white; }
 
-.role-card.receiver {
-    background: linear-gradient(135deg, #17a2b8 0%, #009688 100%);
-}
-
-.role-card.effector {
-    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-}
-
-.role-card h3 {
-    margin-bottom: 10px;
-    font-size: 18px;
-}
-
-.role-card p {
-    margin-bottom: 15px;
-    font-size: 14px;
-    opacity: 0.9;
-}
-
-.role-card ul {
-    list-style: none;
-    padding: 0;
-}
-
-.role-card li {
-    margin-bottom: 8px;
-    font-size: 13px;
-    padding-left: 20px;
-    position: relative;
-}
-
-.role-card li:before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: white;
-}
-
-.stats-container,
-.logs-container {
-    background: white;
+.stats-container, .logs-container {
+    background: var(--light-bg);
     border-radius: 10px;
     padding: 25px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-/* Responsive */
+/* ==========================================================================
+   MODALS DE PROFIL ET MOT DE PASSE
+   ========================================================================== */
+.admin_dash_profile_modal, .admin_dash_password_modal { max-width: 500px; }
+.admin_dash_profile_info { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; }
+.admin_dash_profile_avatar_container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+
+.admin_dash_profile_avatar_large { 
+    position: relative; 
+    width: 120px; 
+    height: 120px; 
+    border-radius: 50%; 
+    overflow: hidden; 
+    background: linear-gradient(135deg, #ff6b00, #ff8c2e); 
+    cursor: pointer; 
+    transition: transform 0.3s ease; 
+}
+.admin_dash_profile_avatar_large:hover { transform: scale(1.05); }
+.admin_dash_profile_avatar_large:hover .admin_dash_avatar_overlay { opacity: 1; }
+.admin_dash_profile_avatar_large img { width: 100%; height: 100%; object-fit: cover; }
+
+.admin_dash_avatar_initials_large { 
+    width: 100%; 
+    height: 100%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 2.5rem; 
+    font-weight: bold; 
+    color: white; 
+}
+
+.admin_dash_avatar_overlay { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0, 0, 0, 0.6); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    opacity: 0; 
+    transition: opacity 0.3s ease; 
+    color: white; 
+    font-size: 1.5rem; 
+}
+
+.admin_dash_avatar_actions { display: flex; gap: 10px; margin-top: 10px; }
+.admin_dash_btn_change_photo, .admin_dash_btn_delete_photo { padding: 8px 16px; border: none; border-radius: 20px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.3s ease; }
+.admin_dash_btn_change_photo { background: linear-gradient(135deg, #ff6b00, #ff8c2e); color: white; }
+.admin_dash_btn_change_photo:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3); }
+.admin_dash_btn_delete_photo { background: #f1f5f9; color: #dc2626; border: 1px solid #fee2e2; }
+.admin_dash_btn_delete_photo:hover { background: #fee2e2; transform: translateY(-2px); }
+
+.admin_dash_profile_details { width: 100%; text-align: left; margin-top: 20px; }
+.admin_dash_profile_details p { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 1px solid var(--border-color); }
+.admin_dash_status_active { color: #28a745; font-weight: bold; }
+
+/* Structures des Fenêtres Modales */
+.admin_dash_modal_overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1100; }
+.admin_dash_modal_content { background: white; border-radius: 12px; width: 90%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); animation: slideIn 0.3s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+.admin_dash_modal_header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border-color); }
+.admin_dash_modal_close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+.admin_dash_modal_close:hover { color: #ef4444; }
+.admin_dash_modal_body { padding: 20px; }
+.admin_dash_modal_footer { display: flex; justify-content: flex-end; gap: 10px; padding: 20px; border-top: 1px solid var(--border-color); }
+
+.admin_dash_btn_close, .admin_dash_btn_cancel { padding: 10px 20px; background: #f1f5f9; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-weight: 500; transition: background 0.2s; }
+.admin_dash_btn_close:hover, .admin_dash_btn_cancel:hover { background: #e2e8f0; }
+.admin_dash_btn_submit { padding: 10px 20px; background: linear-gradient(135deg, #ff6b00, #ff8c2e); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; }
+.admin_dash_btn_submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3); }
+.admin_dash_btn_submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.admin_dash_form_group { margin-bottom: 15px; }
+.admin_dash_form_group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; }
+.admin_dash_form_group input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; transition: border-color 0.3s ease; }
+.admin_dash_form_group input:focus { outline: none; border-color: #ff6b00; }
+
+.admin_dash_alert { padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+.admin_dash_alert.admin_dash_error { background: #fee; color: #c33; border-left: 4px solid #c33; }
+.admin_dash_alert.admin_dash_success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (Adaptabilité Écrans)
+   ========================================================================== */
 @media (max-width: 768px) {
-    .admin-main {
+    .dashboard-sidebar {
+        transform: translateX(-100%); /* Masque la sidebar sur petits écrans */
+        transition: transform 0.3s ease;
+    }
+    .admin_dash_main {
         margin-left: 0;
+        margin-top: var(--navbar-height);
         padding: 20px;
     }
-    
     .roles-grid {
         grid-template-columns: 1fr;
     }

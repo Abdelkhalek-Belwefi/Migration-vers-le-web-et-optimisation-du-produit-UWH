@@ -25,6 +25,7 @@ const LoginForm = () => {
       localStorage.setItem("role", response.data.role);
       localStorage.setItem("email", response.data.email || email);
       localStorage.setItem("estActif", response.data.estActif);
+      localStorage.setItem("userId", response.data.id); // ← AJOUTÉ : ID utilisateur
       
       if (response.data.nom) localStorage.setItem("nom", response.data.nom);
       if (response.data.prenom) localStorage.setItem("prenom", response.data.prenom);

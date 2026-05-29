@@ -48,6 +48,7 @@ const AddArticleModal = ({
     const [success, setSuccess] = useState('');
     const [scanning, setScanning] = useState(false);
     const [categories, setCategories] = useState([]); // Nouvel état pour les catégories dynamiques
+    const [isLoadingCode, setIsLoadingCode] = useState(false); // ← AJOUTÉ
     
     const scanInputRef = useRef(null);
     const formRef = useRef(null);
@@ -62,6 +63,21 @@ const AddArticleModal = ({
         }
     };
 
+    // ========== NOUVELLE FONCTION : Charger le prochain code ERP ==========
+    const loadNextCodeERP = async () => {
+        setIsLoadingCode(true);
+        try {
+            const nextCode = await articleService.getNextCodeERP();
+            setFormData(prev => ({ ...prev, codeArticleERP: nextCode }));
+        } catch (err) {
+            console.error('Erreur chargement code ERP:', err);
+            // Fallback : générer un code temporaire
+            setFormData(prev => ({ ...prev, codeArticleERP: `ART-${Date.now()}` }));
+        } finally {
+            setIsLoadingCode(false);
+        }
+    };
+
     // Charger les catégories quand le modal s'ouvre
     useEffect(() => {
         if (show) {
@@ -69,7 +85,7 @@ const AddArticleModal = ({
         }
     }, [show]);
 
-    // Charger les données si on est en mode édition
+    // Charger les données si on est en mode édition, ou charger le code ERP si nouveau
     useEffect(() => {
         if (articleToEdit && isEditMode) {
             console.log('📝 Mode édition - Chargement article:', articleToEdit);
@@ -88,8 +104,9 @@ const AddArticleModal = ({
                 dureeExpirationJours: articleToEdit.dureeExpirationJours || '',
                 actif: articleToEdit.actif !== undefined ? articleToEdit.actif : true
             });
-        } else {
+        } else if (show && !isEditMode) {
             resetForm();
+            loadNextCodeERP(); // ← CHARGER LE CODE ERP À L'OUVERTURE
         }
     }, [articleToEdit, isEditMode, show]);
 
@@ -309,6 +326,7 @@ const AddArticleModal = ({
         return true;
     };
 
+    // ========== MÉTHODE HANDLESUBMIT MODIFIÉE (GESTION DES ERREURS D'UNICITÉ) ==========
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -325,7 +343,18 @@ const AddArticleModal = ({
             onClose();
             resetForm();
         } catch (err) {
-            setError(err.message || `Erreur lors de ${isEditMode ? 'la modification' : "l'ajout"}`);
+            // ========== GESTION DES ERREURS D'UNICITÉ ==========
+            const errorMessage = err.response?.data?.message || err.message;
+            
+            if (errorMessage.includes('GTIN') && errorMessage.includes('existe déjà')) {
+                setError(`❌ ${errorMessage}\n\n Un article avec ce code-barres (GTIN) existe déjà dans la base.`);
+            } else if (errorMessage.includes('code ERP') && errorMessage.includes('existe déjà')) {
+                setError(`❌ ${errorMessage}\n\n Un article avec ce code ERP existe déjà dans la base.`);
+            } else if (errorMessage.includes('numéro de série') && errorMessage.includes('existe déjà')) {
+                setError(`❌ ${errorMessage}\n\n Un article avec ce numéro de série existe déjà dans la base.`);
+            } else {
+                setError(errorMessage || `Erreur lors de ${isEditMode ? 'la modification' : "l'ajout"}`);
+            }
         } finally {
             setLoading(false);
         }
@@ -367,7 +396,16 @@ const AddArticleModal = ({
                     <div className="form-row">
                         <div className="form-group">
                             <label><FaTag /> Code ERP *</label>
-                            <input type="text" name="codeArticleERP" value={formData.codeArticleERP} onChange={handleChange} required disabled={loading || !canEdit} placeholder="Ex: ART-001" />
+                            <input 
+                                type="text" 
+                                name="codeArticleERP" 
+                                value={isLoadingCode ? "Chargement..." : formData.codeArticleERP} 
+                                onChange={handleChange} 
+                                required 
+                                disabled={true}
+                                placeholder="Généré automatiquement"
+                            />
+                            
                         </div>
                         <div className="form-group">
                             <label><FaBarcode /> GTIN (GS1)</label>

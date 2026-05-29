@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, Area, ComposedChart,
-    Legend
+    Legend, ReferenceLine
 } from 'recharts';
-import { FaChartLine, FaExclamationTriangle, FaSync, FaCalendarAlt } from 'react-icons/fa';
+import { 
+    FaChartLine, FaExclamationTriangle, FaSync, FaCalendarAlt, 
+    FaInfoCircle, FaChartBar, FaArrowUp, FaArrowDown 
+} from 'react-icons/fa';
 import { previsionService } from '../../services/PrevisionService';
 import './PrevisionChart.css';
 
@@ -13,6 +16,7 @@ const PrevisionChart = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [refreshing, setRefreshing] = useState(false);
+    const [activeTab, setActiveTab] = useState('chart');
 
     useEffect(() => {
         chargerPrevisions();
@@ -45,7 +49,6 @@ const PrevisionChart = () => {
         }
     };
 
-    // Formater les données pour Recharts
     const formatDataForChart = () => {
         if (!previsions || !previsions.previsions) return [];
 
@@ -56,75 +59,88 @@ const PrevisionChart = () => {
             min: Math.round(p.chargeMin),
             max: Math.round(p.chargeMax),
             estPic: p.estPic,
-            commentaire: p.commentaire
+            commentaire: p.commentaire,
+            variation: p.chargePrevue > (previsions.chargeMoyennePrevue || 0) ? 'up' : 'down'
         }));
     };
 
-    // Custom Tooltip
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
-            // Trouver l'élément avec le plus de données pour extraire estPic
             const dataPoint = payload[0]?.payload;
+            const variationPourcent = dataPoint?.prevue && previsions?.chargeMoyennePrevue 
+                ? ((dataPoint.prevue - previsions.chargeMoyennePrevue) / previsions.chargeMoyennePrevue * 100).toFixed(1)
+                : 0;
+            
             return (
-                <div style={{
-                    background: '#1e293b',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    color: 'white',
-                    fontSize: '0.8rem',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                }}>
-                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>{label}</p>
-                    <p style={{ margin: '4px 0' }}>
-                        📈 Charge prévue: <strong>{payload[0]?.value}</strong>
-                    </p>
-                    <p style={{ margin: '4px 0', color: '#94a3b8' }}>
-                        📉 Fourchette: {Math.round(payload[2]?.value)} - {Math.round(payload[1]?.value)}
-                    </p>
-                    {dataPoint?.estPic && (
-                        <p style={{ margin: '8px 0 0 0', color: '#f87171' }}>
-                            ⚠️ PIC DE CHARGE PRÉVU !
-                        </p>
-                    )}
+                <div className="custom-tooltip-premium">
+                    <div className="tooltip-header">
+                        <FaCalendarAlt className="tooltip-icon" />
+                        <span className="tooltip-date">{label}</span>
+                    </div>
+                    <div className="tooltip-body">
+                        <div className="tooltip-row">
+                            <span className="tooltip-label">📈 Charge prévue :</span>
+                            <span className="tooltip-value">{dataPoint?.prevue} unités</span>
+                        </div>
+                        <div className="tooltip-row">
+                            <span className="tooltip-label">📉 Fourchette :</span>
+                            <span className="tooltip-value">{dataPoint?.min} - {dataPoint?.max} unités</span>
+                        </div>
+                        <div className="tooltip-row">
+                            <span className="tooltip-label">📊 Variation :</span>
+                            <span className={`tooltip-value ${variationPourcent >= 0 ? 'positive' : 'negative'}`}>
+                                {variationPourcent >= 0 ? '▲' : '▼'} {Math.abs(variationPourcent)}%
+                            </span>
+                        </div>
+                        {dataPoint?.estPic && (
+                            <div className="tooltip-alert">
+                                <FaExclamationTriangle /> PIC DE CHARGE ANTICIPÉ
+                            </div>
+                        )}
+                    </div>
                 </div>
             );
         }
         return null;
     };
 
-    // Custom dot pour les pics
     const renderDot = (props) => {
         const { cx, cy, payload } = props;
         if (payload.estPic) {
             return (
-                <circle
-                    cx={cx}
-                    cy={cy}
-                    r={8}
-                    fill="#ef4444"
-                    stroke="white"
-                    strokeWidth={2}
-                />
+                <g>
+                    <circle cx={cx} cy={cy} r={10} fill="#ef4444" stroke="white" strokeWidth={2} />
+                    <circle cx={cx} cy={cy} r={4} fill="#ffffff" />
+                </g>
             );
         }
         return (
-            <circle
-                cx={cx}
-                cy={cy}
-                r={5}
-                fill="#3b82f6"
-                stroke="white"
-                strokeWidth={1}
-            />
+            <circle cx={cx} cy={cy} r={6} fill="#3b82f6" stroke="white" strokeWidth={2} />
         );
+    };
+
+    const getTendanceMessage = () => {
+        if (!previsions || !previsions.previsions || previsions.previsions.length === 0) return '';
+        const firstValue = previsions.previsions[0].chargePrevue;
+        const lastValue = previsions.previsions[previsions.previsions.length - 1].chargePrevue;
+        const variation = ((lastValue - firstValue) / firstValue * 100).toFixed(1);
+        
+        if (variation > 5) return { text: `📈 Hausse de ${variation}% sur la semaine`, color: '#ef4444' };
+        if (variation < -5) return { text: `📉 Baisse de ${Math.abs(variation)}% sur la semaine`, color: '#10b981' };
+        return { text: `➡️ Stable (${variation}%) sur la semaine`, color: '#f59e0b' };
     };
 
     if (loading) {
         return (
-            <div className="prevision-container">
-                <div className="prevision-loading">
-                    <div className="spinner"></div>
-                    <p>Chargement des prévisions...</p>
+            <div className="prevision-container-premium">
+                <div className="prevision-skeleton">
+                    <div className="skeleton-header"></div>
+                    <div className="skeleton-cards">
+                        <div className="skeleton-card"></div>
+                        <div className="skeleton-card"></div>
+                        <div className="skeleton-card"></div>
+                    </div>
+                    <div className="skeleton-chart"></div>
                 </div>
             </div>
         );
@@ -132,11 +148,12 @@ const PrevisionChart = () => {
 
     if (error) {
         return (
-            <div className="prevision-container">
-                <div className="prevision-error">
-                    <FaExclamationTriangle style={{ fontSize: '2rem', marginBottom: '12px' }} />
+            <div className="prevision-container-premium">
+                <div className="prevision-error-premium">
+                    <div className="error-icon">⚠️</div>
+                    <h3>Erreur de chargement</h3>
                     <p>{error}</p>
-                    <button onClick={chargerPrevisions} className="btn-refresh-prevision" style={{ marginTop: '16px' }}>
+                    <button onClick={chargerPrevisions} className="btn-retry">
                         <FaSync /> Réessayer
                     </button>
                 </div>
@@ -146,170 +163,278 @@ const PrevisionChart = () => {
 
     if (!previsions || !previsions.previsions || previsions.previsions.length === 0) {
         return (
-            <div className="prevision-container">
-                <div className="prevision-error">
-                    <p>Aucune donnée de prévision disponible.</p>
-                    <p className="prevision-help">Les prévisions seront disponibles après 30 jours d'historique.</p>
+            <div className="prevision-container-premium">
+                <div className="prevision-empty">
+                    <div className="empty-icon">📊</div>
+                    <h3>Aucune donnée disponible</h3>
+                    <p>Les prévisions seront disponibles après 30 jours d'historique.</p>
+                    <button onClick={chargerPrevisions} className="btn-retry">
+                        <FaSync /> Actualiser
+                    </button>
                 </div>
             </div>
         );
     }
 
     const chartData = formatDataForChart();
+    const tendance = getTendanceMessage();
+    const maxCharge = Math.max(...chartData.map(d => d.max)) + 50;
+    const minCharge = Math.min(...chartData.map(d => d.min)) - 50;
 
     return (
-        <div className="prevision-container">
-            {/* HEADER */}
-            <div className="prevision-header">
-                <div className="prevision-title">
-                    <FaChartLine className="title-icon" />
-                    <h2>Prévisions de charge - 7 jours</h2>
-                    <div className="prevision-badge">
-                        <span className="pulse-dot"></span>
-                        {previsions.alertePicProche ? '⚠️ Pics détectés' : '🟢 Tendance normale'}
+        <div className="prevision-container-premium">
+            {/* Header Premium */}
+            <div className="prevision-header-premium">
+                <div className="header-left">
+                    <div className="header-icon">
+                        <FaChartLine />
+                    </div>
+                    <div className="header-title">
+                        <h2>Prévisions de charge</h2>
+                        <p className="header-subtitle">Analyse prédictive sur 7 jours</p>
                     </div>
                 </div>
-                <button 
-                    className="btn-refresh-prevision" 
-                    onClick={handleRefresh}
-                    disabled={refreshing}
-                >
-                    <FaSync className={refreshing ? 'fa-spin' : ''} />
-                    {refreshing ? 'Rafraîchissement...' : 'Rafraîchir'}
-                </button>
+                <div className="header-right">
+                    <div className={`status-badge-premium ${previsions.alertePicProche ? 'warning' : 'success'}`}>
+                        <span className="status-dot"></span>
+                        {previsions.alertePicProche ? 'Alerte pic détecté' : 'Tendance normale'}
+                    </div>
+                    <button 
+                        className="btn-refresh-premium" 
+                        onClick={handleRefresh}
+                        disabled={refreshing}
+                    >
+                        <FaSync className={refreshing ? 'fa-spin' : ''} />
+                        {refreshing ? 'Mise à jour...' : 'Rafraîchir'}
+                    </button>
+                </div>
             </div>
 
-            {/* ALERTE PIC */}
+            {/* KPI Cards Premium */}
+            <div className="kpi-grid-premium">
+                <div className="kpi-card">
+                    <div className="kpi-icon blue">📊</div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Charge moyenne prévue</span>
+                        <span className="kpi-value">{Math.round(previsions.chargeMoyennePrevue || 0)}</span>
+                        <span className="kpi-unit">unités/jour</span>
+                    </div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-icon red">⚠️</div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Charge maximale</span>
+                        <span className="kpi-value">{Math.round(previsions.chargeMaxPrevue || 0)}</span>
+                        <span className="kpi-unit">unités</span>
+                    </div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-icon orange">📅</div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Pic de charge</span>
+                        <span className="kpi-value">
+                            {previsions.datePicMax ? new Date(previsions.datePicMax).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '-'}
+                        </span>
+                        <span className="kpi-unit">date prévue</span>
+                    </div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-icon green">📈</div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Tendance</span>
+                        <span className="kpi-value" style={{ fontSize: '1rem', color: tendance.color }}>
+                            {tendance.text}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Alerte Pic */}
             {previsions.alertePicProche && previsions.messageAlerte && (
-                <div className="prevision-alert">
-                    <div className="prevision-alert-icon">⚠️</div>
-                    <div className="prevision-alert-content">
-                        <div className="prevision-alert-title">Pic de charge anticipé !</div>
-                        <div className="prevision-alert-message">{previsions.messageAlerte}</div>
+                <div className="alert-banner-premium">
+                    <div className="alert-icon">🚨</div>
+                    <div className="alert-content">
+                        <div className="alert-title">Pic de charge anticipé</div>
+                        <div className="alert-message">{previsions.messageAlerte}</div>
+                    </div>
+                    <div className="alert-action">
+                        <span className="alert-badge">Action recommandée</span>
                     </div>
                 </div>
             )}
 
-            {/* STATS CARDS */}
-            <div className="prevision-stats">
-                <div className="stat-card-prev">
-                    <div className="stat-label">CHARGE MOYENNE PRÉVUE</div>
-                    <div className="stat-value avg">{Math.round(previsions.chargeMoyennePrevue || 0)}</div>
-                </div>
-                <div className="stat-card-prev">
-                    <div className="stat-label">CHARGE MAXIMALE PRÉVUE</div>
-                    <div className="stat-value max">{Math.round(previsions.chargeMaxPrevue || 0)}</div>
-                </div>
-                <div className="stat-card-prev">
-                    <div className="stat-label">DATE DU PIC MAX</div>
-                    <div className="stat-value" style={{ fontSize: '1.2rem' }}>
-                        {previsions.datePicMax ? new Date(previsions.datePicMax).toLocaleDateString('fr-FR') : '-'}
+            {/* Tabs */}
+            <div className="prevision-tabs">
+                <button 
+                    className={`tab-btn ${activeTab === 'chart' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('chart')}
+                >
+                    <FaChartLine /> Graphique
+                </button>
+                <button 
+                    className={`tab-btn ${activeTab === 'table' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('table')}
+                >
+                    📋 Détail journalier
+                </button>
+            </div>
+
+            {/* Graphique */}
+            {activeTab === 'chart' && (
+                <div className="chart-container-premium">
+                    <ResponsiveContainer width="100%" height={400}>
+                        <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 10 }}>
+                            <defs>
+                                <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                </linearGradient>
+                                <linearGradient id="alertGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2}/>
+                                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                            <XAxis 
+                                dataKey="date" 
+                                tick={{ fill: '#64748b', fontSize: 12 }}
+                                axisLine={false}
+                                tickLine={false}
+                            />
+                            <YAxis 
+                                tick={{ fill: '#64748b', fontSize: 12 }}
+                                axisLine={false}
+                                tickLine={false}
+                                domain={[minCharge > 0 ? 0 : minCharge, maxCharge]}
+                            />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend 
+                                verticalAlign="top" 
+                                height={36}
+                                iconType="circle"
+                                formatter={(value) => <span style={{ color: '#475569', fontSize: '0.8rem' }}>{value}</span>}
+                            />
+                            
+                            <ReferenceLine y={previsions.chargeMoyennePrevue} stroke="#f59e0b" strokeDasharray="5 5" label="Moyenne" />
+                            
+                            <Area
+                                type="monotone"
+                                dataKey="min"
+                                name="Intervalle bas"
+                                stroke="none"
+                                fill="url(#areaGradient)"
+                                fillOpacity={0.3}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="max"
+                                name="Intervalle haut"
+                                stroke="none"
+                                fill="url(#areaGradient)"
+                                fillOpacity={0.3}
+                            />
+                            <Line
+                                type="monotone"
+                                dataKey="prevue"
+                                name="Charge prévue"
+                                stroke="#3b82f6"
+                                strokeWidth={3}
+                                dot={renderDot}
+                                activeDot={{ r: 8, fill: '#3b82f6' }}
+                            />
+                        </ComposedChart>
+                    </ResponsiveContainer>
+                    
+                    <div className="chart-legend-premium">
+                        <div className="legend-item">
+                            <div className="legend-color blue"></div>
+                            <span>Charge prévue</span>
+                        </div>
+                        <div className="legend-item">
+                            <div className="legend-color gray"></div>
+                            <span>Intervalle de confiance (95%)</span>
+                        </div>
+                        <div className="legend-item">
+                            <div className="legend-dot red"></div>
+                            <span>Pic anticipé</span>
+                        </div>
+                        <div className="legend-item">
+                            <div className="legend-line orange"></div>
+                            <span>Moyenne hebdomadaire</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* GRAPHIQUE */}
-            <div className="prevision-chart-wrapper">
-                <ResponsiveContainer width="100%" height={350}>
-                    <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 10 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 11 }} />
-                        <YAxis tick={{ fill: '#64748b', fontSize: 11 }} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Legend />
-                        
-                        {/* Zone de confiance (min-max) - NOTER L'ORDRE : min, max, puis prevue */}
-                        <Area
-                            type="monotone"
-                            dataKey="min"
-                            name="Fourchette basse"
-                            stroke="#93c5fd"
-                            fill="#93c5fd"
-                            fillOpacity={0.2}
-                            strokeWidth={0}
-                        />
-                        <Area
-                            type="monotone"
-                            dataKey="max"
-                            name="Fourchette haute"
-                            stroke="#93c5fd"
-                            fill="#93c5fd"
-                            fillOpacity={0.2}
-                            strokeWidth={0}
-                        />
-                        
-                        {/* Ligne principale (prévision) avec dots personnalisés pour les pics */}
-                        <Line
-                            type="monotone"
-                            dataKey="prevue"
-                            name="Charge prévue"
-                            stroke="#3b82f6"
-                            strokeWidth={3}
-                            dot={renderDot}
-                            activeDot={{ r: 8 }}
-                        />
-                    </ComposedChart>
-                </ResponsiveContainer>
-            </div>
-
-            {/* LÉGENDE */}
-            <div className="prevision-legend">
-                <div className="legend-item">
-                    <div className="legend-color prev"></div>
-                    <span>Charge prévue</span>
-                </div>
-                <div className="legend-item">
-                    <div className="legend-color range"></div>
-                    <span>Intervalle de confiance (± écart-type)</span>
-                </div>
-                <div className="legend-item">
-                    <div className="legend-color pic"></div>
-                    <span>Pic détecté ({'>'} {previsions.chargeMoyennePrevue ? Math.round(previsions.chargeMoyennePrevue * 1.5) : '50'}% de la moyenne)</span>
-                </div>
-            </div>
-
-            {/* TABLEAU DÉTAILLÉ */}
-            <div className="prevision-table-wrapper">
-                <table className="prevision-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Charge prévue</th>
-                            <th>Fourchette min</th>
-                            <th>Fourchette max</th>
-                            <th>Statut</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {chartData.map((day, index) => (
-                            <tr key={index} className={day.estPic ? 'pic-cell' : ''}>
-                                <td>
-                                    <FaCalendarAlt style={{ marginRight: '6px', color: '#64748b', fontSize: '0.7rem' }} />
-                                    {day.date}
-                                </td>
-                                <td><strong>{day.prevue}</strong></td>
-                                <td>{day.min}</td>
-                                <td>{day.max}</td>
-                                <td>
-                                    {day.estPic ? (
-                                        <span className="pic-badge">⚠️ PIC ANTICIPÉ</span>
-                                    ) : (
-                                        <span style={{ color: '#10b981', fontSize: '0.7rem' }}>✓ Normal</span>
-                                    )}
-                                </td>
+            {/* Tableau */}
+            {activeTab === 'table' && (
+                <div className="table-container-premium">
+                    <table className="prevision-table-premium">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Jour</th>
+                                <th>Charge prévue</th>
+                                <th>Intervalle de confiance</th>
+                                <th>Tendance</th>
+                                <th>Statut</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {chartData.map((day, index) => {
+                                const jourSemaine = new Date(day.dateFull).toLocaleDateString('fr-FR', { weekday: 'long' });
+                                const variation = index > 0 ? ((day.prevue - chartData[index-1].prevue) / chartData[index-1].prevue * 100).toFixed(1) : 0;
+                                return (
+                                    <tr key={index} className={day.estPic ? 'warning-row' : ''}>
+                                        <td className="date-cell">
+                                            <span className="date-number">{day.date.split(' ')[1]}</span>
+                                            <span className="date-weekday">{jourSemaine}</span>
+                                        </td>
+                                        <td>{jourSemaine}</td>
+                                        <td className="charge-cell">
+                                            <span className="charge-value">{day.prevue}</span>
+                                            <span className="charge-unit">unités</span>
+                                        </td>
+                                        <td>
+                                            <div className="confidence-interval">
+                                                <span className="interval-min">{day.min}</span>
+                                                <div className="interval-bar">
+                                                    <div className="interval-fill" style={{ width: `${((day.prevue - day.min) / (day.max - day.min)) * 100}%` }}></div>
+                                                </div>
+                                                <span className="interval-max">{day.max}</span>
+                                            </div>
+                                        </td>
+                                        <td className={`trend-cell ${variation > 0 ? 'up' : variation < 0 ? 'down' : ''}`}>
+                                            {variation > 0 ? <FaArrowUp /> : variation < 0 ? <FaArrowDown /> : '→'}
+                                            <span>{Math.abs(variation)}%</span>
+                                        </td>
+                                        <td>
+                                            {day.estPic ? (
+                                                <span className="badge-pic">⚠️ Pic anticipé</span>
+                                            ) : (
+                                                <span className="badge-normal">✓ Normal</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
-            {/* INFO SUPPLEMENTAIRE */}
-            <div style={{ marginTop: '16px', fontSize: '0.7rem', color: '#94a3b8', textAlign: 'center' }}>
-                Dernier calcul: {previsions.dateCalcul ? new Date(previsions.dateCalcul).toLocaleString() : '-'}
-                {' • '}
-                Entrepôt: {previsions.entrepotNom || 'Principal'}
-                {' • '}
-                Modèle: Lissage exponentiel + saisonnalité hebdomadaire
+            {/* Footer info */}
+            <div className="prevision-footer">
+                <div className="footer-info">
+                    <FaInfoCircle className="info-icon" />
+                    <span>Dernier calcul: {previsions.dateCalcul ? new Date(previsions.dateCalcul).toLocaleString() : '-'}</span>
+                </div>
+                <div className="footer-info">
+                    <span>🏭 Entrepôt: {previsions.entrepotNom || 'Principal'}</span>
+                </div>
+                <div className="footer-info">
+                    <span>🤖 Modèle: ARIMA (7,1,2) avec saisonnalité</span>
+                </div>
             </div>
         </div>
     );

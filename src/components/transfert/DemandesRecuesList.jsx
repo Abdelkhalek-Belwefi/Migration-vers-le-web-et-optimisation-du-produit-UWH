@@ -7,8 +7,8 @@ import {
 import { FaClipboard } from "react-icons/fa";
 import { FaInbox } from "react-icons/fa";
 import { FaSyncAlt } from "react-icons/fa";
+import { FaCheckCircle } from "react-icons/fa";
 import './DemandesRecuesList.css';
-
 
 const DemandesRecuesList = () => {
     const [demandes, setDemandes] = useState([]);
@@ -16,6 +16,8 @@ const DemandesRecuesList = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [actionLoading, setActionLoading] = useState(null);
+    const [selectedDemande, setSelectedDemande] = useState(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
 
     const userRole = localStorage.getItem('role');
     const isResponsable = userRole === 'RESPONSABLE_ENTREPOT' || userRole === 'ADMINISTRATEUR';
@@ -30,7 +32,6 @@ const DemandesRecuesList = () => {
         try {
             setLoading(true);
             setError('');
-            // Récupère les commandes où l'entrepôt SOURCE = entrepôt de l'utilisateur
             const data = await getCommandesTransfertSource();
             setDemandes(data);
         } catch (err) {
@@ -77,6 +78,16 @@ const DemandesRecuesList = () => {
         } finally {
             setActionLoading(null);
         }
+    };
+
+    const handleRowClick = (demande) => {
+        setSelectedDemande(demande);
+        setShowDetailModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowDetailModal(false);
+        setSelectedDemande(null);
     };
 
     const formatDate = (dateString) => {
@@ -158,10 +169,15 @@ const DemandesRecuesList = () => {
                         </thead>
                         <tbody>
                             {demandes.map((demande) => (
-                                <tr key={demande.id}>
-                                    <td><strong>{demande.numeroCommande}</strong></td>
+                                <tr 
+                                    key={demande.id} 
+                                    className="clickable-row"
+                                    onClick={() => handleRowClick(demande)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <td style={{ fontWeight: 'bold' }}>{demande.numeroCommande}</td>
                                     <td>
-                                        {demande.entrepotDestination?.nom || 
+                                        {demande.entrepotDestinationNom || 
                                          (demande.entrepotDestinationId ? `Entrepôt #${demande.entrepotDestinationId}` : '-')}
                                     </td>
                                     <td>
@@ -183,9 +199,9 @@ const DemandesRecuesList = () => {
                                     </td>
                                     <td>{formatDate(demande.dateCommande)}</td>
                                     <td>{getStatutBadge(demande.statut)}</td>
-                                    <td>
+                                    <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
                                         {demande.statut === 'EN_ATTENTE' && (
-                                            <div className="action-buttons">
+                                            <>
                                                 <button
                                                     className="btn-accepter"
                                                     onClick={() => handleAccepter(demande.id)}
@@ -200,7 +216,7 @@ const DemandesRecuesList = () => {
                                                 >
                                                     {actionLoading === demande.id ? '...' : '❌ Refuser'}
                                                 </button>
-                                            </div>
+                                            </>
                                         )}
                                         {demande.statut !== 'EN_ATTENTE' && (
                                             <span className="status-indicator">
@@ -214,6 +230,98 @@ const DemandesRecuesList = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+            )}
+
+            {/* Modal de détails */}
+            {showDetailModal && selectedDemande && (
+                <div className="modal-overlay" onClick={handleCloseModal}>
+                    <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>📋 Détails de la demande</h3>
+                            <button className="modal-close" onClick={handleCloseModal}>✕</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="detail-section">
+                                <h4>Informations générales</h4>
+                                <div className="detail-grid">
+                                    <div className="detail-item">
+                                        <label>N° Demande :</label>
+                                        <span>{selectedDemande.numeroCommande}</span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <label>Statut :</label>
+                                        <span>{getStatutBadge(selectedDemande.statut)}</span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <label>Date demande :</label>
+                                        <span>{formatDate(selectedDemande.dateCommande)}</span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <label>Entrepôt demandeur :</label>
+                                        <span>{selectedDemande.entrepotDestinationNom || `Entrepôt #${selectedDemande.entrepotDestinationId}`}</span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <label>Entrepôt fournisseur :</label>
+                                        <span>{selectedDemande.entrepotSourceNom || `Entrepôt #${selectedDemande.entrepotSourceId}`}</span>
+                                    </div>
+                                    {selectedDemande.notes && (
+                                        <div className="detail-item">
+                                            <label>Notes :</label>
+                                            <span>{selectedDemande.notes}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="detail-section">
+                                <h4>Articles demandés</h4>
+                                <table className="detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Désignation</th>
+                                            <th>Quantité demandée</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {selectedDemande.lignes?.map((ligne, idx) => (
+                                            <tr key={idx}>
+                                                <td>{ligne.articleCode}</td>
+                                                <td>{ligne.articleDesignation}</td>
+                                                <td className="quantite-cell">{ligne.quantite} unités</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            {selectedDemande.statut === 'EN_ATTENTE' && (
+                                <>
+                                    <button 
+                                        className="btn-accepter" 
+                                        onClick={() => {
+                                            handleAccepter(selectedDemande.id);
+                                            handleCloseModal();
+                                        }}
+                                    >
+                                        ✅ Accepter
+                                    </button>
+                                    <button 
+                                        className="btn-refuser" 
+                                        onClick={() => {
+                                            handleRefuser(selectedDemande.id);
+                                            handleCloseModal();
+                                        }}
+                                    >
+                                        ❌ Refuser
+                                    </button>
+                                </>
+                            )}
+                            <button className="btn-close" onClick={handleCloseModal}>Fermer</button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

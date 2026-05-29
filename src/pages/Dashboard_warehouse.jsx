@@ -48,12 +48,48 @@ const Dashboard_warehouse = () => {
   const [userName] = useState(localStorage.getItem("nom") || "Utilisateur");
   const [userPrenom] = useState(localStorage.getItem("prenom") || "");
   const [userRole] = useState(localStorage.getItem("role") || "OPERATOR");
+  const [userId] = useState(localStorage.getItem("userId") || null);
   const [profileImage, setProfileImage] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [loadingPassword, setLoadingPassword] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
 
+  // ========== CHARGER LA PHOTO DEPUIS LA BASE DE DONNÉES ==========
   useEffect(() => {
-    const savedImage = localStorage.getItem("profileImage");
-    if (savedImage) setProfileImage(savedImage);
+    const loadProfileImageFromBackend = async () => {
+      const token = localStorage.getItem('token');
+      const userIdFromStorage = localStorage.getItem('userId');
+      
+      if (!token || !userIdFromStorage) return;
+      
+      try {
+        const response = await fetch(`http://localhost:8080/api/admin/users/${userIdFromStorage}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const userData = await response.json();
+        if (userData.profileImage) {
+          setProfileImage(userData.profileImage);
+          localStorage.setItem('profileImage', userData.profileImage);
+        } else {
+          const savedImage = localStorage.getItem('profileImage');
+          if (savedImage) setProfileImage(savedImage);
+        }
+      } catch (error) {
+        console.error('Erreur chargement photo:', error);
+        const savedImage = localStorage.getItem('profileImage');
+        if (savedImage) setProfileImage(savedImage);
+      }
+    };
+    
+    loadProfileImageFromBackend();
 
     const token = localStorage.getItem("token");
     if (!token) navigate("/login");
@@ -61,13 +97,38 @@ const Dashboard_warehouse = () => {
     const role = localStorage.getItem("role");
     if (role === "ADMINISTRATEUR") navigate("/admin");
     
-    // Rediriger les transporteurs vers leur dashboard dédié
     if (role === "TRANSPORTEUR") navigate("/transporteur");
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
+  };
+
+  // ========== SAUVEGARDER LA PHOTO EN BASE DE DONNÉES ==========
+  const saveProfileImageToBackend = async (base64Image) => {
+    const token = localStorage.getItem('token');
+    const userIdFromStorage = localStorage.getItem('userId');
+    
+    if (!token || !userIdFromStorage) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8080/api/admin/users/${userIdFromStorage}/profile-image`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ profileImage: base64Image })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la sauvegarde');
+      }
+      console.log('Photo sauvegardée en base de données');
+    } catch (error) {
+      console.error('Erreur sauvegarde photo:', error);
+    }
   };
 
   const handleImageClick = () => fileInputRef.current.click();
@@ -83,23 +144,92 @@ const Dashboard_warehouse = () => {
         alert("L'image ne doit pas dépasser 2 Mo");
         return;
       }
+      setUploadingImage(true);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result);
-        localStorage.setItem("profileImage", reader.result);
+      reader.onloadend = async () => {
+        const base64Image = reader.result;
+        setProfileImage(base64Image);
+        localStorage.setItem("profileImage", base64Image);
+        await saveProfileImageToBackend(base64Image);
+        setUploadingImage(false);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleDeleteImage = () => {
-    setProfileImage(null);
-    localStorage.removeItem("profileImage");
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const handleDeleteImage = async () => {
+    if (window.confirm('Supprimer votre photo de profil ?')) {
+      setProfileImage(null);
+      localStorage.removeItem("profileImage");
+      await saveProfileImageToBackend(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
+  // ========== GESTION DU MOT DE PASSE ==========
   const handleProfileClick = () => setActiveTab("profile");
-  const handlePasswordClick = () => setActiveTab("password");
+  
+  const handlePasswordClick = () => {
+    setShowPasswordModal(true);
+    setOldPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setPasswordError('');
+    setPasswordSuccess('');
+  };
+
+  const handleClosePasswordModal = () => {
+    setShowPasswordModal(false);
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+    
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Les mots de passe ne correspondent pas');
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      setPasswordError('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+    
+    setLoadingPassword(true);
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8080/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          oldPassword: oldPassword,
+          newPassword: newPassword
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setPasswordSuccess('Mot de passe modifié avec succès !');
+        setTimeout(() => {
+          setShowPasswordModal(false);
+          setPasswordSuccess('');
+        }, 2000);
+      } else {
+        setPasswordError(data.message || 'Erreur lors du changement de mot de passe');
+      }
+    } catch (error) {
+      setPasswordError('Erreur de connexion au serveur');
+    } finally {
+      setLoadingPassword(false);
+    }
+  };
 
   const handleStockClick = (stock) => {
     setSelectedStock(stock);
@@ -115,7 +245,7 @@ const Dashboard_warehouse = () => {
   // Construction du menu latéral selon le rôle (sans TRANSPORTEUR)
   const getMenuItems = () => {
     const baseItems = [
-      { id: "dashboard", label: "Tableau de bord", icon: <FaTachometerAlt /> }
+      { id: "dashboard", label: "TABLEAU DE BORD", icon: <FaTachometerAlt /> }
     ];
 
     switch (userRole) {
@@ -123,37 +253,33 @@ const Dashboard_warehouse = () => {
         return [
           ...baseItems,
           
-          { id: "reception", label: "Réception", icon: <FaBoxes /> },
-          { id: "rangement", label: "Rangement", icon: <FaClipboardList /> },
-          { id: "preparation", label: "Préparation de commandes", icon: <FaClipboardList /> },
-          // ========== NOUVEAU MENU ITEM POUR LIVRAISONS EN ATTENTE ==========
-          { id: "livraisonsAttente", label: "Livraisons en attente", icon: <FaClock /> }
+          { id: "reception", label: "RÉCEPTION", icon: <FaBoxes /> },
+          { id: "rangement", label: "RANGEMENT", icon: <FaClipboardList /> },
+          { id: "preparation", label: "PRÉPARATION DE COMMANDES", icon: <FaClipboardList /> },
+          { id: "livraisonsAttente", label: "LIVRAISONS EN ATTENTE", icon: <FaClock /> }
         ];
 
       case "RESPONSABLE_ENTREPOT":
         return [
           ...baseItems,
-          { id: "previsions", label: "Prévisions 7j", icon: <FaChartLine /> },  // ← AJOUTÉ
-          { id: "stock", label: "Consultation Stock", icon: <FaBoxes /> },
-          { id: "mouvements", label: "Historique mouvements", icon: <FaHistory /> },
-          { id: "reception", label: "Validation Réception", icon: <FaCheckCircle /> },
-          { id: "rangement", label: "Suivi Rangement", icon: <FaClipboardList /> },
-          { id: "expedier", label: "Expéditions", icon: <FaTruck /> },
-          { id: "documents", label: "Impression Documents", icon: <FaPrint /> },
-          
-          // ========== NOUVEAUX MENU ITEMS POUR TRANSFERT ==========
-          { id: "stockFaible", label: "Stock faible", icon: <FaExclamationTriangle /> },
-          { id: "demandesRecues", label: "Demandes reçues", icon: <FaInbox /> },
-          // ========== NOUVEAU MENU ITEM POUR LIVRAISONS EN ATTENTE ==========
-          { id: "livraisonsAttente", label: "Livraisons en attente", icon: <FaClock /> }
+          { id: "previsions", label: "PRÉVISIONS 7J", icon: <FaChartLine /> },
+          { id: "stock", label: "STOCK", icon: <FaBoxes /> },
+          { id: "mouvements", label: "HISTORIQUE MOUVEMENTS", icon: <FaHistory /> },
+          { id: "reception", label: "RÉCEPTIONS EN ATTENTE", icon: <FaCheckCircle /> },
+          { id: "rangement", label: "SUIVI RANGEMENT", icon: <FaClipboardList /> },
+          { id: "expedier", label: "EXPÉDITIONS", icon: <FaTruck /> },
+          { id: "documents", label: "IMPRESSION DOCUMENTS", icon: <FaPrint /> },
+          { id: "stockFaible", label: "STOCK FAIBLE", icon: <FaExclamationTriangle /> },
+          { id: "demandesRecues", label: "DEMANDES REÇUES", icon: <FaInbox /> },
+          { id: "livraisonsAttente", label: "LIVRAISONS EN ATTENTE", icon: <FaClock /> }
         ];
 
       case "SERVICE_COMMERCIAL":
         return [
           ...baseItems,
           
-          { id: "commandes", label: "Commandes", icon: <FaShoppingCart /> },
-          { id: "clients", label: "Clients", icon: <FaBoxOpen /> }
+          { id: "commandes", label: "COMMANDES", icon: <FaShoppingCart /> },
+          { id: "clients", label: "CLIENTS", icon: <FaBoxOpen /> }
         ];
 
       case "OPERATOR":
@@ -190,7 +316,7 @@ const Dashboard_warehouse = () => {
       stockFaible: "Stocks faibles - Déclarer un besoin",
       demandesRecues: "Demandes de transfert reçues",
       livraisonsAttente: "Livraisons en attente - Codes OTP",
-      previsions: "Prévisions de charge - 7 jours"  // ← AJOUTÉ
+      previsions: "Prévisions de charge - 7 jours"
     };
     return titles[tabId] || tabId;
   };
@@ -337,18 +463,15 @@ const Dashboard_warehouse = () => {
       case "documents":
         return <ImpressionDocuments />;
 
-      // ========== NOUVEAUX CAS POUR LES TRANSFERTS ==========
       case "stockFaible":
         return <StockFaibleList />;
 
       case "demandesRecues":
         return <DemandesRecuesList />;
 
-      // ========== NOUVEAU CAS POUR LES LIVRAISONS EN ATTENTE ==========
       case "livraisonsAttente":
         return <LivraisonsAttenteList />;
 
-      // ========== NOUVEAU CAS POUR LES PRÉVISIONS 7 JOURS ==========
       case "previsions":
         return <PrevisionChart />;
 
@@ -393,6 +516,65 @@ const Dashboard_warehouse = () => {
           {renderContent()}
         </div>
       </div>
+
+      {/* MODAL CHANGER MOT DE PASSE */}
+      {showPasswordModal && (
+        <div className="modal-overlay" onClick={handleClosePasswordModal}>
+          <div className="modal-content password-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>🔒 Changer le mot de passe</h3>
+              <button className="modal-close" onClick={handleClosePasswordModal}>✕</button>
+            </div>
+            <form onSubmit={handleChangePassword}>
+              <div className="modal-body">
+                {passwordError && <div className="alert error">{passwordError}</div>}
+                {passwordSuccess && <div className="alert success">{passwordSuccess}</div>}
+                
+                <div className="form-group">
+                  <label>Ancien mot de passe</label>
+                  <input
+                    type="password"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    required
+                    placeholder="Entrez votre ancien mot de passe"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Nouveau mot de passe</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    placeholder="Minimum 6 caractères"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Confirmer le nouveau mot de passe</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="Confirmez votre nouveau mot de passe"
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={handleClosePasswordModal}>
+                  Annuler
+                </button>
+                <button type="submit" className="btn-submit" disabled={loadingPassword}>
+                  {loadingPassword ? 'Chargement...' : 'Changer le mot de passe'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ChatBot */}
       <ChatBot userRole={userRole} userId={localStorage.getItem('userId')} />

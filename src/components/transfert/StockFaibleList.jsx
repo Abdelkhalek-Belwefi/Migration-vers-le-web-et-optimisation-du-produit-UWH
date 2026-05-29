@@ -7,6 +7,7 @@ import { MdLocalShipping } from "react-icons/md";
 import { FaBox } from "react-icons/fa";
 import { FaSyncAlt } from "react-icons/fa";
 import { FaCheckCircle } from "react-icons/fa";
+import { FaPaperPlane } from "react-icons/fa";
 
 const StockFaibleList = () => {
     const [stocksFaibles, setStocksFaibles] = useState([]);
@@ -136,7 +137,7 @@ const StockFaibleList = () => {
                                             className="btn-declarer"
                                             onClick={() => handleDeclarer(stock)}
                                         >
-                                            📤 Déclarer
+                                            <FaPaperPlane /> Déclarer
                                         </button>
                                     </td>
                                 </tr>

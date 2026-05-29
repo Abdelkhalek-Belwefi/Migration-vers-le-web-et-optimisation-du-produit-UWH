@@ -101,8 +101,9 @@ $transition: all 0.3s ease;
 // Address Wrapper
 .clientCom-address-wrapper {
   display: flex;
+  flex-direction: column;
   gap: 10px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 // Address Input

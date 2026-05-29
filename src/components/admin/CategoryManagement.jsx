@@ -83,27 +83,27 @@ const CategoryManagement = () => {
         setError('');
     };
 
-    if (loading) return <div className="cat-mgt-loading">Chargement des catégories...</div>;
+    if (loading) return <div className="categ_loading">Chargement des catégories...</div>;
 
     return (
-        <div className="cat-mgt-container">
-            <div className="cat-mgt-header">
+        <div className="categ_container">
+            <div className="categ_header">
                 <h2>Gestion des catégories</h2>
                 {!showForm && (
-                    <button className="cat-mgt-btn-add" onClick={() => setShowForm(true)}>
+                    <button className="categ_btn_add" onClick={() => setShowForm(true)}>
                         <FaPlus /> Nouvelle catégorie
                     </button>
                 )}
             </div>
 
-            {error && <div className="cat-mgt-alert error">{error}</div>}
-            {success && <div className="cat-mgt-alert success">{success}</div>}
+            {error && <div className="categ_alert error">{error}</div>}
+            {success && <div className="categ_alert success">{success}</div>}
 
             {showForm && (
-                <div className="cat-mgt-form-card">
+                <div className="categ_form_card">
                     <h3>{editingCategory ? 'Modifier la catégorie' : 'Ajouter une catégorie'}</h3>
                     <form onSubmit={handleSubmit}>
-                        <div className="cat-mgt-form-group">
+                        <div className="categ_form_group">
                             <label>Nom *</label>
                             <input
                                 type="text"
@@ -113,7 +113,7 @@ const CategoryManagement = () => {
                                 required
                             />
                         </div>
-                        <div className="cat-mgt-form-group">
+                        <div className="categ_form_group">
                             <label>Description</label>
                             <textarea
                                 name="description"
@@ -122,11 +122,11 @@ const CategoryManagement = () => {
                                 rows="3"
                             />
                         </div>
-                        <div className="cat-mgt-form-actions">
-                            <button type="button" className="cat-mgt-btn-cancel" onClick={handleCancel}>
+                        <div className="categ_form_actions">
+                            <button type="button" className="categ_btn_cancel" onClick={handleCancel}>
                                 <FaTimes /> Annuler
                             </button>
-                            <button type="submit" className="cat-mgt-btn-submit">
+                            <button type="submit" className="categ_btn_submit">
                                 <FaSave /> {editingCategory ? 'Modifier' : 'Ajouter'}
                             </button>
                         </div>
@@ -134,8 +134,8 @@ const CategoryManagement = () => {
                 </div>
             )}
 
-            <div className="cat-mgt-table-wrapper">
-                <table className="cat-mgt-table">
+            <div className="categ_table_wrapper">
+                <table className="categ_table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -151,10 +151,10 @@ const CategoryManagement = () => {
                                 <td>{cat.name}</td>
                                 <td>{cat.description || '-'}</td>
                                 <td>
-                                    <button className="cat-mgt-btn-edit" onClick={() => handleEdit(cat)}>
+                                    <button className="categ_btn_edit" onClick={() => handleEdit(cat)}>
                                         <FaEdit />
                                     </button>
-                                    <button className="cat-mgt-btn-delete" onClick={() => handleDelete(cat)}>
+                                    <button className="categ_btn_delete" onClick={() => handleDelete(cat)}>
                                         <FaTrash />
                                     </button>
                                 </td>

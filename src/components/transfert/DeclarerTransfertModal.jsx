@@ -3,6 +3,7 @@ import { getAllEntrepots } from '../../services/entrepotService ';
 import { createCommandeTransfert } from '../../services/commandeService';
 import { stockService } from '../../services/stockService';
 import './DeclarerTransfertModal.css';
+import { FaPaperPlane } from "react-icons/fa";
 
 const DeclarerTransfertModal = ({ stock, onClose, onSuccess }) => {
     const [entrepots, setEntrepots] = useState([]);
@@ -122,7 +123,7 @@ const DeclarerTransfertModal = ({ stock, onClose, onSuccess }) => {
                 notes: `Demande de transfert pour réapprovisionnement : ${stock.articleDesignation} (lot: ${stock.lot})`
             };
 
-            console.log('📤 Données envoyées:', JSON.stringify(commandeData, null, 2));
+            console.log('<FaPaperPlane /> Données envoyées:', JSON.stringify(commandeData, null, 2));
             console.log('selectedEntrepotId:', selectedEntrepotId);
             console.log('userEntrepotId:', userEntrepotId);
             console.log('Stock source:', stockSource);
@@ -154,7 +155,7 @@ const DeclarerTransfertModal = ({ stock, onClose, onSuccess }) => {
         <div className="modal-overlay" onClick={onClose}>
             <div className="declarer-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>📤 Déclarer un besoin de réapprovisionnement</h3>
+                    <h3><FaPaperPlane /> Déclarer un besoin de réapprovisionnement</h3>
                     <button className="modal-close" onClick={onClose}>✕</button>
                 </div>
 
@@ -254,7 +255,7 @@ const DeclarerTransfertModal = ({ stock, onClose, onSuccess }) => {
                                 className="btn-submit" 
                                 disabled={loading || entrepots.length === 0 || !stockSource || quantiteDemandee > stockDisponible}
                             >
-                                {loading ? 'Envoi en cours...' : '📦 Envoyer la demande'}
+                                {loading ? 'Envoi en cours...' : ' Envoyer la demande'}
                             </button>
                         </div>
                     </form>

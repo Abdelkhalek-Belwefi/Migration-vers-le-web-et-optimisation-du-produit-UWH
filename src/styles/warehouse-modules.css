@@ -786,3 +786,116 @@
     margin: 0;
   }
 }
+/* Preparation Header */
+.preparation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.preparation-stats {
+    display: flex;
+    gap: 12px;
+}
+
+.stat-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.stat-badge.client {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.stat-badge.transfert {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.stat-badge.total {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+/* Preparation Tabs */
+.preparation-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 30px 30px 0 0;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    color: #3b82f6;
+    background: #eff6ff;
+}
+
+.tab-btn.active {
+    color: #3b82f6;
+    background: #eff6ff;
+    border-bottom: 2px solid #3b82f6;
+}
+
+/* Preparation Section */
+.preparation-section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #eef2f6;
+}
+
+.section-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+    font-style: italic;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.badge-info {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}

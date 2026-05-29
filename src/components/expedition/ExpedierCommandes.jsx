@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getCommandesAExpedier } from '../../services/commandeService';
 import { expedierCommandeAvecId, getMesExpeditions, deleteExpedition, getTransporteurs } from '../../services/expeditionService';
 import '../../styles/warehouse-modules.css';
-import { FaBox, FaHistory, FaTruck, FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaBox, FaHistory, FaTruck, FaTrash, FaCheck, FaTimes, FaEye } from 'react-icons/fa';
 
 const ExpedierCommandes = () => {
   const [commandes, setCommandes] = useState([]);
@@ -17,6 +17,13 @@ const ExpedierCommandes = () => {
   const [transporteurId, setTransporteurId] = useState('');
   const [transporteurs, setTransporteurs] = useState([]);
   const [loadingTransporteurs, setLoadingTransporteurs] = useState(false);
+
+  // ========== NOUVEAU : État pour le filtre ==========
+  const [filterType, setFilterType] = useState('ALL'); // 'ALL', 'CLIENT', 'TRANSFERT'
+
+  // ========== NOUVEAU : État pour le modal de détails ==========
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailCommande, setDetailCommande] = useState(null);
 
   const loadCommandes = async () => {
     try {
@@ -61,6 +68,17 @@ const ExpedierCommandes = () => {
     loadTransporteurs();
   }, []);
 
+  // ========== NOUVEAU : Filtrer les commandes selon le type ==========
+  const filteredCommandes = commandes.filter(cmd => {
+    if (filterType === 'CLIENT') return cmd.typeCommande === 'CLIENT';
+    if (filterType === 'TRANSFERT') return cmd.typeCommande === 'TRANSFERT';
+    return true;
+  });
+
+  // ========== NOUVEAU : Compter les commandes par type ==========
+  const clientCount = commandes.filter(cmd => cmd.typeCommande === 'CLIENT').length;
+  const transfertCount = commandes.filter(cmd => cmd.typeCommande === 'TRANSFERT').length;
+
   const openModal = (commande) => {
     setSelectedCommande(commande);
     setTransporteurId('');
@@ -73,6 +91,18 @@ const ExpedierCommandes = () => {
     setTransporteurId('');
   };
 
+  // ========== NOUVEAU : Ouvrir le modal de détails ==========
+  const openDetailModal = (commande) => {
+    setDetailCommande(commande);
+    setShowDetailModal(true);
+  };
+
+  // ========== NOUVEAU : Fermer le modal de détails ==========
+  const closeDetailModal = () => {
+    setShowDetailModal(false);
+    setDetailCommande(null);
+  };
+
   const handleExpedier = async () => {
     if (!transporteurId) {
       alert('Veuillez sélectionner un transporteur');
@@ -80,7 +110,6 @@ const ExpedierCommandes = () => {
     }
     setExpeditionInProgress(selectedCommande.id);
     try {
-      // Appel de la nouvelle méthode avec l'ID du transporteur
       await expedierCommandeAvecId(selectedCommande.id, transporteurId);
       closeModal();
       loadCommandes();
@@ -111,8 +140,30 @@ const ExpedierCommandes = () => {
       <h2>Expéditions</h2>
       {error && <div className="error-message">{error}</div>}
 
+      {/* ========== NOUVEAU : Boutons de filtre (comme dans Préparation de commandes) ========== */}
+      <div className="filter-buttons" style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <button
+          onClick={() => setFilterType('ALL')}
+          className={`filter-btn ${filterType === 'ALL' ? 'active' : ''}`}
+        >
+          Toutes les commandes ({commandes.length})
+        </button>
+        <button
+          onClick={() => setFilterType('CLIENT')}
+          className={`filter-btn ${filterType === 'CLIENT' ? 'active' : ''}`}
+        >
+          Commandes client ({clientCount})
+        </button>
+        <button
+          onClick={() => setFilterType('TRANSFERT')}
+          className={`filter-btn ${filterType === 'TRANSFERT' ? 'active' : ''}`}
+        >
+          Transferts ({transfertCount})
+        </button>
+      </div>
+
       <h3><FaBox style={{ marginRight: '8px' }} /> Commandes à expédier</h3>
-      {commandes.length === 0 ? (
+      {filteredCommandes.length === 0 ? (
         <p>Aucune commande à expédier.</p>
       ) : (
         <table className="expedition-table">
@@ -121,15 +172,23 @@ const ExpedierCommandes = () => {
               <th>N° commande</th>
               <th>Client</th>
               <th>Date</th>
+              <th>Type</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {commandes.map(cmd => (
+            {filteredCommandes.map(cmd => (
               <tr key={cmd.id}>
                 <td>{cmd.numeroCommande}</td>
-                <td>{cmd.clientNom}</td>
+                <td>{cmd.clientNom || (cmd.typeCommande === 'TRANSFERT' ? `Transfert - Entrepôt ${cmd.entrepotDestinationId}` : '-')}</td>
                 <td>{new Date(cmd.dateCommande).toLocaleDateString()}</td>
+                <td>
+                  {cmd.typeCommande === 'TRANSFERT' ? (
+                    <span className="badge-transfert">Transfert</span>
+                  ) : (
+                    <span className="badge-client">Client</span>
+                  )}
+                </td>
                 <td>
                   <button
                     className="btn-expedier"
@@ -137,6 +196,15 @@ const ExpedierCommandes = () => {
                     disabled={expeditionInProgress === cmd.id}
                   >
                     {expeditionInProgress === cmd.id ? 'Expédition...' : <><FaTruck style={{ marginRight: '5px' }} /> Expédier</>}
+                  </button>
+                  {/* ========== NOUVEAU : Bouton Détails ========== */}
+                  <button
+                    className="btn-details"
+                    onClick={() => openDetailModal(cmd)}
+                    title="Voir les détails de la commande"
+                    style={{ marginLeft: '8px' }}
+                  >
+                    <FaEye /> Détails
                   </button>
                 </td>
               </tr>
@@ -159,7 +227,7 @@ const ExpedierCommandes = () => {
               <th>Client</th>
               <th>Transporteur</th>
               <th>Date d'expédition</th>
-              <th>Actions</th>
+              
             </tr>
           </thead>
           <tbody>
@@ -170,18 +238,54 @@ const ExpedierCommandes = () => {
                 <td>{exp.clientNom}</td>
                 <td>{exp.transporteur || 'Non spécifié'}</td>
                 <td>{new Date(exp.dateExpedition).toLocaleDateString()}</td>
-                <td>
-                  <button
-                    className="btn-cancel"
-                    onClick={() => handleDeleteExpedition(exp.id)}
-                  >
-                    <FaTrash style={{ marginRight: '5px' }} /> Supprimer
-                  </button>
-                </td>
+               
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {/* ========== NOUVEAU : Modal de détails de la commande ========== */}
+      {showDetailModal && detailCommande && (
+        <div className="modal-overlay" onClick={closeDetailModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
+            <div className="modal-header">
+              <h3>Détails de la commande {detailCommande.numeroCommande}</h3>
+              <button className="modal-close" onClick={closeDetailModal}>×</button>
+            </div>
+            <div className="modal-body">
+              <p><strong>Client :</strong> {detailCommande.clientNom || (detailCommande.typeCommande === 'TRANSFERT' ? `Transfert - Entrepôt ${detailCommande.entrepotDestinationId}` : '-')}</p>
+              <p><strong>Type :</strong> {detailCommande.typeCommande === 'TRANSFERT' ? 'Transfert entre entrepôts' : 'Commande client'}</p>
+              <p><strong>Date de commande :</strong> {new Date(detailCommande.dateCommande).toLocaleDateString()}</p>
+              <p><strong>Date de livraison souhaitée :</strong> {detailCommande.dateLivraisonSouhaitee ? new Date(detailCommande.dateLivraisonSouhaitee).toLocaleDateString() : 'Non spécifiée'}</p>
+              <p><strong>Notes :</strong> {detailCommande.notes || 'Aucune'}</p>
+              <h4>Articles</h4>
+              <table className="detail-table">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Désignation</th>
+                    <th>Quantité</th>
+                    
+                  </tr>
+                </thead>
+                <tbody>
+                  {detailCommande.lignes?.map((ligne, idx) => (
+                    <tr key={idx}>
+                      <td>{ligne.articleCode}</td>
+                      <td>{ligne.articleDesignation}</td>
+                      <td>{ligne.quantite}</td>
+                     
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={closeDetailModal}>Fermer</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showModal && selectedCommande && (
@@ -192,7 +296,7 @@ const ExpedierCommandes = () => {
               <button className="modal-close" onClick={closeModal}>×</button>
             </div>
             <div className="modal-body">
-              <p><strong>Client :</strong> {selectedCommande.clientNom}</p>
+              <p><strong>Client :</strong> {selectedCommande.clientNom || (selectedCommande.typeCommande === 'TRANSFERT' ? `Transfert - Entrepôt ${selectedCommande.entrepotDestinationId}` : '-')}</p>
               <p><strong>Date de commande :</strong> {new Date(selectedCommande.dateCommande).toLocaleDateString()}</p>
               <p><strong>Date de livraison souhaitée :</strong> {selectedCommande.dateLivraisonSouhaitee ? new Date(selectedCommande.dateLivraisonSouhaitee).toLocaleDateString() : 'Non spécifiée'}</p>
               <h4>Articles à expédier</h4>

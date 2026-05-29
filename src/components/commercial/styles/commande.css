@@ -156,3 +156,65 @@
     font-size: 0.875rem;
     font-weight: 500;
 }
+/* styles/commande.css */
+
+/* ========== AJOUT : Styles pour les alertes de stock ========== */
+.LigneCmdFr--error {
+    border: 2px solid #dc3545 !important;
+    border-radius: 8px;
+    padding: 8px;
+    background-color: #fff5f5;
+}
+
+.input-error {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.LigneCmdFr-stock-alert {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.LigneCmdFr-stock-alert--error {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+}
+
+.LigneCmdFr-stock-alert--warning {
+    background-color: #fff3cd;
+    color: #664d03;
+    border: 1px solid #ffecb5;
+}
+
+.LigneCmdFr-stock-ok {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: #198754;
+    font-weight: 500;
+}
+
+.LigneCmdFr-stock-badge {
+    margin-top: 4px;
+}
+
+.badge-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.badge-warning {
+    background-color: #fff3cd;
+    color: #664d03;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+/* ========== FIN AJOUT ========== */

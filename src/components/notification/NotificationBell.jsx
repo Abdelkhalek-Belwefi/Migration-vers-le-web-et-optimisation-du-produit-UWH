@@ -115,15 +115,15 @@ const NotificationBell = () => {
             {showDropdown && (
                 <div className="notification-dropdown">
                     <div className="notification-header">
-                        <h4>📬 Notifications</h4>
+                        <h4> Notifications</h4>
                         <div className="notification-header-actions">
                             {nonLuCount > 0 && (
                                 <button onClick={handleMarkAllAsRead}>✓ Tout lire</button>
                             )}
                             {notifications.length > 0 && (
-                                <button onClick={handleDeleteAll}>🗑️ Supprimer</button>
+                                <button onClick={handleDeleteAll}> Supprimer</button>
                             )}
-                            <button onClick={handleRefresh}>🔄</button>
+                            <button onClick={handleRefresh}></button>
                         </div>
                     </div>
                     

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { getLivraisonsEntrepotAttente } from '../../services/commandeService';
 import { FaTruck, FaClock, FaCheckCircle, FaMapMarkerAlt, FaHashtag, FaCalendarAlt } from 'react-icons/fa';
+import { FaClipboardList } from 'react-icons/fa';
 import './LivraisonsAttenteList.css';
 import { FaBox } from "react-icons/fa";
 import { FaSyncAlt } from "react-icons/fa";
 import { MdLocalShipping } from "react-icons/md";
+import { FaKey } from 'react-icons/fa';
+import { FaHourglassHalf } from 'react-icons/fa';
 
 const LivraisonsAttenteList = () => {
     const [livraisons, setLivraisons] = useState([]);
@@ -13,6 +16,8 @@ const LivraisonsAttenteList = () => {
     const [success, setSuccess] = useState('');
     const [selectedLivraison, setSelectedLivraison] = useState(null);
     const [showOtpModal, setShowOtpModal] = useState(false);
+    const [articles, setArticles] = useState([]);
+    const [loadingArticles, setLoadingArticles] = useState(false);
 
     const userRole = localStorage.getItem('role');
     const isOperateur = userRole === 'OPERATEUR_ENTREPOT' || userRole === 'RESPONSABLE_ENTREPOT' || userRole === 'ADMINISTRATEUR';
@@ -23,7 +28,6 @@ const LivraisonsAttenteList = () => {
         }
     }, [isOperateur]);
 
-    // Recharger toutes les 30 secondes
     useEffect(() => {
         if (!isOperateur) return;
         const interval = setInterval(() => {
@@ -70,14 +74,46 @@ const LivraisonsAttenteList = () => {
         }
     };
 
-    const handleShowOtp = (livraison) => {
+    const handleShowOtp = async (livraison) => {
         setSelectedLivraison(livraison);
         setShowOtpModal(true);
+        
+        // Récupérer les articles depuis la commande via l'API
+        if (livraison.expeditionId) {
+            setLoadingArticles(true);
+            try {
+                const token = localStorage.getItem('token');
+                // D'abord récupérer l'expédition pour avoir commandeId
+                const expeditionRes = await fetch(`http://localhost:8080/api/expeditions/${livraison.expeditionId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const expedition = await expeditionRes.json();
+                
+                if (expedition.commandeId) {
+                    const commandeRes = await fetch(`http://localhost:8080/api/commandes/${expedition.commandeId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const commande = await commandeRes.json();
+                    setArticles(commande.lignes || []);
+                } else {
+                    setArticles([]);
+                }
+            } catch (err) {
+                console.error('Erreur chargement articles:', err);
+                setArticles([]);
+            } finally {
+                setLoadingArticles(false);
+            }
+        } else {
+            setArticles([]);
+            setLoadingArticles(false);
+        }
     };
 
     const closeOtpModal = () => {
         setShowOtpModal(false);
         setSelectedLivraison(null);
+        setArticles([]);
     };
 
     const copyToClipboard = (text) => {
@@ -158,7 +194,7 @@ const LivraisonsAttenteList = () => {
                                     className="btn-show-otp"
                                     onClick={() => handleShowOtp(livraison)}
                                 >
-                                    🔑 Voir le code OTP
+                                    <FaKey /> Voir le code OTP
                                 </button>
                             </div>
                         </div>
@@ -166,12 +202,12 @@ const LivraisonsAttenteList = () => {
                 </div>
             )}
 
-            {/* Modal pour afficher l'OTP */}
+            {/* Modal OTP avec articles */}
             {showOtpModal && selectedLivraison && (
                 <div className="modal-overlay" onClick={closeOtpModal}>
-                    <div className="otp-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="otp-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px' }}>
                         <div className="modal-header">
-                            <h3>🔑 Code OTP - Livraison</h3>
+                            <h3><FaKey /> Code OTP - Livraison</h3>
                             <button className="modal-close" onClick={closeOtpModal}>✕</button>
                         </div>
                         <div className="modal-body">
@@ -179,7 +215,41 @@ const LivraisonsAttenteList = () => {
                                 <p><strong>BL:</strong> {selectedLivraison.numeroBL}</p>
                                 <p><strong>Client / Entrepôt:</strong> {selectedLivraison.clientNom}</p>
                                 <p><strong>Transporteur:</strong> {selectedLivraison.transporteurNom}</p>
+                                <p><strong>Statut:</strong> {selectedLivraison.statut}</p>
+                                <p><strong>Date d'assignation:</strong> {formatDate(selectedLivraison.dateAssignation)}</p>
                             </div>
+
+                            {/* Tableau des articles */}
+                            {loadingArticles ? (
+                                <p style={{ textAlign: 'center', marginTop: '15px' }}><FaHourglassHalf /> Chargement des articles...</p>
+                            ) : articles && articles.length > 0 ? (
+                                <>
+                                    <h4 style={{ marginTop: '15px', marginBottom: '10px' }}><FaClipboardList /> Articles à recevoir</h4>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '15px' }}>
+                                        <thead>
+                                            <tr style={{ backgroundColor: '#f5f5f5' }}>
+                                                <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Code</th>
+                                                <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Désignation</th>
+                                                <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Quantité</th>
+                                                <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Lot</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {articles.map((ligne, idx) => (
+                                                <tr key={idx}>
+                                                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{ligne.articleCode || ligne.code || '-'}</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{ligne.articleDesignation || ligne.designation || '-'}</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>{ligne.quantite || '-'}</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{ligne.lot || '-'}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </>
+                            ) : (
+                                <p style={{ color: '#999', fontStyle: 'italic', marginTop: '15px' }}>Aucun article disponible</p>
+                            )}
+
                             <div className="otp-code-container">
                                 <div className="otp-code-label">Code de validation à donner au transporteur :</div>
                                 <div className="otp-code-value">{selectedLivraison.codeOtp}</div>
@@ -187,7 +257,7 @@ const LivraisonsAttenteList = () => {
                                     className="btn-copy-otp"
                                     onClick={() => copyToClipboard(selectedLivraison.codeOtp)}
                                 >
-                                    📋 Copier le code
+                                    <FaClipboardList /> Copier le code
                                 </button>
                             </div>
                             <div className="otp-instruction">

@@ -11,6 +11,7 @@ import 'leaflet/dist/leaflet.css';
 import { LineChart, Line, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, AreaChart, Area } from 'recharts';
 import 'leaflet/dist/leaflet.css';
 
+
 // Correction des icônes Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -234,7 +235,7 @@ const TransporteurDashboard = () => {
         <div className="transporteur-dashboard-stat-box transporteur-dashboard-quick-actions-box">
           <span className="transporteur-dashboard-label">ACTIONS RAPIDES</span>
           <div className="transporteur-dashboard-action-btns">
-            <button className="transporteur-dashboard-btn-main" onClick={() => setActiveMenu('livraisons')}><FaPlus /> Mes livraisons</button>
+            <button className="transporteur-dashboard-btn-main" onClick={() => setActiveMenu('livraisons')}> Mes livraisons</button>
             <button className="transporteur-dashboard-btn-sub" onClick={() => window.location.reload()}><FaSearch /> Actualiser</button>
           </div>
         </div>
@@ -399,6 +400,7 @@ const TransporteurDashboard = () => {
           onClose={handleCloseModals}
         />
       )}
+      
     </div>
   );
 };

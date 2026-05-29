@@ -22,11 +22,18 @@ const CommandeList = () => {
     return [...data].sort((a, b) => new Date(b.dateCommande) - new Date(a.dateCommande));
   };
 
+  // 🔥 NOUVEAU : Filtrer pour ne garder que les commandes CLIENT (pas les TRANSFERT)
+  const filterOnlyClientCommandes = (data) => {
+    return data.filter(commande => commande.typeCommande !== 'TRANSFERT');
+  };
+
   const fetchCommandes = async () => {
     try {
       setLoading(true);
       const data = await getAllCommandes();
-      const sortedData = sortByDateDesc(data);
+      // 🔥 Appliquer le filtre pour ne garder que les commandes CLIENT
+      const clientCommandes = filterOnlyClientCommandes(data);
+      const sortedData = sortByDateDesc(clientCommandes);
       setCommandes(sortedData);
       setFilteredCommandes(sortedData);
     } catch (err) {
@@ -113,7 +120,7 @@ const CommandeList = () => {
   return (
     <div className="commande-management">
       <div className="commande-header">
-        <h2>Gestion des commandes</h2>
+        <h2>Gestion des commandes clients</h2>
         <button className="btn-add" onClick={handleAddClick}>
           + Nouvelle commande
         </button>
@@ -184,7 +191,7 @@ const CommandeList = () => {
 
       {filteredCommandes.length === 0 && (
         <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
-          Aucune commande trouvée avec ce numéro
+          Aucune commande client trouvée
         </div>
       )}
 
