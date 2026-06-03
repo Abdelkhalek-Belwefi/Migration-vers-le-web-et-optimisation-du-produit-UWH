@@ -63,11 +63,12 @@ const AddArticleModal = ({
         }
     };
 
-    // ========== NOUVELLE FONCTION : Charger le prochain code ERP ==========
+    // ==========   Charger le prochain code ERP ==========
     const loadNextCodeERP = async () => {
         setIsLoadingCode(true);
         try {
             const nextCode = await articleService.getNextCodeERP();
+            //   Met à jour SEULEMENT le champ codeArticleERP sans effacer les autres champs ==>  (grâce à ...prev)
             setFormData(prev => ({ ...prev, codeArticleERP: nextCode }));
         } catch (err) {
             console.error('Erreur chargement code ERP:', err);
@@ -88,7 +89,7 @@ const AddArticleModal = ({
     // Charger les données si on est en mode édition, ou charger le code ERP si nouveau
     useEffect(() => {
         if (articleToEdit && isEditMode) {
-            console.log('📝 Mode édition - Chargement article:', articleToEdit);
+            console.log(' Mode édition - Chargement article:', articleToEdit);
             setFormData({
                 id: articleToEdit.id,
                 codeArticleERP: articleToEdit.codeArticleERP || '',
@@ -140,16 +141,18 @@ const AddArticleModal = ({
         setSuccess('');
     };
 
-    // Fonction decodeBarcode (inchangée, identique à l'original)
+    // Fonction decodeBarcode 
     const decodeBarcode = (barcode) => {
-        console.log('🔍 DÉCODAGE - Code reçu:', barcode);
+        console.log(' DÉCODAGE - Code reçu:', barcode);
 
         if (!barcode || barcode.length < 8) {
             return { error: 'Code trop court' };
         }
-
+        // netoyer le code barre a par les espaces
+        // \s = tout espace blanc 
+        // g = global (remplace PARTOUT dans la chaîne, pas juste le premier).
         let cleanBarcode = barcode.replace(/\s/g, '');
-        console.log('🔍 Code nettoyé des espaces:', cleanBarcode);
+        console.log(' Code nettoyé des espaces:', cleanBarcode);
 
         const result = {
             format: 'GS1',
@@ -159,30 +162,36 @@ const AddArticleModal = ({
             dateExpiration: null,
             dateObj: null
         };
-
+        // en regex 
+        // match recherche les motif 
+        // la methode match return une tableau 
+        //  \d est une chiffre de 0 a 9 
         const gtinMatch = cleanBarcode.match(/\(01\)(\d{14})/);
         if (gtinMatch) {
             result.gtin = gtinMatch[1];
-            console.log('✅ GTIN trouvé (avec parenthèses):', result.gtin);
+            console.log(' GTIN trouvé (avec parenthèses):', result.gtin);
         }
-
+        // Trouve (17) suivi de 6 chiffres
         const expMatch = cleanBarcode.match(/\(17\)(\d{6})/);
+        // On vérifie que la regex a trouvé quelque chose
         if (expMatch) {
             const expDate = expMatch[1];
+            // On sauvegarde la date brute (format texte) dans result
             result.dateExpiration = expDate;
             const year = 2000 + parseInt(expDate.substring(0, 2));
             const month = parseInt(expDate.substring(2, 4)) - 1;
             const day = parseInt(expDate.substring(4, 6));
             result.dateObj = new Date(year, month, day);
-            console.log('✅ Date expiration trouvée:', expDate);
+            console.log(' Date expiration trouvée:', expDate);
         }
 
         const lotMatch = cleanBarcode.match(/\(10\)([^\(]+)/);
         if (lotMatch) {
             let lot = lotMatch[1];
+            // en va verifier si le lot contient (')
             if (lot.includes('(')) lot = lot.substring(0, lot.indexOf('('));
             result.lot = lot.trim();
-            console.log('✅ LOT trouvé:', result.lot);
+            console.log(' LOT trouvé:', result.lot);
         }
 
         const snMatch = cleanBarcode.match(/\(21\)([^\(]+)/);
@@ -190,36 +199,39 @@ const AddArticleModal = ({
             let sn = snMatch[1];
             if (sn.includes('(')) sn = sn.substring(0, sn.indexOf('('));
             result.numSerie = sn.trim();
-            console.log('✅ Numéro série trouvé:', result.numSerie);
+            console.log(' Numéro série trouvé:', result.numSerie);
         }
 
         if (!result.gtin) {
-            console.log('🔄 Tentative sans parenthèses pour le GTIN...');
+            console.log(' Tentative sans parenthèses pour le GTIN...');
+            // en va remplacer les () par par des espce 
             const withoutParens = cleanBarcode.replace(/[()]/g, '');
             const gtinRaw = withoutParens.match(/01(\d{14})/);
             if (gtinRaw) {
                 result.gtin = gtinRaw[1];
-                console.log('✅ GTIN trouvé (sans parenthèses):', result.gtin);
+                console.log(' GTIN trouvé (sans parenthèses):', result.gtin);
             } else {
                 const digitsMatch = withoutParens.match(/\d{13,14}/);
                 if (digitsMatch) {
                     result.gtin = digitsMatch[0];
-                    console.log('✅ GTIN extrait par digits:', result.gtin);
+                    console.log(' GTIN extrait par digits:', result.gtin);
                 }
             }
         }
 
-        console.log('✅ RÉSULTAT DÉCODAGE FINAL:', result);
+        console.log(' RÉSULTAT DÉCODAGE FINAL:', result);
         return result;
     };
-
+    // calcul expiration data 
     const calculateExpirationDays = (expDate) => {
         if (!expDate) return '';
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const diffTime = expDate - today;
+        // diffTime  c’est une durée en millisecondes
+        // en va convertir les milliseconde en jours 
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        console.log('📅 Calcul expiration:', {
+        console.log(' Calcul expiration:', {
             aujourdhui: today.toISOString(),
             expiration: expDate.toISOString(),
             diffJours: diffDays
@@ -228,6 +240,7 @@ const AddArticleModal = ({
     };
 
     const handleScan = async (e) => {
+        //récupère la valeur scannée (input) et effacer les espace 
         const scannedValue = e.target.value.trim();
         if (!scannedValue || scannedValue.length < 8) return;
 
@@ -236,19 +249,20 @@ const AddArticleModal = ({
         setSuccess('');
 
         try {
+            // elle extrait le gtin lot et numserie et datexp
             const decoded = decodeBarcode(scannedValue);
             if (decoded.error) {
                 setError(decoded.error);
                 setScanning(false);
                 return;
             }
-
-            let successMsg = '✅ Données extraites:';
+            // construire un message comme ca Données extraites: GTIN:12345 LOT:A12 SÉRIE:999
+            let successMsg = ' Données extraites:';
             if (decoded.gtin) successMsg += ` GTIN:${decoded.gtin}`;
             if (decoded.lot) successMsg += ` LOT:${decoded.lot}`;
             if (decoded.numSerie) successMsg += ` SÉRIE:${decoded.numSerie}`;
             setSuccess(successMsg);
-
+            // on prépare les données pour remplir le formulaire
             const updates = {};
             if (decoded.gtin) updates.gtin = decoded.gtin;
             if (decoded.lot) updates.lotDefaut = decoded.lot;
@@ -257,8 +271,10 @@ const AddArticleModal = ({
 
             if (decoded.gtin) {
                 try {
+                    // cherche si l’article existe déjà dans la base
                     const article = await articleService.findByGTIN(decoded.gtin);
                     if (article) {
+                        // remplit TOUT le formulaire automatiquement
                         setFormData({
                             id: article.id,
                             codeArticleERP: article.codeArticleERP || '',
@@ -274,13 +290,13 @@ const AddArticleModal = ({
                             dureeExpirationJours: article.dureeExpirationJours || '',
                             actif: article.actif
                         });
-                        setSuccess('✅ Article trouvé en base !');
+                        setSuccess(' Article trouvé en base !');
                         setScanning(false);
                         e.target.value = '';
                         return;
                     }
                 } catch (err) {
-                    console.log('ℹ️ Nouvel article à créer');
+                    console.log('ℹ Nouvel article à créer');
                 }
             }
 
@@ -288,7 +304,7 @@ const AddArticleModal = ({
                 setFormData(prev => ({ ...prev, ...updates }));
             }
         } catch (err) {
-            console.error('❌ Erreur scan:', err);
+            console.error(' Erreur scan:', err);
             setError('Erreur lors du décodage');
         } finally {
             setScanning(false);
@@ -395,7 +411,7 @@ const AddArticleModal = ({
                 <form onSubmit={handleSubmit} ref={formRef}>
                     <div className="form-row">
                         <div className="form-group">
-                            <label><FaTag /> Code ERP *</label>
+                            <label><FaTag /> Code ERP </label>
                             <input 
                                 type="text" 
                                 name="codeArticleERP" 

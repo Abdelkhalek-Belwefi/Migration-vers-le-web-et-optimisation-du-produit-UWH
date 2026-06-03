@@ -21,6 +21,9 @@ const ExpedierCommandes = () => {
   // ========== NOUVEAU : État pour le filtre ==========
   const [filterType, setFilterType] = useState('ALL'); // 'ALL', 'CLIENT', 'TRANSFERT'
 
+  // ========== État pour le filtre de l'HISTORIQUE des expéditions ==========
+  const [historyFilterType, setHistoryFilterType] = useState('ALL');
+
   // ========== NOUVEAU : État pour le modal de détails ==========
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailCommande, setDetailCommande] = useState(null);
@@ -78,6 +81,26 @@ const ExpedierCommandes = () => {
   // ========== NOUVEAU : Compter les commandes par type ==========
   const clientCount = commandes.filter(cmd => cmd.typeCommande === 'CLIENT').length;
   const transfertCount = commandes.filter(cmd => cmd.typeCommande === 'TRANSFERT').length;
+
+  // ========== Filtrer l'HISTORIQUE des expéditions selon le type ==========
+  const filteredExpeditions = expeditions.filter(exp => {
+    if (historyFilterType === 'CLIENT') return exp.typeCommande === 'CLIENT';
+    if (historyFilterType === 'TRANSFERT') return exp.typeCommande === 'TRANSFERT';
+    return true;
+  });
+
+  // ========== Compter l'HISTORIQUE des expéditions par type ==========
+  const historyClientCount = expeditions.filter(exp => exp.typeCommande === 'CLIENT').length;
+  const historyTransfertCount = expeditions.filter(exp => exp.typeCommande === 'TRANSFERT').length;
+
+  // ========== Fonction pour obtenir le client ou l'entrepôt destinataire ==========
+  const getClientOrDestinataire = (expedition) => {
+    if (expedition.typeCommande === 'CLIENT') {
+      return expedition.clientNom;
+    } else {
+      return expedition.entrepotDestinationNom || 'Entrepôt destinataire';
+    }
+  };
 
   const openModal = (commande) => {
     setSelectedCommande(commande);
@@ -214,9 +237,32 @@ const ExpedierCommandes = () => {
       )}
 
       <h3 style={{ marginTop: '30px' }}><FaHistory style={{ marginRight: '8px' }} /> Historique des expéditions</h3>
+
+      {/* ========== NOUVEAU : Boutons de filtre pour l'HISTORIQUE des expéditions ========== */}
+      <div className="filter-buttons" style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <button
+          onClick={() => setHistoryFilterType('ALL')}
+          className={`filter-btn ${historyFilterType === 'ALL' ? 'active' : ''}`}
+        >
+          Toutes ({expeditions.length})
+        </button>
+        <button
+          onClick={() => setHistoryFilterType('CLIENT')}
+          className={`filter-btn ${historyFilterType === 'CLIENT' ? 'active' : ''}`}
+        >
+          Commandes client ({historyClientCount})
+        </button>
+        <button
+          onClick={() => setHistoryFilterType('TRANSFERT')}
+          className={`filter-btn ${historyFilterType === 'TRANSFERT' ? 'active' : ''}`}
+        >
+          Transferts ({historyTransfertCount})
+        </button>
+      </div>
+
       {loadingExpeditions ? (
         <div className="loading">Chargement des expéditions...</div>
-      ) : expeditions.length === 0 ? (
+      ) : filteredExpeditions.length === 0 ? (
         <p>Aucune expédition effectuée.</p>
       ) : (
         <table className="expedition-table">
@@ -224,21 +270,27 @@ const ExpedierCommandes = () => {
             <tr>
               <th>N° BL</th>
               <th>Commande N°</th>
-              <th>Client</th>
+              <th>Client / Entrepôt destinataire</th>
+              <th>Type</th>
               <th>Transporteur</th>
               <th>Date d'expédition</th>
-              
             </tr>
           </thead>
           <tbody>
-            {expeditions.map(exp => (
+            {filteredExpeditions.map(exp => (
               <tr key={exp.id}>
                 <td>{exp.numeroBL}</td>
                 <td>{exp.commandeNumero}</td>
-                <td>{exp.clientNom}</td>
+                <td>{getClientOrDestinataire(exp)}</td>
+                <td>
+                  {exp.typeCommande === 'TRANSFERT' ? (
+                    <span className="badge-transfert">Transfert</span>
+                  ) : (
+                    <span className="badge-client">Client</span>
+                  )}
+                </td>
                 <td>{exp.transporteur || 'Non spécifié'}</td>
                 <td>{new Date(exp.dateExpedition).toLocaleDateString()}</td>
-               
               </tr>
             ))}
           </tbody>
@@ -266,7 +318,6 @@ const ExpedierCommandes = () => {
                     <th>Code</th>
                     <th>Désignation</th>
                     <th>Quantité</th>
-                    
                   </tr>
                 </thead>
                 <tbody>
@@ -275,7 +326,6 @@ const ExpedierCommandes = () => {
                       <td>{ligne.articleCode}</td>
                       <td>{ligne.articleDesignation}</td>
                       <td>{ligne.quantite}</td>
-                     
                     </tr>
                   ))}
                 </tbody>

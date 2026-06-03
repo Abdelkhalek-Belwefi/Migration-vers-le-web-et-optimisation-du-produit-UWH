@@ -596,7 +596,7 @@ const UserManagement = () => {
                                 <div className="detail-row">
                                     <span className="detail-label">Statut :</span>
                                     <span className={`status-badge ${selectedUser.estActif ? 'active' : 'inactive'}`}>
-                                        {selectedUser.estActif ? '✅ Actif' : '❌ Inactif'}
+                                        {selectedUser.estActif ? ' Actif' : ' Inactif'}
                                     </span>
                                 </div>
                                 

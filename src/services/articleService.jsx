@@ -34,7 +34,7 @@ export const articleService = {
     getAllArticles: async () => {
         try {
             const response = await axios.get(API_URL, getAuthHeader());
-            console.log('📦 Données reçues du backend:', response.data);
+            console.log(' Données reçues du backend:', response.data);
             return response.data;
         } catch (error) {
             console.error('❌ Erreur API getAllArticles:', error.response?.data || error.message);
@@ -44,10 +44,11 @@ export const articleService = {
 
     getArticleById: async (id) => {
         try {
+            // getAuthHeader : ajouter automatiquement le token d’authentification dans les requêtes vers le backend
             const response = await axios.get(`${API_URL}/${id}`, getAuthHeader());
             return response.data;
         } catch (error) {
-            console.error('❌ Erreur API getArticleById:', error.response?.data || error.message);
+            console.error(' Erreur API getArticleById:', error.response?.data || error.message);
             throw error;
         }
     },
@@ -57,7 +58,7 @@ export const articleService = {
             const response = await axios.get(`${API_URL}/code/${encodeURIComponent(codeERP)}`, getAuthHeader());
             return response.data;
         } catch (error) {
-            console.error('❌ Erreur API getArticleByCodeERP:', error.response?.data || error.message);
+            console.error(' Erreur API getArticleByCodeERP:', error.response?.data || error.message);
             throw error;
         }
     },
@@ -68,7 +69,7 @@ export const articleService = {
             return response.data;
         } catch (error) {
             if (error.response?.status === 404 || error.response?.status === 400) return null;
-            console.error('❌ Erreur API findByGTIN:', error.response?.data || error.message);
+            console.error(' Erreur API findByGTIN:', error.response?.data || error.message);
             throw error;
         }
     },
@@ -94,7 +95,7 @@ export const articleService = {
             const response = await axios.get(`${API_URL}/next-code`, getAuthHeader());
             return response.data;
         } catch (error) {
-            console.error('❌ Erreur API getNextCodeERP:', error.response?.data || error.message);
+            console.error(' Erreur API getNextCodeERP:', error.response?.data || error.message);
             return "ART-0001"; // Fallback
         }
     },
@@ -122,12 +123,12 @@ export const articleService = {
                 actif: articleData.actif !== undefined ? articleData.actif : true,
                 prixUnitaire: articleData.prixUnitaire || 0
             };
-            console.log('📤 Envoi article avec payload:', payload);
+            console.log(' Envoi article avec payload:', payload);
             const response = await axios.post(API_URL, payload, getAuthHeader());
-            console.log('✅ Réponse création:', response.data);
+            console.log(' Réponse création:', response.data);
             return response.data;
         } catch (error) {
-            console.error('❌ Erreur API createArticle:', error.response?.data || error.message);
+            console.error(' Erreur API createArticle:', error.response?.data || error.message);
             throw error;
         }
     },
@@ -137,7 +138,7 @@ export const articleService = {
 updateArticle: async (id, articleData) => {
     try {
         const payload = {
-            codeArticleERP: articleData.codeArticleERP,   // ← AJOUTÉ
+            codeArticleERP: articleData.codeArticleERP,   
             designation: articleData.designation,
             gtin: articleData.gtin || '',
             numSerie: articleData.numSerie || '',
@@ -151,12 +152,12 @@ updateArticle: async (id, articleData) => {
             actif: articleData.actif !== undefined ? articleData.actif : true,
             prixUnitaire: articleData.prixUnitaire || 0
         };
-        console.log('📤 Mise à jour article avec payload:', payload);
+        console.log(' Mise à jour article avec payload:', payload);
         const response = await axios.put(`${API_URL}/${id}`, payload, getAuthHeader());
-        console.log('✅ Réponse mise à jour:', response.data);
+        console.log(' Réponse mise à jour:', response.data);
         return response.data;
     } catch (error) {
-        console.error('❌ Erreur API updateArticle:', error.response?.data || error.message);
+        console.error(' Erreur API updateArticle:', error.response?.data || error.message);
         throw error;
     }
 },
@@ -166,7 +167,7 @@ updateArticle: async (id, articleData) => {
             const response = await axios.patch(`${API_URL}/${id}/activer`, {}, getAuthHeader());
             return response.data;
         } catch (error) {
-            console.error('❌ Erreur API activerArticle:', error.response?.data || error.message);
+            console.error(' Erreur API activerArticle:', error.response?.data || error.message);
             throw error;
         }
     },
@@ -176,19 +177,19 @@ updateArticle: async (id, articleData) => {
             const response = await axios.patch(`${API_URL}/${id}/desactiver`, {}, getAuthHeader());
             return response.data;
         } catch (error) {
-            console.error('❌ Erreur API desactiverArticle:', error.response?.data || error.message);
+            console.error(' Erreur API desactiverArticle:', error.response?.data || error.message);
             throw error;
         }
     },
 
     deleteArticle: async (id) => {
         try {
-            console.log('🗑️ Suppression article id:', id);
+            console.log(' Suppression article id:', id);
             const response = await axios.delete(`${API_URL}/${id}`, getAuthHeader());
-            console.log('✅ Réponse suppression:', response.status, response.data);
+            console.log(' Réponse suppression:', response.status, response.data);
             return response.data;
         } catch (error) {
-            console.error('❌ Erreur API deleteArticle:', error.response?.data || error.message);
+            console.error(' Erreur API deleteArticle:', error.response?.data || error.message);
             throw error;
         }
     },

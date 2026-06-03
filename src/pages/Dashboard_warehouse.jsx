@@ -256,7 +256,7 @@ const Dashboard_warehouse = () => {
           { id: "reception", label: "RÉCEPTION", icon: <FaBoxes /> },
           { id: "rangement", label: "RANGEMENT", icon: <FaClipboardList /> },
           { id: "preparation", label: "PRÉPARATION DE COMMANDES", icon: <FaClipboardList /> },
-          { id: "livraisonsAttente", label: "LIVRAISONS EN ATTENTE", icon: <FaClock /> }
+          { id: "livraisonsAttente", label: "TRANSFERT ENTRANT", icon: <FaClock /> }
         ];
 
       case "RESPONSABLE_ENTREPOT":
@@ -271,7 +271,7 @@ const Dashboard_warehouse = () => {
           { id: "documents", label: "IMPRESSION DOCUMENTS", icon: <FaPrint /> },
           { id: "stockFaible", label: "STOCK FAIBLE", icon: <FaExclamationTriangle /> },
           { id: "demandesRecues", label: "DEMANDES REÇUES", icon: <FaInbox /> },
-          { id: "livraisonsAttente", label: "LIVRAISONS EN ATTENTE", icon: <FaClock /> }
+          { id: "livraisonsAttente", label: "TRANSFERT ENTRANT", icon: <FaClock /> }
         ];
 
       case "SERVICE_COMMERCIAL":

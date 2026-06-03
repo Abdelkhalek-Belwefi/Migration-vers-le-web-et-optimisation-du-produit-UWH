@@ -132,7 +132,7 @@ const ArticleList = () => {
             setSuccess(`Recherche terminée : ${data.length} résultat(s)`);
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            console.error('❌ Erreur recherche:', err);
+            console.error(' Erreur recherche:', err);
             setError(err.message || 'Erreur lors de la recherche');
         } finally {
             setLoading(false);
@@ -154,7 +154,7 @@ const ArticleList = () => {
             setLoading(true);
             const updated = await articleService.activerArticle(id);
             setArticles(prev => prev.map(a => a.id === id ? updated : a));
-            setSuccess('✅ Article activé avec succès');
+            setSuccess(' Article activé avec succès');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             setError(err.message || "Erreur lors de l'activation");
@@ -169,7 +169,7 @@ const ArticleList = () => {
             setLoading(true);
             const updated = await articleService.desactiverArticle(id);
             setArticles(prev => prev.map(a => a.id === id ? updated : a));
-            setSuccess('✅ Article désactivé avec succès');
+            setSuccess(' Article désactivé avec succès');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             setError(err.message || 'Erreur lors de la désactivation');
@@ -189,7 +189,7 @@ const ArticleList = () => {
             setArticles(prev => prev.map(a => a.id === updatedArticle.id ? updatedArticle : a));
             setShowEditModal(false);
             setEditingArticle(null);
-            setSuccess('✅ Article modifié avec succès');
+            setSuccess(' Article modifié avec succès');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             setError(err.message || 'Erreur lors de la modification');
@@ -198,16 +198,16 @@ const ArticleList = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('⚠️ Êtes-vous sûr de vouloir supprimer cet article ?')) return;
+        if (!window.confirm(' Êtes-vous sûr de vouloir supprimer cet article ?')) return;
         try {
             setLoading(true);
             await articleService.deleteArticle(id);
             setArticles(prev => prev.filter(a => a.id !== id));
-            setSuccess('✅ Article supprimé avec succès');
+            setSuccess(' Article supprimé avec succès');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            if (err.response?.status === 403) setError('⛔ Droits insuffisants');
-            else if (err.response?.status === 404) setError('❌ Article non trouvé');
+            if (err.response?.status === 403) setError(' Droits insuffisants');
+            else if (err.response?.status === 404) setError(' Article non trouvé');
             else setError(err.message || 'Erreur lors de la suppression');
             setTimeout(() => setError(''), 3000);
         } finally {
@@ -217,7 +217,7 @@ const ArticleList = () => {
 
     const handleArticleAdded = (newArticle) => {
         setArticles(prev => [...prev, newArticle]);
-        setSuccess('✅ Article ajouté avec succès');
+        setSuccess(' Article ajouté avec succès');
         setTimeout(() => setSuccess(''), 3000);
     };
 

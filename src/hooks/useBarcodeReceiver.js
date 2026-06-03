@@ -112,7 +112,7 @@ const connectWebSocket = () => {
       console.warn("⚠️ WebSocket fermé");
       if (globalReconnectTimeout) clearTimeout(globalReconnectTimeout);
       globalReconnectTimeout = setTimeout(() => {
-        console.log("🔄 Tentative de reconnexion...");
+        console.log(" Tentative de reconnexion...");
         connectWebSocket();
       }, 2000);
     };

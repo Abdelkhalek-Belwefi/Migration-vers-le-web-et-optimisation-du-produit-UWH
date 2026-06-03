@@ -43,7 +43,7 @@ wss.on('connection', (ws) => {
         count++;
       }
     });
-    console.log(`📤 Code-barres diffusé à ${count} client(s)`);
+    console.log(` Code-barres diffusé à ${count} client(s)`);
   });
 
   ws.on('close', () => {
@@ -52,13 +52,13 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('error', (err) => {
-    console.error('❌ Erreur WebSocket:', err);
+    console.error(' Erreur WebSocket:', err);
   });
 });
 
 // ========== FONCTION OCR - DIFFUSE LE RÉSULTAT À TOUS LES CLIENTS ==========
 async function processOCR(base64Image) {
-  console.log('📤 Envoi de l\'image au backend OCR...');
+  console.log(' Envoi de l\'image au backend OCR...');
   try {
     const imageBuffer = Buffer.from(base64Image, 'base64');
     const formData = new FormData();
