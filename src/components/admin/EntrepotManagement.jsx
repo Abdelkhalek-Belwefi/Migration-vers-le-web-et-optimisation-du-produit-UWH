@@ -3,6 +3,7 @@ import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaMapMarkerAlt } from 'react-
 import entrepotService from '../../services/entrepotService ';
 import MapPickerModal from './MapPickerModal';
 import './EntrepotManagement.css';
+import { adminService } from '../../services/adminService';
 
 const EntrepotManagement = () => {
     const [entrepots, setEntrepots] = useState([]);
@@ -12,12 +13,15 @@ const EntrepotManagement = () => {
     const [showForm, setShowForm] = useState(false);
     const [editingEntrepot, setEditingEntrepot] = useState(null);
     const [showMapPicker, setShowMapPicker] = useState(false);
+    const [availableUsers, setAvailableUsers] = useState([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
     const [formData, setFormData] = useState({
         nom: '',
         adresse: '',
         ville: '',
         codePostal: '',
         pays: '',
+        responsableId: '',
         responsableNom: '',
         telephone: '',
         email: '',
@@ -42,12 +46,68 @@ const EntrepotManagement = () => {
         }
     };
 
+    // ========== NOUVEAU : Récupérer les utilisateurs disponibles pour être responsables ==========
+    const fetchAvailableUsers = async () => {
+        setLoadingUsers(true);
+        try {
+            // Récupérer tous les utilisateurs
+            const allUsers = await adminService.getAllUsers();
+            
+            // Récupérer les IDs des responsables déjà affectés à un entrepôt
+            const existingResponsibleIds = entrepots
+                .filter(ent => ent.responsableId)
+                .map(ent => ent.responsableId);
+            
+            // Filtrer les utilisateurs :
+            // 1. Qui ont le rôle OPERATOR (en attente) ou RESPONSABLE_ENTREPOT sans entrepôt
+            // 2. Qui ne sont pas déjà responsables d'un autre entrepôt
+            // 3. Exclure l'utilisateur actuellement en édition (si modification)
+            const available = allUsers.filter(user => {
+                // Exclure les utilisateurs déjà responsables d'un autre entrepôt
+                if (existingResponsibleIds.includes(user.id)) return false;
+                
+                // En mode édition, exclure l'utilisateur actuel s'il est déjà sélectionné
+                if (editingEntrepot && editingEntrepot.responsableId === user.id) return true;
+                
+                // Rôle accepté : OPERATOR (en attente) ou RESPONSABLE_ENTREPOT sans entrepôt
+                const isOperator = user.role === 'OPERATOR';
+                const isResponsableWithoutWarehouse = user.role === 'RESPONSABLE_ENTREPOT' && !user.entrepotId;
+                
+                return isOperator || isResponsableWithoutWarehouse;
+            });
+            
+            setAvailableUsers(available);
+        } catch (err) {
+            console.error('Erreur chargement utilisateurs:', err);
+            setAvailableUsers([]);
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
+
+    // Recharger la liste des utilisateurs quand le formulaire s'ouvre ou quand la liste des entrepôts change
+    useEffect(() => {
+        if (showForm) {
+            fetchAvailableUsers();
+        }
+    }, [showForm, entrepots, editingEntrepot]);
+
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'checkbox' ? checked : value
-        });
+        
+        if (name === 'responsableId') {
+            const selectedUser = availableUsers.find(u => u.id.toString() === value);
+            setFormData({
+                ...formData,
+                responsableId: value,
+                responsableNom: selectedUser ? `${selectedUser.prenom} ${selectedUser.nom}` : ''
+            });
+        } else {
+            setFormData({
+                ...formData,
+                [name]: type === 'checkbox' ? checked : value
+            });
+        }
     };
 
     const handleLocationSelect = (location) => {
@@ -73,11 +133,26 @@ const EntrepotManagement = () => {
         }
 
         try {
+            const submitData = {
+                nom: formData.nom,
+                adresse: formData.adresse,
+                ville: formData.ville,
+                codePostal: formData.codePostal,
+                pays: formData.pays,
+                responsableNom: formData.responsableNom,
+                responsableId: formData.responsableId || null,
+                telephone: formData.telephone,
+                email: formData.email,
+                actif: formData.actif,
+                latitude: formData.latitude,
+                longitude: formData.longitude
+            };
+
             if (editingEntrepot) {
-                await entrepotService.updateEntrepot(editingEntrepot.id, formData);
+                await entrepotService.updateEntrepot(editingEntrepot.id, submitData);
                 setSuccess('Entrepôt modifié avec succès');
             } else {
-                await entrepotService.createEntrepot(formData);
+                await entrepotService.createEntrepot(submitData);
                 setSuccess('Entrepôt créé avec succès');
             }
             resetForm();
@@ -95,6 +170,7 @@ const EntrepotManagement = () => {
             ville: entrepot.ville || '',
             codePostal: entrepot.codePostal || '',
             pays: entrepot.pays || '',
+            responsableId: entrepot.responsableId || '',
             responsableNom: entrepot.responsableNom || '',
             telephone: entrepot.telephone || '',
             email: entrepot.email || '',
@@ -123,6 +199,7 @@ const EntrepotManagement = () => {
             ville: '',
             codePostal: '',
             pays: '',
+            responsableId: '',
             responsableNom: '',
             telephone: '',
             email: '',
@@ -206,8 +283,27 @@ const EntrepotManagement = () => {
                             <input type="text" name="pays" value={formData.pays} onChange={handleInputChange} />
                         </div>
                         <div className="entrepot_management-form-group">
-                            <label>Responsable (nom)</label>
-                            <input type="text" name="responsableNom" value={formData.responsableNom} onChange={handleInputChange} />
+                            <label>Responsable</label>
+                            {loadingUsers ? (
+                                <div className="loading-users">Chargement des utilisateurs...</div>
+                            ) : (
+                                <select
+                                    name="responsableId"
+                                    value={formData.responsableId}
+                                    onChange={handleInputChange}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                                >
+                                    <option value="">-- Sélectionner un responsable --</option>
+                                    {availableUsers.map(user => (
+                                        <option key={user.id} value={user.id}>
+                                            {user.prenom} {user.nom} ({user.email})
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                            <small className="field-hint">
+                                Seuls les utilisateurs sans rôle affecté ou responsables sans entrepôt sont disponibles
+                            </small>
                         </div>
                         <div className="entrepot_management-form-group">
                             <label>Téléphone</label>

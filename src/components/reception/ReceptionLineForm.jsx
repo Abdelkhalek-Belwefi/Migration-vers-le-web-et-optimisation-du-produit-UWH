@@ -9,7 +9,7 @@ import {
   FaSave,
   FaTimes
 } from "react-icons/fa";
-
+// C'est une fonction callback. Elle est appelée après qu'une ligne a été ajoutée avec succès.
 const ReceptionLineForm = ({ receptionId, onLineAdded, onCancel, editingLine }) => {
 
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const ReceptionLineForm = ({ receptionId, onLineAdded, onCancel, editingLine }) 
 
   useEffect(() => {
     loadArticles();
-
+    // Pré-remplir le formulaire si on est en mode édition
     if (editingLine) {
       setFormData({
         articleId: editingLine.articleId,
@@ -49,31 +49,35 @@ const ReceptionLineForm = ({ receptionId, onLineAdded, onCancel, editingLine }) 
 
   const handleChange = (e) => {
     setFormData({
+      // garde toutes les valeurs existantes
       ...formData,
+      //  met à jour uniquement le champ modifié.
       [e.target.name]: e.target.value
     });
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
+    e.preventDefault(); // // Empêche le rechargement de la page
+    setLoading(true);// Active l'indicateur de chargement
+    setError("");//// Réinitialise les erreurs
+    //  Modifier une ligne existante 
     try {
       if (editingLine) {
         await receptionService.updateLine(
           editingLine.id,
           formData.quantiteRecue,
-          formData.lot,                // ✅ Lot inclus
+          formData.lot,                //  Lot inclus
           null,
           formData.emplacementDestination
         );
       } else {
+        // Ajouter une nouvelle ligne 
         await receptionService.addLine(receptionId, {
+          //  convertit les valeurs texte du formulaire en nombres entiers
           articleId: parseInt(formData.articleId),
           quantiteAttendue: parseInt(formData.quantiteAttendue),
           quantiteRecue: parseInt(formData.quantiteRecue),
-          lot: formData.lot,            // ✅ Lot inclus
+          lot: formData.lot,            //  Lot inclus
           emplacementDestination: formData.emplacementDestination
         });
       }

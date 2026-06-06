@@ -508,7 +508,7 @@ const UserManagement = () => {
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label>Entrepôt (optionnel)</label>
+                                <label>Entrepôt </label>
                                 <select
                                     value={newUser.entrepotId}
                                     onChange={(e) => setNewUser({...newUser, entrepotId: e.target.value})}
@@ -518,7 +518,7 @@ const UserManagement = () => {
                                         <option key={ent.id} value={ent.id}>{ent.nom}</option>
                                     ))}
                                 </select>
-                                <small>Laissez vide pour un rôle valable sur tous les entrepôts</small>
+                                
                             </div>
                             <div className="modal-actions">
                                 <button type="submit" className="btn-submit">

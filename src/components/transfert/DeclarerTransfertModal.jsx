@@ -117,6 +117,7 @@ const DeclarerTransfertModal = ({ stock, onClose, onSuccess }) => {
                     {
                         articleId: stock.articleId,
                         quantite: parseInt(quantiteDemandee),
+                        // je mit ca car dans long temps je le fait le process de facturation a traver l utilisation d erp 
                         prixUnitaire: 0
                     }
                 ],
