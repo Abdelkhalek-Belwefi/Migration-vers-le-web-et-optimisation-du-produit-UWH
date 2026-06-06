@@ -4,6 +4,10 @@ import RangementTaskCard from './RangementTaskCard';
 
 import './styles/RangementList.css';
 import { FiPackage } from "react-icons/fi";
+import { FaHourglassHalf } from "react-icons/fa";
+import { FaSync } from "react-icons/fa";
+import { FaCheck } from "react-icons/fa";
+import { FaClipboard } from "react-icons/fa";
 
 const RangementList = () => {
     const [tasks, setTasks] = useState([]);
@@ -116,26 +120,26 @@ const RangementList = () => {
                     className={`filter-btn ${filter === 'A_FAIRE' ? 'active' : ''}`}
                     onClick={() => setFilter('A_FAIRE')}
                 >
-                    ⏳ À faire {stats.aFaire > 0 && `(${stats.aFaire})`}
+                    <FaHourglassHalf /> À faire {stats.aFaire > 0 && `(${stats.aFaire})`}
                 </button>
                 <button 
                     className={`filter-btn ${filter === 'EN_COURS' ? 'active' : ''}`}
                     onClick={() => setFilter('EN_COURS')}
                 >
-                    🔄 En cours {stats.enCours > 0 && `(${stats.enCours})`}
+                    <FaSync /> En cours {stats.enCours > 0 && `(${stats.enCours})`}
                 </button>
                 <button 
                     className={`filter-btn ${filter === 'TERMINEE' ? 'active' : ''}`}
                     onClick={() => setFilter('TERMINEE')}
                 >
-                    ✅ Terminées {stats.terminees > 0 && `(${stats.terminees})`}
+                    <FaCheck /> Terminées {stats.terminees > 0 && `(${stats.terminees})`}
                 </button>
                 {isResponsable && (
                     <button 
                         className={`filter-btn ${filter === 'TOUS' ? 'active' : ''}`}
                         onClick={() => setFilter('TOUS')}
                     >
-                        📋 Toutes
+                        <FaClipboard /> Toutes
                     </button>
                 )}
             </div>
